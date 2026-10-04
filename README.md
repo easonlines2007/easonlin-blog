@@ -93,7 +93,9 @@ PDF.js 仅在附件接近视口时加载。`scripts/prepare-pdf-assets.mjs` 在�
 
 `vercel.json` 使用 Astro 预设，固定 pnpm 11.25.0，安装时使用冻结锁文件，输出目录为 `dist`。设置环境变量 `SITE_URL` 为正式域名（含 `https://`），用于 canonical、RSS 和 sitemap；未设置时优先使用 Vercel 的生产域名，本地则使用预览地址。环境变量示例见 `.env.example`。
 
-第一版只在本地预览，尚未发布到外网。
+正式网址：[easonlin-blog.vercel.app](https://easonlin-blog.vercel.app)。源码保存在 GitHub 私有仓库 `easonlines2007/easonlin-blog`，Vercel 连接该仓库的 `main` 分支；推送更新后自动构建发布。
+
+Vercel 项目使用 Node.js 24，生产与预览环境均设置 `SITE_URL=https://easonlin-blog.vercel.app`。网站公开访问，GitHub 源码仓库保持私有。
 
 ## 参考与许可
 
