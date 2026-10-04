@@ -91,7 +91,11 @@ PDF.js 仅在附件接近视口时加载。`scripts/prepare-pdf-assets.mjs` 在�
 
 ## 项目与联系方式
 
-顶栏“项目”指向 `/projects`，展示 GitHub 公开贡献日历、个人项目和标注为 Fork 的学习参考仓库。笔记内部仍按专题归档。`src/data/github.json` 是匿名公开接口生成的数据快照，页面注明更新时间；运行 `pnpm github:update` 后提交更新即可刷新，不需要 GitHub Token，构建也不依赖 GitHub 网络请求。
+顶栏“项目”指向 `/projects`，展示 GitHub 公开贡献日历、个人项目和标注为 Fork 的学习参考仓库。笔记内部仍按专题归档。项目名称、描述、语言与仓库链接跟随 GitHub 更新，不再使用手工覆盖的描述。
+
+`.github/workflows/sync-github.yml` 每小时检查一次，并支持在 Actions 页面手动运行。同步使用匿名公开接口，覆盖分页中的全部公开、未归档仓库；私有仓库不会进入网站。数据有变化时更新 `src/data/github.json` 并推送到 `main`，随后 Vercel 自动构建发布。数据不变时跳过提交和部署。页面日期表示数据最后发生变化的时间，执行记录可在 GitHub Actions 查看；定时执行可能受 GitHub 队列影响而延迟。
+
+同步会重试暂时的网络错误，并在验证仓库字段、日期完整性和贡献数字后原子替换快照。接口异常时工作流失败并保留上一次可用数据，网站构建不依赖 GitHub 网络请求。运行 `pnpm github:update` 仍可手动更新；不需要个人 GitHub Token 或 Vercel Token，工作流仅使用 GitHub 内置的当前仓库写入凭据。
 
 “关于”页的微信、QQ、Instagram、小红书卡片使用一致的 4:5 展示框，原图以 `object-fit: contain` 完整显示。桌面悬停或键盘聚焦显示图片，点击可打开原比例大图；触屏设备直接显示图片。素材位于 `src/assets/contact/`，请仅放准备公开的联系方式。
 

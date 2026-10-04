@@ -70,7 +70,8 @@ const labels = months.filter(
     </span>
   </div>
   <p class="activity-updated">
-    公开数据 · 更新于 <time datetime={github.updatedAt}>{github.updatedAt.slice(0, 10)}</time> ·{' '}
+    每小时自动同步 · 数据更新于{' '}
+    <time datetime={github.updatedAt}>{github.updatedAt.slice(0, 10)}</time> ·{' '}
     <a href={`https://github.com/${github.username}`}>@{github.username} ↗</a>
   </p>
 </div>

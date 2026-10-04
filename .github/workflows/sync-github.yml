@@ -1,0 +1,53 @@
+name: Sync public GitHub data
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-github.yml'
+      - 'scripts/github-data.mjs'
+      - 'scripts/update-github-data.mjs'
+      - 'tests/github-data.test.mjs'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-public-github-data
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Verify public-data validation
+        run: node --test tests/github-data.test.mjs
+      - name: Fetch public repositories and contributions
+        run: node scripts/update-github-data.mjs
+      - name: Publish changed data
+        env:
+          SITE_OWNER: ${{ github.repository_owner }}
+          SITE_OWNER_ID: ${{ github.repository_owner_id }}
+        run: |
+          if git diff --quiet -- src/data/github.json; then
+            echo "Public GitHub data is unchanged."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/data/github.json
+          # Associate the author with the site owner for Vercel deployment authorization.
+          git commit -m "Sync public GitHub projects and contributions" --author="$SITE_OWNER <$SITE_OWNER_ID+$SITE_OWNER@users.noreply.github.com>"
+          git pull --rebase origin main
+          git push origin HEAD:main
