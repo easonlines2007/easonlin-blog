@@ -12,7 +12,7 @@ const { title, description, tags, status, updated, date, pdf } = note.data
   <div class="note-card-heading">
     <h2>
       <a class="note-title" href={noteUrl(note.id)}>
-        {title}
+        <span class="lift-text">{title}</span>
       </a>
     </h2>
     <span class:list={['status', status]}>{statusLabels[status]}</span>
@@ -23,7 +23,7 @@ const { title, description, tags, status, updated, date, pdf } = note.data
     <time datetime={(updated ?? date).toISOString()}>{formatDate(updated ?? date)}</time>
     {tags.map((tag) => (
       <a class="tag" href={tagUrl(tag)}>
-        {tag}
+        <span class="lift-text">{tag}</span>
       </a>
     ))}
   </div>

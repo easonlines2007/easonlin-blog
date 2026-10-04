@@ -68,8 +68,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
             © {new Date().getFullYear()} {theme.author}
           </span>
           <span class="footer-credit">
-            <a href="https://astro.build">Astro</a> &{' '}
-            <a href="https://github.com/cworld1/astro-theme-pure">Pure</a>
+            <a href="https://astro.build">
+              <span class="lift-text">Astro</span>
+            </a>{' '}
+            &{' '}
+            <a href="https://github.com/cworld1/astro-theme-pure">
+              <span class="lift-text">Pure</span>
+            </a>
           </span>
         </div>
         <a href="/rss.xml" class="icon-button" aria-label="订阅 RSS" title="订阅 RSS">

@@ -13,7 +13,7 @@ const topics = countValues(await getNotes(), 'topic')
     {topics.map(([topic, count]) => (
       <a class="index-card" href={topicUrl(topic)}>
         <div>
-          <h2>{topic}</h2>
+          <h2 class="lift-text">{topic}</h2>
           <p>{count} 篇笔记</p>
         </div>
         <Icon name="next" />

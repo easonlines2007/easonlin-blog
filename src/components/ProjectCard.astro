@@ -10,12 +10,12 @@ const { project } = Astro.props
 <li>
   <a class="project-card" href={project.url} target="_blank" rel="noopener noreferrer">
     <span class="project-kind">{project.kind}</span>
-    <h3>{project.name}</h3>
+    <h3 class="lift-text">{project.name}</h3>
     <p>{project.description}</p>
     <span class="project-meta">
       <span>{project.language ?? 'GitHub'}</span>
       <span class="project-open">
-        查看仓库 <Icon name="next" />
+        <span class="lift-text">查看仓库</span> <Icon name="next" />
       </span>
     </span>
   </a>

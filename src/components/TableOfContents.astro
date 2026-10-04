@@ -13,7 +13,7 @@ const items = headings.filter((heading) => heading.depth >= 2 && heading.depth <
     {items.map((heading) => (
       <li>
         <a href={`#${heading.slug}`} class:list={[heading.depth > 2 && 'nested']} data-toc-link>
-          {heading.text}
+          <span class="lift-text">{heading.text}</span>
         </a>
       </li>
     ))}

@@ -17,12 +17,14 @@ const { notes, filterNotes = notes, filters = false } = Astro.props
         <Icon name="tag" />
         标签
       </h2>
-      <a href="/notes/tags">全部标签</a>
+      <a href="/notes/tags">
+        <span class="lift-text">全部标签</span>
+      </a>
     </div>
     <div class="tag-list">
       {countValues(notes, 'tags').map(([tag]) => (
         <a class="tag" href={tagUrl(tag)}>
-          {tag}
+          <span class="lift-text">{tag}</span>
         </a>
       ))}
     </div>
@@ -38,7 +40,7 @@ const { notes, filterNotes = notes, filters = false } = Astro.props
       {countValues(notes, 'topic').map(([topic, count]) => (
         <li>
           <a href={topicUrl(topic)}>
-            <span>{topic}</span>
+            <span class="lift-text">{topic}</span>
             <span>{count}</span>
           </a>
         </li>
@@ -52,15 +54,15 @@ const { notes, filterNotes = notes, filters = false } = Astro.props
       </div>
       <div class="filter-options" role="group" aria-label="按整理状态筛选">
         <button type="button" data-status-filter="all" aria-pressed="true">
-          <span>全部笔记</span>
+          <span class="lift-text">全部笔记</span>
           <span>{filterNotes.length}</span>
         </button>
         <button type="button" data-status-filter="growing" aria-pressed="false">
-          <span>进行中</span>
+          <span class="lift-text">进行中</span>
           <span>{filterNotes.filter((note) => note.data.status === 'growing').length}</span>
         </button>
         <button type="button" data-status-filter="ready" aria-pressed="false">
-          <span>已整理</span>
+          <span class="lift-text">已整理</span>
           <span>{filterNotes.filter((note) => note.data.status === 'ready').length}</span>
         </button>
       </div>

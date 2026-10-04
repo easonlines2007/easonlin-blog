@@ -11,7 +11,7 @@ const { src, title } = Astro.props
   <div class="pdf-header">
     <h2>PDF 附件</h2>
     <a href={src} target="_blank" rel="noopener">
-      打开 PDF
+      <span class="lift-text">打开 PDF</span>
     </a>
   </div>
   <div class="pdf-reader" data-pdf-reader data-src={src} data-title={title}>
@@ -48,7 +48,11 @@ const { src, title } = Astro.props
   <p class="pdf-note">原稿保持纸张颜色。需要选择文字、打印或批注时，可以打开原文件。</p>
   <noscript>
     <p class="pdf-note">
-      启用 JavaScript 后可在这里翻页，也可以直接<a href={src}>打开 PDF</a>。
+      启用 JavaScript 后可在这里翻页，也可以直接
+      <a href={src}>
+        <span class="lift-text">打开 PDF</span>
+      </a>
+      。
     </p>
   </noscript>
 </section>

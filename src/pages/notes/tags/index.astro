@@ -16,7 +16,7 @@ const tags = countValues(await getNotes(), 'tags')
   <div class="tag-list enter delay-1">
     {tags.map(([tag, count]) => (
       <a class="tag" href={tagUrl(tag)} style="font-size:14px;padding:6px 12px;gap:12px">
-        {tag}
+        <span class="lift-text">{tag}</span>
         <span>{count}</span>
       </a>
     ))}

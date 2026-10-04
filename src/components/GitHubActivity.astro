@@ -56,7 +56,7 @@ const labels = months.filter(
       rel="noopener noreferrer"
     >
       <Image src={avatar} width={64} height={64} alt="" format="webp" />
-      <span>
+      <span class="lift-text">
         <strong>Eason Lin</strong>
         <span>过去一年 {github.total} 次贡献</span>
       </span>
@@ -72,7 +72,9 @@ const labels = months.filter(
   <p class="activity-updated">
     每小时自动同步 · 数据更新于{' '}
     <time datetime={github.updatedAt}>{github.updatedAt.slice(0, 10)}</time> ·{' '}
-    <a href={`https://github.com/${github.username}`}>@{github.username} ↗</a>
+    <a href={`https://github.com/${github.username}`}>
+      <span class="lift-text">@{github.username} ↗</span>
+    </a>
   </p>
 </div>
 <style>

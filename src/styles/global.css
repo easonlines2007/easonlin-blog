@@ -70,6 +70,48 @@ a {
 a:hover {
   color: var(--accent);
 }
+.lift-text {
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    text-shadow 260ms ease;
+}
+span.lift-text {
+  display: inline-block;
+}
+/* Keep clickable shells and their hit areas still, including stretched note links. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :where(main, .site-footer)
+    :is(a[href], button:enabled, summary):is(:hover, :focus-visible)
+    .lift-text {
+    transform: translateY(-2px);
+    text-shadow: 0 3px 7px hsl(var(--foreground) / 0.1);
+  }
+  /* Rendered Markdown and Pagefind links stay inline so long labels can wrap. */
+  :where(.prose a, .pagefind-ui__result-link):not(:has(img, svg, .lift-text)) {
+    position: relative;
+    top: 0;
+    transition:
+      top 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      text-shadow 260ms ease,
+      color 160ms ease;
+  }
+  :where(.prose a, .pagefind-ui__result-link):not(:has(img, svg, .lift-text)):is(
+      :hover,
+      :focus-visible
+    ) {
+    top: -2px;
+    text-shadow: 0 3px 7px hsl(var(--foreground) / 0.1);
+  }
+  :where(.pagefind-ui__search-clear, .pagefind-ui__button) {
+    transition:
+      translate 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      text-shadow 260ms ease;
+  }
+  :where(.pagefind-ui__search-clear, .pagefind-ui__button):is(:hover, :focus-visible) {
+    translate: 0 -2px;
+    text-shadow: 0 3px 7px hsl(var(--foreground) / 0.1);
+  }
+}
 button,
 summary {
   -webkit-tap-highlight-color: transparent;
@@ -449,11 +491,6 @@ summary::-webkit-details-marker {
 .avatar {
   width: 116px;
   height: 116px;
-  padding: 7px;
-  border: 1px solid hsl(35 15% 76% / 0.4);
-  border-radius: 3px;
-  background: #fffdf8;
-  box-shadow: 0 3px 10px #3027190d;
   transform: rotate(-3deg);
 }
 .avatar img {

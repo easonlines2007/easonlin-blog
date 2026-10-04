@@ -5,8 +5,7 @@ import { getNotes } from '../lib/notes'
 import { countValues, noteUrl } from '../lib/note-utils'
 import { projects } from '../lib/projects'
 import { theme } from '../site.config'
-import { Image } from 'astro:assets'
-import avatar from '../assets/avatar.png'
+import HomeAvatar from '../components/HomeAvatar.astro'
 import HomeEntrance from '../components/HomeEntrance.astro'
 const notes = await getNotes()
 const topics = countValues(notes, 'topic')
@@ -15,17 +14,7 @@ const topics = countValues(notes, 'topic')
 <BaseLayout title="首页" home>
   <HomeEntrance slot="head" />
   <section class="home-intro">
-    <div class="avatar" data-intro-avatar>
-      <Image
-        src={avatar}
-        width={256}
-        height={256}
-        format="webp"
-        alt="Eason Lin 的头像：戴墨镜、穿红毛衣的史努比"
-        loading="eager"
-        fetchpriority="high"
-      />
-    </div>
+    <HomeAvatar />
     <div class="intro-heading">
       <span class="intro-eyebrow" data-intro-reveal>
         笔记与日常
@@ -35,7 +24,7 @@ const topics = countValues(notes, 'topic')
     <p data-intro-reveal>记录、整理，慢慢理解。</p>
     <a class="pill-link" href="/notes" data-intro-reveal>
       <Icon name="book" />
-      翻开笔记
+      <span class="lift-text">翻开笔记</span>
     </a>
   </section>
   <div class="home-sections">
@@ -49,7 +38,7 @@ const topics = countValues(notes, 'topic')
       <div class="section-body">
         <p>一个存放学习笔记、阅读批注和零散思考的地方。</p>
         <a class="more-link" href="/about">
-          更多关于这里
+          <span class="lift-text">更多关于这里</span>
         </a>
       </div>
     </section>
@@ -66,14 +55,14 @@ const topics = countValues(notes, 'topic')
             <li>
               <a class="compact-note" href={noteUrl(note.id)}>
                 <span class="type">{note.data.pdf ? 'PDF' : '笔记'}</span>
-                <span class="title">{note.data.title}</span>
+                <span class="title lift-text">{note.data.title}</span>
                 <Icon name="next" />
               </a>
             </li>
           ))}
         </ul>
         <a class="more-link" href="/notes">
-          全部笔记
+          <span class="lift-text">全部笔记</span>
         </a>
       </div>
     </section>
@@ -92,14 +81,14 @@ const topics = countValues(notes, 'topic')
             .map((project) => (
               <li>
                 <a class="topic-row" href={project.url} target="_blank" rel="noopener noreferrer">
-                  <span>{project.name}</span>
-                  <span>GitHub ↗</span>
+                  <span class="lift-text">{project.name}</span>
+                  <span class="lift-text">GitHub ↗</span>
                 </a>
               </li>
             ))}
         </ul>
         <a class="more-link" href="/projects">
-          全部项目与 GitHub 动态
+          <span class="lift-text">全部项目与 GitHub 动态</span>
         </a>
       </div>
     </section>

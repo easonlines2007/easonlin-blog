@@ -25,7 +25,10 @@ import Icon from './Icon.astro'
     const button = document.createElement('button')
     button.type = 'button'
     button.className = 'copy-code'
-    button.textContent = '复制'
+    const label = document.createElement('span')
+    label.className = 'lift-text'
+    label.textContent = '复制'
+    button.append(label)
     button.setAttribute('aria-label', '复制代码')
     button.setAttribute('aria-live', 'polite')
     wrapper.append(button)
@@ -34,13 +37,19 @@ import Icon from './Icon.astro'
       clearTimeout(timer)
       try {
         await navigator.clipboard.writeText(pre.querySelector('code')?.textContent ?? '')
-        button.textContent = '已复制'
+        label.textContent = '已复制'
       } catch {
-        button.textContent = '请选中后复制'
+        label.textContent = '请选中后复制'
       }
       timer = setTimeout(() => {
-        button.textContent = '复制'
+        label.textContent = '复制'
       }, 2000)
     })
+  })
+  document.querySelectorAll('.prose details > summary').forEach((summary) => {
+    const label = document.createElement('span')
+    label.className = 'lift-text'
+    label.append(...summary.childNodes)
+    summary.append(label)
   })
 </script>

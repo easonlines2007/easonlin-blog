@@ -22,13 +22,15 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
 <BaseLayout {title} {description}>
   <a class="back-link" href="/notes">
     <Icon name="back" />
-    笔记
+    <span class="lift-text">笔记</span>
   </a>
   <div class="article-grid">
     <article class="article-body enter" data-pagefind-body>
       <header class="article-header">
         <div class="article-kicker">
-          <a href={topicUrl(topic)}>{topic}</a>
+          <a href={topicUrl(topic)}>
+            <span class="lift-text">{topic}</span>
+          </a>
           <span class:list={['status', status]}>{statusLabels[status]}</span>
           {sample && (
             <span class="sample-label" data-pagefind-ignore>
@@ -44,7 +46,9 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
         </time>
       </header>
       <details class="mobile-toc" data-pagefind-ignore>
-        <summary>本页目录</summary>
+        <summary>
+          <span class="lift-text">本页目录</span>
+        </summary>
         <TableOfContents {headings} mobile />
       </details>
       <div class="prose" id="article-content">
@@ -55,11 +59,13 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
         <div class="tag-list">
           {tags.map((tag) => (
             <a class="tag" href={tagUrl(tag)}>
-              {tag}
+              <span class="lift-text">{tag}</span>
             </a>
           ))}
         </div>
-        <a href="/notes">返回全部笔记</a>
+        <a href="/notes">
+          <span class="lift-text">返回全部笔记</span>
+        </a>
       </footer>
     </article>
     <aside class="toc-sidebar enter delay-1">
