@@ -1,0 +1,71 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { render } from 'astro:content'
+import 'katex/dist/katex.min.css'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Icon from '../../components/Icon.astro'
+import TableOfContents from '../../components/TableOfContents.astro'
+import ArticleTools from '../../components/ArticleTools.astro'
+import PdfReader from '../../components/PdfReader.astro'
+import { getNotes } from '../../lib/notes'
+import { formatDate, tagUrl, topicUrl, statusLabels } from '../../lib/note-utils'
+export const getStaticPaths = (async () =>
+  (await getNotes()).map((note) => ({
+    params: { id: note.id },
+    props: { note }
+  }))) satisfies GetStaticPaths
+const { note } = Astro.props
+const { Content, headings } = await render(note)
+const { title, description, tags, topic, date, updated, status, sample, pdf } = note.data
+---
+
+<BaseLayout {title} {description}>
+  <a class="back-link" href="/notes">
+    <Icon name="back" />
+    笔记
+  </a>
+  <div class="article-grid">
+    <article class="article-body enter" data-pagefind-body>
+      <header class="article-header">
+        <div class="article-kicker">
+          <a href={topicUrl(topic)}>{topic}</a>
+          <span class:list={['status', status]}>{statusLabels[status]}</span>
+          {sample && (
+            <span class="sample-label" data-pagefind-ignore>
+              示例笔记
+            </span>
+          )}
+        </div>
+        <h1 data-pagefind-meta="title">{title}</h1>
+        <p>{description}</p>
+        <time class="article-date" datetime={(updated ?? date).toISOString()}>
+          {updated ? '更新于 ' : ''}
+          {formatDate(updated ?? date)}
+        </time>
+      </header>
+      <details class="mobile-toc" data-pagefind-ignore>
+        <summary>本页目录</summary>
+        <TableOfContents {headings} mobile />
+      </details>
+      <div class="prose" id="article-content">
+        <Content />
+      </div>
+      {pdf && <PdfReader src={pdf} {title} />}
+      <footer class="article-bottom" data-pagefind-ignore>
+        <div class="tag-list">
+          {tags.map((tag) => (
+            <a class="tag" href={tagUrl(tag)}>
+              {tag}
+            </a>
+          ))}
+        </div>
+        <a href="/notes">返回全部笔记</a>
+      </footer>
+    </article>
+    <aside class="toc-sidebar enter delay-1">
+      <h2 class="toc-title">本页目录</h2>
+      <TableOfContents {headings} />
+    </aside>
+  </div>
+  <ArticleTools />
+</BaseLayout>

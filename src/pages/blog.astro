@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import PageHeader from '../components/PageHeader.astro'
+---
+
+<BaseLayout title="文章">
+  <PageHeader title="文章" />
+  <div class="enter delay-1">
+    <p class="empty-state">暂时还没有文章。先从一篇笔记开始。</p>
+    <a class="more-link" href="/notes">
+      阅读笔记
+    </a>
+  </div>
+</BaseLayout>

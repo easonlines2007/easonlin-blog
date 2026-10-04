@@ -1,0 +1,69 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { countValues, tagUrl, topicUrl } from '../lib/note-utils'
+import Icon from './Icon.astro'
+interface Props {
+  notes: CollectionEntry<'notes'>[]
+  filterNotes?: CollectionEntry<'notes'>[]
+  filters?: boolean
+}
+const { notes, filterNotes = notes, filters = false } = Astro.props
+---
+
+<aside class="notes-sidebar" aria-label="笔记分类">
+  <section>
+    <div class="sidebar-title">
+      <h2>
+        <Icon name="tag" />
+        标签
+      </h2>
+      <a href="/notes/tags">全部标签</a>
+    </div>
+    <div class="tag-list">
+      {countValues(notes, 'tags').map(([tag]) => (
+        <a class="tag" href={tagUrl(tag)}>
+          {tag}
+        </a>
+      ))}
+    </div>
+  </section>
+  <section>
+    <div class="sidebar-title">
+      <h2>
+        <Icon name="book" />
+        专题
+      </h2>
+    </div>
+    <ul class="sidebar-list">
+      {countValues(notes, 'topic').map(([topic, count]) => (
+        <li>
+          <a href={topicUrl(topic)}>
+            <span>{topic}</span>
+            <span>{count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+  {filters && (
+    <section class="status-filter">
+      <div class="sidebar-title">
+        <h2>整理状态</h2>
+      </div>
+      <div class="filter-options" role="group" aria-label="按整理状态筛选">
+        <button type="button" data-status-filter="all" aria-pressed="true">
+          <span>全部笔记</span>
+          <span>{filterNotes.length}</span>
+        </button>
+        <button type="button" data-status-filter="growing" aria-pressed="false">
+          <span>进行中</span>
+          <span>{filterNotes.filter((note) => note.data.status === 'growing').length}</span>
+        </button>
+        <button type="button" data-status-filter="ready" aria-pressed="false">
+          <span>已整理</span>
+          <span>{filterNotes.filter((note) => note.data.status === 'ready').length}</span>
+        </button>
+      </div>
+    </section>
+  )}
+</aside>

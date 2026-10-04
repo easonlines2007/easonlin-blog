@@ -1,0 +1,16 @@
+---
+import type { GetStaticPaths } from 'astro'
+import NotesLayout from '../../../layouts/NotesLayout.astro'
+import { getNotes } from '../../../lib/notes'
+import { countValues } from '../../../lib/note-utils'
+export const getStaticPaths = (async () => {
+  const allNotes = await getNotes()
+  return countValues(allNotes, 'topic').map(([topic]) => ({
+    params: { topic },
+    props: { topic, allNotes, notes: allNotes.filter((note) => note.data.topic === topic) }
+  }))
+}) satisfies GetStaticPaths
+const { topic, notes, allNotes } = Astro.props
+---
+
+<NotesLayout title={topic} {notes} {allNotes} back="/notes/topics" backLabel="全部专题" />

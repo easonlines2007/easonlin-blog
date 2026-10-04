@@ -1,0 +1,35 @@
+---
+import { Image } from 'astro:assets'
+import woodstockCool from '../assets/characters/woodstock-cool.png'
+import doghouse from '../assets/characters/doghouse.png'
+import woodstock from '../assets/characters/woodstock.png'
+import snoopyReading from '../assets/characters/snoopy-reading.png'
+import charlieBrown from '../assets/characters/charlie-brown.png'
+
+const characters = {
+  '/': woodstockCool,
+  '/notes': doghouse,
+  '/notes/topics': woodstock,
+  '/blog': snoopyReading,
+  '/about': charlieBrown
+}
+interface Props {
+  href: string
+}
+const { href } = Astro.props
+const character = characters[href as keyof typeof characters]
+---
+
+{character && (
+  <span class="nav-character" aria-hidden="true">
+    <Image
+      src={character}
+      width={160}
+      height={160}
+      format="webp"
+      alt=""
+      loading="eager"
+      draggable="false"
+    />
+  </span>
+)}

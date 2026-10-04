@@ -1,0 +1,86 @@
+---
+import Icon from './Icon.astro'
+const options = [
+  { value: 'system', label: '跟随系统', icon: 'monitor' },
+  { value: 'light', label: '浅色', icon: 'sun' },
+  { value: 'dark', label: '深色', icon: 'moon' }
+] as const
+---
+
+<details class="theme-picker header-disclosure">
+  <summary class="icon-button" aria-label="主题设置" title="主题设置">
+    <span data-mode-icon="system">
+      <Icon name="monitor" />
+    </span>
+    <span data-mode-icon="light">
+      <Icon name="sun" />
+    </span>
+    <span data-mode-icon="dark">
+      <Icon name="moon" />
+    </span>
+  </summary>
+  <div class="theme-options" role="group" aria-label="主题模式">
+    {options.map((option) => (
+      <button
+        type="button"
+        data-theme-choice={option.value}
+        aria-pressed={option.value === 'system'}
+      >
+        <Icon name={option.icon} />
+        <span>{option.label}</span>
+        <span class="choice-check" aria-hidden="true">
+          ✓
+        </span>
+      </button>
+    ))}
+  </div>
+</details>
+<script>
+  import { normalizeTheme, resolveTheme, type ThemePreference } from '../lib/theme'
+  const media = window.matchMedia('(prefers-color-scheme: dark)')
+  let preference: ThemePreference = 'system'
+  try {
+    preference = normalizeTheme(localStorage.getItem('notes-theme'))
+  } catch {
+    /* Storage is optional. */
+  }
+  const picker = document.querySelector<HTMLDetailsElement>('.theme-picker')!
+  const choices = picker.querySelectorAll<HTMLButtonElement>('[data-theme-choice]')
+  function apply() {
+    const resolved = resolveTheme(preference, media.matches)
+    document.documentElement.classList.toggle('dark', resolved === 'dark')
+    document.documentElement.dataset.themePreference = preference
+    document.documentElement.style.colorScheme = resolved
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', resolved === 'dark' ? '#1e1c1a' : '#f7f6f2')
+    choices.forEach((button) =>
+      button.setAttribute('aria-pressed', String(button.dataset.themeChoice === preference))
+    )
+    const label = { system: '跟随系统', light: '浅色', dark: '深色' }[preference]
+    picker.querySelector('summary')?.setAttribute('aria-label', `主题设置，当前${label}`)
+  }
+  choices.forEach((button) =>
+    button.addEventListener('click', () => {
+      preference = normalizeTheme(button.dataset.themeChoice ?? null)
+      try {
+        localStorage.setItem('notes-theme', preference)
+      } catch {
+        /* Keep the choice for this page. */
+      }
+      apply()
+      picker.open = false
+      picker.querySelector('summary')?.focus()
+    })
+  )
+  media.addEventListener('change', () => {
+    if (preference === 'system') apply()
+  })
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'notes-theme' || event.key === null) {
+      preference = normalizeTheme(event.newValue)
+      apply()
+    }
+  })
+  apply()
+</script>

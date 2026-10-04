@@ -1,0 +1,30 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { formatDate, noteUrl, tagUrl, statusLabels } from '../lib/note-utils'
+interface Props {
+  note: CollectionEntry<'notes'>
+}
+const { note } = Astro.props
+const { title, description, tags, status, updated, date, pdf } = note.data
+---
+
+<li class="note-card" data-note-status={status}>
+  <div class="note-card-heading">
+    <h2>
+      <a class="note-title" href={noteUrl(note.id)}>
+        {title}
+      </a>
+    </h2>
+    <span class:list={['status', status]}>{statusLabels[status]}</span>
+  </div>
+  <p class="note-description">{description}</p>
+  <div class="note-meta">
+    <span class="content-type">{pdf ? 'PDF 笔记' : '笔记'}</span>
+    <time datetime={(updated ?? date).toISOString()}>{formatDate(updated ?? date)}</time>
+    {tags.map((tag) => (
+      <a class="tag" href={tagUrl(tag)}>
+        {tag}
+      </a>
+    ))}
+  </div>
+</li>

@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PageHeader from '../../../components/PageHeader.astro'
+import { getNotes } from '../../../lib/notes'
+import { countValues, tagUrl } from '../../../lib/note-utils'
+const tags = countValues(await getNotes(), 'tags')
+---
+
+<BaseLayout title="标签">
+  <PageHeader
+    title="标签"
+    description={`从 ${tags.length} 个关键词出发，找到相关笔记。`}
+    back="/notes"
+    backLabel="笔记"
+  />
+  <div class="tag-list enter delay-1">
+    {tags.map(([tag, count]) => (
+      <a class="tag" href={tagUrl(tag)} style="font-size:14px;padding:6px 12px;gap:12px">
+        {tag}
+        <span>{count}</span>
+      </a>
+    ))}
+  </div>
+</BaseLayout>

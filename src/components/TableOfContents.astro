@@ -1,0 +1,60 @@
+---
+import type { MarkdownHeading } from 'astro'
+interface Props {
+  headings: MarkdownHeading[]
+  mobile?: boolean
+}
+const { headings, mobile = false } = Astro.props
+const items = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3)
+---
+
+<nav aria-label={mobile ? '文章目录（手机）' : '文章目录'}>
+  <ul class="toc-list">
+    {items.map((heading) => (
+      <li>
+        <a href={`#${heading.slug}`} class:list={[heading.depth > 2 && 'nested']} data-toc-link>
+          {heading.text}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+<script>
+  const headings = [...document.querySelectorAll<HTMLElement>('.prose h2, .prose h3')]
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')]
+  let scheduled = false
+  function update() {
+    const offset =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--reading-offset')) +
+      20
+    let current: string | undefined = headings[0]?.id
+    for (const heading of headings) {
+      if (heading.getBoundingClientRect().top <= offset) current = heading.id
+      else break
+    }
+    if (
+      window.scrollY > 0 &&
+      window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2
+    ) {
+      current = headings.at(-1)?.id
+    }
+    links.forEach((link) => {
+      if (decodeURIComponent(link.hash.slice(1)) === current)
+        link.setAttribute('aria-current', 'location')
+      else link.removeAttribute('aria-current')
+    })
+    scheduled = false
+  }
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!scheduled) {
+        requestAnimationFrame(update)
+        scheduled = true
+      }
+    },
+    { passive: true }
+  )
+  window.addEventListener('resize', update)
+  update()
+</script>

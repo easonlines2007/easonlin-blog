@@ -1,0 +1,23 @@
+<!-- Set before first paint; content remains visible without JavaScript. -->
+<script is:inline>
+  ;(() => {
+    const navigation = performance.getEntriesByType('navigation')[0]
+    if (
+      matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      location.hash ||
+      navigation?.type === 'back_forward'
+    )
+      return
+    try {
+      if (sessionStorage.getItem('notes-intro-seen') && navigation?.type !== 'reload') return
+    } catch {}
+    document.documentElement.dataset.homeEntrance = 'pending'
+    // Fail open if the animation module cannot load.
+    setTimeout(() => delete document.documentElement.dataset.homeEntrance, 4000)
+  })()
+</script>
+
+<script>
+  import { startHomeEntrance } from '../scripts/home-entrance'
+  startHomeEntrance()
+</script>

@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import PageHeader from '../components/PageHeader.astro'
+import '@pagefind/default-ui/css/ui.css'
+---
+
+<BaseLayout title="搜索" noindex>
+  <PageHeader title="搜索" description="输入一个关键词，找回读过、写过的内容。" />
+  <div class="search-container enter delay-1" id="search" data-development={import.meta.env.DEV}>
+    <p class="search-message" id="search-message" role="status">
+      正在准备搜索…
+    </p>
+  </div>
+  <noscript>
+    <p class="search-message">
+      搜索需要 JavaScript。你也可以通过<a href="/notes/topics">专题</a>或
+      <a href="/notes/tags">标签</a>浏览笔记。
+    </p>
+  </noscript>
+</BaseLayout>
+<script>
+  async function setupSearch() {
+    const container = document.querySelector<HTMLElement>('#search')!
+    const message = document.querySelector<HTMLElement>('#search-message')!
+    // Pagefind is generated after build; preview serves the complete, production search.
+    if (container.dataset.development === 'true') {
+      message.textContent = '开发预览不包含搜索索引，请在构建预览中使用完整搜索。'
+      return
+    }
+    try {
+      // The upstream package ships no TypeScript declaration.
+      // @ts-expect-error -- @pagefind/default-ui has no bundled types.
+      const { PagefindUI } = await import('@pagefind/default-ui')
+      new PagefindUI({
+        element: '#search',
+        bundlePath: '/pagefind/',
+        showImages: false,
+        showSubResults: true,
+        translations: {
+          placeholder: '搜索笔记…',
+          zero_results: '没有找到 “[SEARCH_TERM]” 的相关笔记',
+          clear_search: '清除',
+          search_label: '搜索笔记',
+          searching: '正在搜索…',
+          one_result: '找到 [COUNT] 篇笔记',
+          many_results: '找到 [COUNT] 篇笔记',
+          load_more: '更多结果'
+        }
+      })
+      message.remove()
+    } catch {
+      message.textContent = '搜索暂时未能加载，请刷新页面重试。'
+    }
+  }
+  setupSearch()
+</script>

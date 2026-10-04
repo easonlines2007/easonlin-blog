@@ -1,0 +1,107 @@
+---
+import { theme } from '../site.config'
+import Icon from './Icon.astro'
+import ThemePicker from './ThemePicker.astro'
+import NavCharacter from './NavCharacter.astro'
+const pathname = Astro.url.pathname
+const active = (href: string) =>
+  href === '/notes'
+    ? pathname.startsWith('/notes') && !pathname.startsWith('/notes/topics')
+    : pathname.startsWith(href)
+---
+
+<header class="site-header" data-pagefind-ignore>
+  <a class="brand character-link" href="/">
+    <span class="nav-flip">
+      <span class="nav-label">{theme.title}</span>
+      <NavCharacter href="/" />
+    </span>
+  </a>
+  <div class="header-actions">
+    <nav class="desktop-nav" aria-label="主导航">
+      {theme.header.menu.map((item) => (
+        <a
+          class="character-link"
+          href={item.link}
+          aria-current={active(item.link) ? 'page' : undefined}
+        >
+          <span class="nav-flip">
+            <span class="nav-label">{item.title}</span>
+            <NavCharacter href={item.link} />
+          </span>
+        </a>
+      ))}
+    </nav>
+    <a class="search-link icon-button" href="/search" aria-label="搜索笔记" title="搜索笔记">
+      <Icon name="search" />
+    </a>
+    <ThemePicker />
+    <details class="mobile-menu header-disclosure">
+      <summary class="icon-button" aria-label="打开导航菜单">
+        <Icon name="menu" />
+      </summary>
+      <nav aria-label="手机导航">
+        {theme.header.menu.map((item) => (
+          <a href={item.link} aria-current={active(item.link) ? 'page' : undefined}>
+            {item.title}
+          </a>
+        ))}
+      </nav>
+    </details>
+  </div>
+</header>
+<div class="header-backdrop" aria-hidden="true"></div>
+<script>
+  const header = document.querySelector<HTMLElement>('.site-header')!
+  const disclosures = [...header.querySelectorAll<HTMLDetailsElement>('.header-disclosure')]
+  let previousY = window.scrollY
+  let scheduled = false
+  function updateHeader() {
+    const y = window.scrollY
+    header.classList.toggle('is-scrolled', y > 24)
+    header.classList.toggle(
+      'is-hidden',
+      y > 350 &&
+        y > previousY &&
+        !disclosures.some((item) => item.open) &&
+        !header.contains(document.activeElement)
+    )
+    previousY = y
+    scheduled = false
+  }
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!scheduled) {
+        requestAnimationFrame(updateHeader)
+        scheduled = true
+      }
+    },
+    { passive: true }
+  )
+  disclosures.forEach((item) =>
+    item.addEventListener('toggle', () => {
+      if (item.open) {
+        header.classList.remove('is-hidden')
+        disclosures.forEach((other) => {
+          if (other !== item) other.open = false
+        })
+      }
+    })
+  )
+  document.addEventListener('click', (event) => {
+    disclosures.forEach((item) => {
+      if (!item.contains(event.target as Node)) item.open = false
+    })
+  })
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape')
+      disclosures.forEach((item) => {
+        if (item.open) {
+          item.open = false
+          item.querySelector('summary')?.focus()
+        }
+      })
+  })
+  updateHeader()
+</script>

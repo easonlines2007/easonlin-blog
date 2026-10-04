@@ -1,0 +1,20 @@
+---
+import Icon from './Icon.astro'
+interface Props {
+  title: string
+  description?: string
+  back?: string
+  backLabel?: string
+}
+const { title, description, back = '/', backLabel = '首页' } = Astro.props
+---
+
+<a class="back-link" href={back}>
+  <Icon name="back" />
+  <span>{backLabel}</span>
+</a>
+<div class="page-heading enter">
+  <h1>{title}</h1>
+  {description && <p>{description}</p>}
+  <slot />
+</div>

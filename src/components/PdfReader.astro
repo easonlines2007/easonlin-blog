@@ -1,0 +1,58 @@
+---
+import Icon from './Icon.astro'
+interface Props {
+  src: string
+  title: string
+}
+const { src, title } = Astro.props
+---
+
+<section class="pdf-section" aria-label="PDF 附件" data-pagefind-ignore>
+  <div class="pdf-header">
+    <h2>PDF 附件</h2>
+    <a href={src} target="_blank" rel="noopener">
+      打开 PDF
+    </a>
+  </div>
+  <div class="pdf-reader" data-pdf-reader data-src={src} data-title={title}>
+    <div class="pdf-toolbar" role="group" aria-label="PDF 阅读控制">
+      <button type="button" class="icon-button" data-pdf-previous aria-label="PDF 上一页" disabled>
+        <Icon name="back" />
+      </button>
+      <span class="pdf-page-count" data-pdf-count>
+        — / —
+      </span>
+      <button type="button" class="icon-button" data-pdf-next aria-label="PDF 下一页" disabled>
+        <Icon name="next" />
+      </button>
+      <select data-pdf-zoom aria-label="PDF 缩放" disabled>
+        <option value="1">适合宽度</option>
+        <option value="1.5">放大 1.5 倍</option>
+        <option value="2">放大 2 倍</option>
+      </select>
+    </div>
+    <p class="pdf-message" data-pdf-message role="status">
+      正在准备 PDF…
+    </p>
+    <div
+      class="pdf-viewport"
+      data-pdf-viewport
+      tabindex="0"
+      role="region"
+      aria-label="PDF 页面，可滚动查看"
+      hidden
+    >
+      <canvas data-pdf-canvas role="img" aria-label={`${title} — PDF 页面`}></canvas>
+    </div>
+  </div>
+  <p class="pdf-note">原稿保持纸张颜色。需要选择文字、打印或批注时，可以打开原文件。</p>
+  <noscript>
+    <p class="pdf-note">
+      启用 JavaScript 后可在这里翻页，也可以直接<a href={src}>打开 PDF</a>。
+    </p>
+  </noscript>
+</section>
+<script>
+  import { setupPdfReader } from '../scripts/pdf-reader'
+  document.querySelectorAll<HTMLElement>('[data-pdf-reader]').forEach(setupPdfReader)
+</script>

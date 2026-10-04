@@ -1,0 +1,7 @@
+---
+import NotesLayout from '../../layouts/NotesLayout.astro'
+import { getNotes } from '../../lib/notes'
+const notes = await getNotes()
+---
+
+<NotesLayout title="笔记" {notes} />

@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import PageHeader from '../components/PageHeader.astro'
+import { theme } from '../site.config'
+---
+
+<BaseLayout title="关于">
+  <PageHeader title="关于" />
+  <div class="simple-content prose enter delay-1">
+    <p>
+      这里是 {theme.author} 的个人笔记本，收集学习中的记录、阅读时的批注，以及值得再想一想的问题。
+    </p>
+    <h2>记录的方法</h2>
+    <p>
+      文字在 Obsidian 里整理，手写推导和 PDF 批注留在
+      Goodnotes。相关内容按专题归档，再用标签连接起来。
+    </p>
+    <p>“进行中”代表仍在补充与修订；“已整理”代表完成了一次梳理，之后也会继续更新。</p>
+    <h2>关于这个网站</h2>
+    <p>
+      基于 <a href="https://astro.build">Astro</a> 和{' '}
+      <a href="https://github.com/cworld1/astro-theme-pure">Astro Theme Pure</a>{' '}
+      搭建。保持简单，把更多空间留给内容。
+    </p>
+    <p>目前展示的是三篇示例笔记，用来试读排版、目录、搜索和 PDF 阅读。</p>
+  </div>
+</BaseLayout>

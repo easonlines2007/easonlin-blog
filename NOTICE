@@ -1,0 +1,7 @@
+This project uses Astro Theme Pure (https://github.com/cworld1/astro-theme-pure)
+by CWorld, under the Apache License 2.0. See LICENSE.
+uno.config.ts is adapted from Astro Theme Pure; the site components and notes
+are customized for this project. The original site's personal content is not included.
+
+PDF previews use Mozilla PDF.js (https://mozilla.github.io/pdf.js/),
+under the Apache License 2.0. Its license is included with the generated PDF assets.
