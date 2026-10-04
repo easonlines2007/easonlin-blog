@@ -36,9 +36,6 @@ jobs:
       - name: Fetch public repositories and contributions
         run: node scripts/update-github-data.mjs
       - name: Publish changed data
-        env:
-          SITE_OWNER: ${{ github.repository_owner }}
-          SITE_OWNER_ID: ${{ github.repository_owner_id }}
         run: |
           if git diff --quiet -- src/data/github.json; then
             echo "Public GitHub data is unchanged."
@@ -47,7 +44,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src/data/github.json
-          # Associate the author with the site owner for Vercel deployment authorization.
-          git commit -m "Sync public GitHub projects and contributions" --author="$SITE_OWNER <$SITE_OWNER_ID+$SITE_OWNER@users.noreply.github.com>"
+          # Bot authorship keeps sync commits out of the owner's contribution calendar.
+          git commit -m "Sync public GitHub projects and contributions"
           git pull --rebase origin main
           git push origin HEAD:main
