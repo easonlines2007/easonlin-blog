@@ -87,7 +87,15 @@ PDF.js 仅在附件接近视口时加载。`scripts/prepare-pdf-assets.mjs` 在�
 
 使用 `pnpm format` 统一代码格式，`pnpm format:check` 检查格式。第一版的实际检查记录见 [验证记录](docs/verification.md)。
 
-文章页当前为真实空状态。项目、联系信息与评论服务将在有实际内容后接入。
+文章页当前为真实空状态，评论服务尚未接入。
+
+## 项目与联系方式
+
+顶栏“项目”指向 `/projects`，展示 GitHub 公开贡献日历、个人项目和标注为 Fork 的学习参考仓库。笔记内部仍按专题归档。`src/data/github.json` 是匿名公开接口生成的数据快照，页面注明更新时间；运行 `pnpm github:update` 后提交更新即可刷新，不需要 GitHub Token，构建也不依赖 GitHub 网络请求。
+
+“关于”页的微信、QQ、Instagram、小红书卡片使用一致的 4:5 展示框，原图以 `object-fit: contain` 完整显示。桌面悬停或键盘聚焦显示图片，点击可打开原比例大图；触屏设备直接显示图片。素材位于 `src/assets/contact/`，请仅放准备公开的联系方式。
+
+浏览器与主屏幕图标使用同一张史努比头像；PNG、ICO 和 iPhone 的 `apple-touch-icon` 已配置。更换头像后运行 `pnpm icons`，提交生成的图标。Manifest 仅提供名称和图标，不包含离线缓存。
 
 ## 部署到 Vercel
 

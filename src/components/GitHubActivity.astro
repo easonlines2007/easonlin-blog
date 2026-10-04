@@ -1,0 +1,174 @@
+---
+import { Image } from 'astro:assets'
+import avatar from '../assets/avatar.png'
+import { github } from '../lib/projects'
+const firstDay = new Date(`${github.days[0].date}T00:00:00Z`)
+const offset = firstDay.getUTCDay()
+const weeks = Math.ceil((offset + github.days.length) / 7)
+const months = github.days.flatMap((day, i) =>
+  i === 0 || day.date.endsWith('-01')
+    ? [{ label: `${Number(day.date.slice(5, 7))}月`, column: Math.floor((i + offset) / 7) + 1 }]
+    : []
+)
+// Keep month labels from sharing a column when the range starts near a month boundary.
+const labels = months.filter(
+  (month, i) => i === months.length - 1 || months[i + 1].column - month.column >= 2
+)
+---
+
+<div class="activity-card">
+  <div
+    class="activity-scroll"
+    tabindex="0"
+    role="region"
+    aria-label="GitHub 过去一年的贡献日历，可横向滚动"
+  >
+    <div class="activity-calendar" style={`--weeks:${weeks}`}>
+      <div class="activity-months" aria-hidden="true">
+        {labels.map((month) => (
+          <span
+            style={`grid-column:${month.column} / span ${Math.min(2, weeks - month.column + 1)}`}
+          >
+            {month.label}
+          </span>
+        ))}
+      </div>
+      <div class="activity-days">
+        {Array.from({ length: offset }).map(() => (
+          <span aria-hidden="true" />
+        ))}
+        {github.days.map((day) => (
+          <span
+            class="activity-day"
+            data-level={day.level}
+            title={`${day.date} · ${day.count} 次贡献`}
+            aria-label={`${day.date}，${day.count} 次贡献`}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+  <div class="activity-footer">
+    <a
+      class="activity-profile"
+      href={`https://github.com/${github.username}`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <Image src={avatar} width={64} height={64} alt="" format="webp" />
+      <span>
+        <strong>Eason Lin</strong>
+        <span>过去一年 {github.total} 次贡献</span>
+      </span>
+    </a>
+    <span class="activity-legend" aria-label="颜色越深，贡献越多">
+      少{' '}
+      {[0, 1, 2, 3, 4].map((level) => (
+        <span class="activity-day" data-level={level} />
+      ))}{' '}
+      多
+    </span>
+  </div>
+  <p class="activity-updated">
+    公开数据 · 更新于 <time datetime={github.updatedAt}>{github.updatedAt.slice(0, 10)}</time> ·{' '}
+    <a href={`https://github.com/${github.username}`}>@{github.username} ↗</a>
+  </p>
+</div>
+<style>
+  .activity-card {
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .activity-scroll {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .activity-scroll:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+  .activity-calendar {
+    min-width: 620px;
+  }
+  .activity-months {
+    display: grid;
+    grid-template-columns: repeat(var(--weeks), minmax(0, 1fr));
+    gap: 3px;
+    font-size: 10px;
+    color: var(--secondary);
+    margin-bottom: 7px;
+  }
+  .activity-days {
+    display: grid;
+    grid-template-columns: repeat(var(--weeks), minmax(0, 1fr));
+    grid-template-rows: repeat(7, auto);
+    grid-auto-flow: column;
+    gap: 3px;
+  }
+  .activity-day {
+    display: block;
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--soft);
+  }
+  .activity-day[data-level='1'] {
+    background: hsl(var(--primary) / 0.25);
+  }
+  .activity-day[data-level='2'] {
+    background: hsl(var(--primary) / 0.45);
+  }
+  .activity-day[data-level='3'] {
+    background: hsl(var(--primary) / 0.7);
+  }
+  .activity-day[data-level='4'] {
+    background: var(--accent);
+  }
+  .activity-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .activity-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .activity-profile img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+  }
+  .activity-profile strong {
+    display: block;
+    font-weight: 500;
+  }
+  .activity-profile span span {
+    color: var(--secondary);
+    font-size: 12px;
+  }
+  .activity-legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--secondary);
+  }
+  .activity-legend .activity-day {
+    width: 10px;
+  }
+  .activity-updated {
+    color: var(--secondary);
+    font-size: 11px;
+    margin-top: 16px;
+  }
+  @media (max-width: 600px) {
+    .activity-card {
+      padding: 16px;
+    }
+  }
+</style>

@@ -2,7 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Icon from '../components/Icon.astro'
 import { getNotes } from '../lib/notes'
-import { countValues, noteUrl, topicUrl } from '../lib/note-utils'
+import { countValues, noteUrl } from '../lib/note-utils'
+import { projects } from '../lib/projects'
 import { theme } from '../site.config'
 import { Image } from 'astro:assets'
 import avatar from '../assets/avatar.png'
@@ -81,19 +82,25 @@ const topics = countValues(notes, 'topic')
         <span class="section-index" aria-hidden="true">
           03
         </span>
-        专题
+        项目
       </h2>
       <div class="section-body">
         <ul>
-          {topics.map(([topic, count]) => (
-            <li>
-              <a class="topic-row" href={topicUrl(topic)}>
-                <span>{topic}</span>
-                <span>{count} 篇笔记</span>
-              </a>
-            </li>
-          ))}
+          {projects
+            .filter((project) => !project.fork)
+            .slice(0, 3)
+            .map((project) => (
+              <li>
+                <a class="topic-row" href={project.url} target="_blank" rel="noopener noreferrer">
+                  <span>{project.name}</span>
+                  <span>GitHub ↗</span>
+                </a>
+              </li>
+            ))}
         </ul>
+        <a class="more-link" href="/projects">
+          全部项目与 GitHub 动态
+        </a>
       </div>
     </section>
     <section class="home-section" data-intro-reveal>

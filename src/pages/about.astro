@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import PageHeader from '../components/PageHeader.astro'
+import ContactCards from '../components/ContactCards.astro'
 import { theme } from '../site.config'
 ---
 
@@ -24,4 +25,35 @@ import { theme } from '../site.config'
     </p>
     <p>目前展示的是三篇示例笔记，用来试读排版、目录、搜索和 PDF 阅读。</p>
   </div>
+  <section class="contact-section enter delay-1" aria-labelledby="contact">
+    <div class="contact-intro">
+      <span class="contact-eyebrow">CONTACT</span>
+      <h2 id="contact">如何联系我</h2>
+      <p>欢迎交流学习、阅读和日常。添加好友时，请简单说明来意。</p>
+    </div>
+    <ContactCards />
+  </section>
 </BaseLayout>
+<style>
+  .contact-section {
+    margin-top: 56px;
+    padding-top: 36px;
+    border-top: 1px solid var(--line);
+  }
+  .contact-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+  .contact-intro h2 {
+    font-family: var(--font-editorial);
+    font-size: 25px;
+    font-weight: 500;
+    margin: 8px 0 12px;
+  }
+  .contact-intro p {
+    font-size: 14px;
+    color: var(--secondary);
+    margin-bottom: 28px;
+  }
+</style>

@@ -24,7 +24,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     <meta name="color-scheme" content="light dark" />
     <meta name="generator" content={Astro.generator} />
     {noindex && <meta name="robots" content="noindex" />}
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Eason's Notes" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href={canonical} />
     <link rel="alternate" type="application/rss+xml" title={theme.title} href="/rss.xml" />
     <meta property="og:title" content={`${title} · ${theme.title}`} />

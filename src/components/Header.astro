@@ -4,10 +4,7 @@ import Icon from './Icon.astro'
 import ThemePicker from './ThemePicker.astro'
 import NavCharacter from './NavCharacter.astro'
 const pathname = Astro.url.pathname
-const active = (href: string) =>
-  href === '/notes'
-    ? pathname.startsWith('/notes') && !pathname.startsWith('/notes/topics')
-    : pathname.startsWith(href)
+const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 ---
 
 <header class="site-header" data-pagefind-ignore>

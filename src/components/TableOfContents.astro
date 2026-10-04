@@ -20,7 +20,11 @@ const items = headings.filter((heading) => heading.depth >= 2 && heading.depth <
   </ul>
 </nav>
 <script>
-  const headings = [...document.querySelectorAll<HTMLElement>('.prose h2, .prose h3')]
+  const headings = [
+    ...document.querySelectorAll<HTMLElement>(
+      '.prose h2[id], .prose h3[id], [data-section-heading]'
+    )
+  ]
   const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')]
   let scheduled = false
   function update() {

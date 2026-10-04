@@ -14,6 +14,8 @@
     "preview": "astro preview --host 127.0.0.1",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "verify": "pnpm test && pnpm build",
+    "icons": "node scripts/prepare-site-icons.mjs",
+    "github:update": "node scripts/update-github-data.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

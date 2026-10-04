@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import PageHeader from '../components/PageHeader.astro'
+import TableOfContents from '../components/TableOfContents.astro'
+import GitHubActivity from '../components/GitHubActivity.astro'
+import ProjectCard from '../components/ProjectCard.astro'
+import { projects } from '../lib/projects'
+const headings = [
+  { depth: 2, slug: 'github-activity', text: 'GitHub 动态' },
+  { depth: 2, slug: 'personal-projects', text: '个人项目' },
+  { depth: 2, slug: 'learnings', text: '学习与参考' }
+]
+---
+
+<BaseLayout title="项目" description="正在做的项目，以及学习过程中留下的代码。">
+  <PageHeader title="项目" description="把想法慢慢做出来，也留下学习的过程。" />
+  <div class="article-grid enter delay-1">
+    <div class="article-body">
+      <details class="mobile-toc">
+        <summary>本页目录</summary>
+        <TableOfContents {headings} mobile />
+      </details>
+      <div class="project-sections">
+        <section aria-labelledby="github-activity">
+          <h2 id="github-activity" data-section-heading>
+            GitHub 动态
+          </h2>
+          <GitHubActivity />
+        </section>
+        <section aria-labelledby="personal-projects">
+          <h2 id="personal-projects" data-section-heading>
+            个人项目
+          </h2>
+          <ul class="project-grid">
+            {projects
+              .filter((project) => !project.fork)
+              .map((project) => (
+                <ProjectCard {project} />
+              ))}
+          </ul>
+        </section>
+        <section aria-labelledby="learnings">
+          <h2 id="learnings" data-section-heading>
+            学习与参考
+          </h2>
+          <p class="section-note">
+            Fork 的公开仓库，用来阅读实现与学习；原作者保留各自的署名与许可。
+          </p>
+          <ul class="project-grid">
+            {projects
+              .filter((project) => project.fork)
+              .map((project) => (
+                <ProjectCard {project} />
+              ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+    <aside class="toc-sidebar">
+      <h2 class="toc-title">本页目录</h2>
+      <TableOfContents {headings} />
+    </aside>
+  </div>
+</BaseLayout>
+<style>
+  .project-sections {
+    max-width: none;
+  }
+  .project-sections section + section {
+    margin-top: 48px;
+  }
+  .project-sections h2 {
+    font-family: var(--font-editorial);
+    font-size: 23px;
+    font-weight: 500;
+    margin: 0 0 20px;
+  }
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .section-note {
+    font-size: 13px;
+    color: var(--secondary);
+    margin: -8px 0 20px;
+  }
+  @media (max-width: 600px) {
+    .project-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
