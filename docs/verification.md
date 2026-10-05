@@ -61,3 +61,23 @@
 - 目录跳转后标题 top 约 112px，导航底部为 82px，标题不被遮挡；目录高亮与目标一致。
 - 生产构建成功，Astro 检查无错误、无警告，格式检查通过。
 - 截图：`artifacts/entrance-moving-clear.jpg`、`artifacts/home-compact-header.jpg`、`artifacts/header-glass-light.jpg`、`artifacts/header-glass-dark.jpg`。
+
+## 统一首页排版、漫画字体与永久格言
+
+- 20 项测试通过，生产构建成功；桌面 1280px、手机 390px、320px 无横向溢出。
+- 首页姓名 48px，中文标题/导航 22px；本地 Schoolbell 与霞鹜漫黑加载，正文系统字体保留。四块内容共用 `HomeRow` 分栏行。
+- 已删除头像下的“笔记与日常”和“翻开笔记”；新增真实 PDF 列表页。
+- 生产环境真实验证：作者登录设置安全 Cookie、私有 Blob 保存、无 Cookie 新访客读取同一记录、旧 ETag 写入返回 409、匿名写入返回 401、退出清除 Cookie。
+- 浏览器验证作者登录后格言成为纯文字编辑区域。预览环境没有作者验证密钥，保持只读。
+- 修复 Vercel 输出中的 TypeScript 导入后缀，以及 Blob SDK 在函数请求上下文取得 OIDC 时的配置检测。
+- 修复本机 iCloud 在生成 PDF.js 资源中产生冲突副本导致构建等待的问题：每次准备时重建该被忽略的生成目录。
+
+## iCloud Obsidian 同步与头像倾斜
+
+- 首页头像每轴最大倾斜由 6° 增加至 14°，保留原有轻微反光、入口动画及减少动效处理。
+- `pnpm verify`：47 项测试全部通过，Astro 检查 0 错误、0 警告（1 个现有输入法兼容提示），22 个静态页面构建成功。
+- 同步测试使用临时 Vault，覆盖公开/草稿筛选、子目录、中文与空格路径、Markdown/Wikilink/HTML 链接、PDF frontmatter、附件歧义与缺失、符号链接、路由冲突、源文件不变、生成副本归属、无变更同步及失败回滚。
+- 配置与监控测试覆盖本地环境文件、shell 优先级、初次同步、连续变更合并、串行同步和停止；真实 CLI 监控也验证修改临时笔记后自动写入一份项目副本，Ctrl+C 正常退出。
+- 隔离项目导入 2 篇公开笔记与 2 个附件，构建 26 个页面。浏览器确认图片加载、笔记跳转与 PDF 第 1/2 页至第 2/2 页切换正常；草稿标记没有进入生成 HTML。截图：`artifacts/obsidian-import-pdf-proof.png`。
+- 本机 `.env.local` 暂配置找到的 FC Vault，文件被 Git 忽略。真实 Vault 尚无 `Blog/`；尝试同步明确失败，未创建源目录、未改写 Vault、未清理现有项目内容。真实笔记导入需用户创建 Blog 并填写 frontmatter 后运行。
+- 不执行 Obsidian 插件渲染或笔记转引；块定位、本地 HTML srcset/CSS url() 明确报错。PDF 嵌入继续使用现有 frontmatter 与 PDF viewer。

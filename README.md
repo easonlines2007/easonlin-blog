@@ -43,7 +43,52 @@ publish: true
 - `sample: true` 显示示例标识；替换当前三篇示例时可以删除此字段。
 - 使用标准 Markdown 内部链接，例如 `[另一篇笔记](/notes/example)`。
 
-正文支持代码高亮/复制、KaTeX 数学公式、表格、折叠区块和文章目录。此版还未包含 Obsidian 仓库自动同步、Wikilink 转换、Dataview 或 Canvas 渲染。
+正文支持代码高亮/复制、KaTeX 数学公式、表格、折叠区块和文章目录。Obsidian 导入支持公开笔记和附件链接转换；Dataview、Canvas 和 Obsidian 插件动态渲染不在同步范围内。
+
+## 从 iCloud Obsidian 同步
+
+现有 iCloud Vault 继续作为笔记唯一来源，不移动 Vault，也不修改其中任何文件。在 Vault 中自行创建 `Blog/` 文件夹，准备公开的 Markdown 放在这里，子目录结构会保留。
+
+复制环境配置并填入 Vault 的**绝对路径**（是 Vault 根目录，不是 Blog 目录）：
+
+```sh
+cp .env.example .env.local
+```
+
+```dotenv
+OBSIDIAN_VAULT_PATH="/你的/iCloud/Vault/绝对路径"
+```
+
+`.env.local` 已被 Git 忽略，路径只保存在本机，不放进 GitHub 或 Vercel。环境变量 `OBSIDIAN_VAULT_PATH` 也可以直接由 shell 设置，优先于本地文件。
+
+每篇笔记使用上面的 frontmatter；只有布尔值 `publish: true` 会导出，缺失或 false 不会发布；字符串 `"true"` 会报错，不能代替布尔值。公开笔记必须满足现有字段校验（title、description、date、topic 等），避免把格式错误带进构建。
+
+```sh
+pnpm obsidian:sync
+pnpm obsidian:watch
+```
+
+`sync` 一次同步到 `src/content/notes/`；`watch` 初次同步后持续监控 Blog 和已引用附件，修改后自动同步。开发时在另一个终端运行 `pnpm dev`，Ctrl+C 停止监控。监控只更新项目副本，不自动提交或推送。
+
+笔记中的图片/PDF、Obsidian `![[附件]]` 和 frontmatter `pdf` 引用会复制到 `public/attachments/`，转换为网站路径。生成附件名使用稳定哈希与原扩展名，以支持中文、空格并兼容现有 PDF viewer。笔记内部链接只连接 Blog 内已公开的笔记。附件解析支持笔记相对路径、Vault 相对路径及唯一文件名；同名歧义或缺失附件会报错，不能猜测。代码块与行内代码保持原样。
+
+`![[笔记]]` 与 `![[文件.pdf]]` 转换为普通链接，不执行 Obsidian 转引；需要内嵌 PDF 阅读器时使用 frontmatter `pdf` 字段。块定位 `#^block-id`、本地 HTML `srcset` 与 CSS `url()` 暂不支持，遇到时会明确报错。页面地址遵循现有 Astro 规则（如 `阅读/index.md` 对应 `/notes/阅读`）；`pdf`、`tags`、`topics` 是已有页面保留的首层名称，不能作为导入笔记地址。
+
+脚本跳过 `.obsidian` 和符号链接，只读取 Blog Markdown 及被公开笔记引用的图片/PDF，不复制整个 Vault。同步清单 `src/data/obsidian-sync.json` 记录生成文件归属，需要随内容提交。把笔记改成草稿或删除源文件时，只清理同步清单拥有的项目副本及不再使用的附件，现有手写/示例内容保留；与手写文件重名或生成副本被手动修改时会报错。缺少 Blog、iCloud 文件尚未下载、链接解析或校验失败时保留上一份同步结果。
+
+不要直接编辑已同步到项目的笔记，回 Obsidian 修改。同步前保证 Blog 和引用附件已经由 iCloud 下载到本机；脚本不接管 iCloud 的下载或同步设置。
+
+完成修改后：
+
+```sh
+pnpm obsidian:sync
+pnpm verify
+git add src/content/notes public/attachments src/data/obsidian-sync.json
+git commit -m "Update notes from Obsidian"
+git push origin main
+```
+
+工作流是 **Obsidian/iCloud → Blog → 本机同步 → Git push → Vercel 自动部署**。Vercel 构建只读取已提交的副本，不需要访问你的 iCloud，也不需要 Vault 路径。新公开笔记引用的附件也会公开；将 `publish` 改回 false 后，需同步并推送清理结果才会从新部署中移除。
 
 ## PDF 附件
 

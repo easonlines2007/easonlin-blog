@@ -16,6 +16,8 @@
     "verify": "pnpm test && pnpm build",
     "icons": "node scripts/prepare-site-icons.mjs",
     "github:update": "node scripts/update-github-data.mjs",
+    "obsidian:sync": "node scripts/obsidian-sync.mjs",
+    "obsidian:watch": "node scripts/obsidian-watch.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -26,11 +28,14 @@
     "@vercel/blob": "2.8.0",
     "astro": "6.4.8",
     "astro-pure": "1.4.9",
+    "github-slugger": "2.0.0",
     "katex": "0.16.47",
+    "mdast-util-from-markdown": "2.1.0",
     "pdfjs-dist": "6.3.289",
     "rehype-katex": "7.0.1",
     "remark-math": "6.0.0",
-    "sharp": "0.35.5"
+    "sharp": "0.35.5",
+    "yaml": "2.9.1"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.9",

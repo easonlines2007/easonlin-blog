@@ -35,8 +35,8 @@ export function setupAvatarTilt(avatar: HTMLElement) {
       if (!bounds.width || !bounds.height) return
       const x = Math.max(0, Math.min(1, (pointerX - bounds.left) / bounds.width))
       const y = Math.max(0, Math.min(1, (pointerY - bounds.top) / bounds.height))
-      avatar.style.setProperty('--avatar-tilt-x', `${((0.5 - y) * 12).toFixed(2)}deg`)
-      avatar.style.setProperty('--avatar-tilt-y', `${((x - 0.5) * 12).toFixed(2)}deg`)
+      avatar.style.setProperty('--avatar-tilt-x', `${((0.5 - y) * 28).toFixed(2)}deg`)
+      avatar.style.setProperty('--avatar-tilt-y', `${((x - 0.5) * 28).toFixed(2)}deg`)
       avatar.style.setProperty('--avatar-glare-x', `${(x * 100).toFixed(1)}%`)
       avatar.style.setProperty('--avatar-glare-y', `${(y * 100).toFixed(1)}%`)
       avatar.dataset.avatarTilting = 'true'
