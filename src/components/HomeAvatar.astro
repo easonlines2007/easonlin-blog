@@ -44,11 +44,11 @@ import woodstock from '../assets/woodstock.png'
     backface-visibility: hidden;
   }
   .avatar-back {
-    transform: rotateY(180deg);
+    transform: rotateX(180deg);
   }
   @media (hover: hover) and (pointer: fine) {
     :global(html:not([data-home-entrance='pending'])) .avatar:hover .avatar-card {
-      transform: rotateY(180deg);
+      transform: rotateX(180deg);
     }
   }
   @media (prefers-reduced-motion: reduce) {
