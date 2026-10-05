@@ -23,7 +23,17 @@ pnpm preview
 
 ## 添加笔记
 
-在 `src/content/notes/` 中创建 `.md` 文件。文件名决定网址，建议使用稳定的英文短名称。笔记可以分子目录保存。
+日常笔记在 Obsidian Vault 的 `Blog/` 中创建，`src/content/notes/` 保存同步生成的博客副本。文件名决定网址，笔记可以分子目录保存。
+
+最少只需这一项属性：
+
+```yaml
+---
+publish: true
+---
+```
+
+标题、简介、日期、分类、标签都可以不填；自动补值只写进博客副本。需要自己指定时，再添加下面这些可选属性：
 
 ```yaml
 ---
@@ -37,7 +47,18 @@ publish: true
 ---
 ```
 
+| 属性             | 未填写或留空时                                        |
+| ---------------- | ----------------------------------------------------- |
+| `title`          | 使用文件名（不含 `.md`）                              |
+| `description`    | 留空                                                  |
+| `date`           | 初次同步使用源文件修改日（UTC），后续保留已同步的日期 |
+| `topic`          | 使用 Blog 下第一层子目录名，根目录笔记归到“随笔”      |
+| `tags`           | 无标签，不影响发布                                    |
+| `status`         | `growing`                                             |
+| `updated`、`pdf` | 不启用相应可选字段                                    |
+
 - `publish` 默认是 `false`；只有显式为 `true` 的笔记进入网页、导航、RSS 和搜索。
+- 如果主动填写日期，建议使用 `2026-10-05` 这样的真实日期字符串；数字 `20261005` 和不存在的日期会报错。`tags` 使用列表，如 `[阅读, 整理]`，可以在 Obsidian 属性面板中添加。
 - `status` 为 `growing`（进行中）或 `ready`（已整理），与是否公开独立。
 - `updated` 可记录修订日期，列表按更新时间排序。
 - `sample: true` 显示示例标识；替换当前三篇示例时可以删除此字段。
@@ -61,7 +82,7 @@ OBSIDIAN_VAULT_PATH="/你的/iCloud/Vault/绝对路径"
 
 `.env.local` 已被 Git 忽略，路径只保存在本机，不放进 GitHub 或 Vercel。环境变量 `OBSIDIAN_VAULT_PATH` 也可以直接由 shell 设置，优先于本地文件。
 
-每篇笔记使用上面的 frontmatter；只有布尔值 `publish: true` 会导出，缺失或 false 不会发布；字符串 `"true"` 会报错，不能代替布尔值。公开笔记必须满足现有字段校验（title、description、date、topic 等），避免把格式错误带进构建。
+每篇笔记只需上面的最简 frontmatter；只有布尔值 `publish: true` 会导出，缺失或 false 不会发布；字符串 `"true"` 会报错，不能代替布尔值。同步器补齐缺失属性后再按现有博客规则校验；手动填写但类型或格式错误的属性仍会报错，避免把格式错误带进构建。
 
 ```sh
 pnpm obsidian:sync
@@ -70,13 +91,15 @@ pnpm obsidian:watch
 
 `sync` 一次同步到 `src/content/notes/`；`watch` 初次同步后持续监控 Blog 和已引用附件，修改后自动同步。开发时在另一个终端运行 `pnpm dev`，Ctrl+C 停止监控。监控只更新项目副本，不自动提交或推送。
 
+两条命令按需选一种：偶尔导入使用 `sync`，持续写作使用 `watch`，无需同时开多个监控进程。属性报错后 `watch` 会继续等待，源文件修改后自动重试。`Unsupported engine` 表示本机 Node 与项目推荐的 Node 24 不一致，是版本提示，与属性校验失败无关；生产环境继续使用 Node 24。
+
 笔记中的图片/PDF、Obsidian `![[附件]]` 和 frontmatter `pdf` 引用会复制到 `public/attachments/`，转换为网站路径。生成附件名使用稳定哈希与原扩展名，以支持中文、空格并兼容现有 PDF viewer。笔记内部链接只连接 Blog 内已公开的笔记。附件解析支持笔记相对路径、Vault 相对路径及唯一文件名；同名歧义或缺失附件会报错，不能猜测。代码块与行内代码保持原样。
 
 `![[笔记]]` 与 `![[文件.pdf]]` 转换为普通链接，不执行 Obsidian 转引；需要内嵌 PDF 阅读器时使用 frontmatter `pdf` 字段。块定位 `#^block-id`、本地 HTML `srcset` 与 CSS `url()` 暂不支持，遇到时会明确报错。页面地址遵循现有 Astro 规则（如 `阅读/index.md` 对应 `/notes/阅读`）；`pdf`、`tags`、`topics` 是已有页面保留的首层名称，不能作为导入笔记地址。
 
 脚本跳过 `.obsidian` 和符号链接，只读取 Blog Markdown 及被公开笔记引用的图片/PDF，不复制整个 Vault。同步清单 `src/data/obsidian-sync.json` 记录生成文件归属，需要随内容提交。把笔记改成草稿或删除源文件时，只清理同步清单拥有的项目副本及不再使用的附件，现有手写/示例内容保留；与手写文件重名或生成副本被手动修改时会报错。缺少 Blog、iCloud 文件尚未下载、链接解析或校验失败时保留上一份同步结果。
 
-不要直接编辑已同步到项目的笔记，回 Obsidian 修改。同步前保证 Blog 和引用附件已经由 iCloud 下载到本机；脚本不接管 iCloud 的下载或同步设置。
+不要直接编辑已同步到项目的笔记，回 Obsidian 修改。项目格式化命令跳过笔记目录，避免改动同步副本导致归属校验失败。同步前保证 Blog 和引用附件已经由 iCloud 下载到本机；脚本不接管 iCloud 的下载或同步设置。
 
 完成修改后：
 

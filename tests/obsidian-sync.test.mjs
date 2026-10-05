@@ -9,6 +9,7 @@ import {
   realpath,
   rm,
   symlink,
+  utimes,
   writeFile
 } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -20,6 +21,8 @@ import { obsidianNoteId, syncObsidian } from '../scripts/obsidian-sync-lib.mjs'
 const digest = (value) => createHash('sha256').update(value).digest('hex')
 const note = (body = '正文', fields = '') =>
   `---\ntitle: 一篇笔记\ndescription: 用于同步测试\ndate: 2026-10-05\ntopic: 学习\ntags: [Obsidian, PDF]\nstatus: ready\npublish: true\n${fields}---\n\n${body}\n`
+const minimalNote = (fields = '', body = '正文') => `---\npublish: true\n${fields}---\n\n${body}\n`
+const exportedMetadata = (source) => parse(source.match(/^---\n([\s\S]*?)\n---/)[1])
 
 async function fixture(t) {
   const directory = await mkdtemp(join(tmpdir(), 'eason-obsidian-test-'))
@@ -77,6 +80,120 @@ test('only literal published Blog Markdown syncs with nested directories; all Va
   assert.deepEqual(Object.keys(JSON.parse(await f.output('src/data/obsidian-sync.json')).notes), [
     '课程/Linear Algebra.md'
   ])
+})
+
+test('publish true alone exports filename metadata and the source modification UTC date without editing the Vault', async (t) => {
+  const f = await fixture(t)
+  await f.source('Blog/First Note.md', minimalNote())
+  const modified = new Date('2024-03-07T23:45:00.000Z')
+  await utimes(join(f.vaultPath, 'Blog/First Note.md'), modified, modified)
+  const before = await snapshot(f.vaultPath)
+  const result = await f.run()
+  assert.equal(result.notes, 1)
+  const data = exportedMetadata(await f.output('src/content/notes/First Note.md'))
+  assert.equal(data.title, 'First Note')
+  assert.equal(data.description, '')
+  assert.equal(data.topic, '随笔')
+  assert.equal(data.date, '2024-03-07')
+  assert.equal(data.publish, true)
+  assert.deepEqual(await snapshot(f.vaultPath), before)
+})
+
+test('empty Obsidian properties get safe defaults and nested notes use the first directory as topic', async (t) => {
+  const f = await fixture(t)
+  await f.source(
+    'Blog/课程/子模块/空字段.md',
+    minimalNote(
+      'title: "  "\ndescription: null\ntopic: "  "\ndate: null\ntags:\nstatus: ""\nupdated: "  "\npdf: null\nsample: ""\n'
+    )
+  )
+  const modified = new Date('2024-02-29T10:30:00.000Z')
+  await utimes(join(f.vaultPath, 'Blog/课程/子模块/空字段.md'), modified, modified)
+  const before = await snapshot(f.vaultPath)
+  await f.run()
+  const data = exportedMetadata(await f.output('src/content/notes/课程/子模块/空字段.md'))
+  assert.equal(data.title, '空字段')
+  assert.equal(data.description, '')
+  assert.equal(data.topic, '课程')
+  assert.equal(data.date, '2024-02-29')
+  assert.deepEqual(data.tags, [])
+  assert.ok(data.status === undefined || data.status === 'growing')
+  for (const field of ['updated', 'pdf', 'sample']) assert.ok(!Object.hasOwn(data, field))
+  assert.deepEqual(await snapshot(f.vaultPath), before)
+})
+
+test('a missing date retains the verified owned publication date after source edits and later syncs are no-ops', async (t) => {
+  const f = await fixture(t)
+  const path = join(f.vaultPath, 'Blog/entry.md')
+  await f.source('Blog/entry.md', minimalNote('', '初版'))
+  const firstDate = new Date('2024-01-03T16:00:00.000Z')
+  await utimes(path, firstDate, firstDate)
+  await f.run()
+  assert.equal(exportedMetadata(await f.output('src/content/notes/entry.md')).date, '2024-01-03')
+  await f.source('Blog/entry.md', minimalNote('date: "  "\n', '修改正文'))
+  const modified = new Date('2026-10-05T09:00:00.000Z')
+  await utimes(path, modified, modified)
+  const result = await f.run()
+  assert.equal(result.written, 1)
+  const output = await f.output('src/content/notes/entry.md')
+  assert.equal(exportedMetadata(output).date, '2024-01-03')
+  assert.match(output, /修改正文/)
+  const before = await snapshot(f.projectRoot)
+  const repeated = await f.run()
+  assert.equal(repeated.written, 0)
+  assert.equal(repeated.removed, 0)
+  assert.deepEqual(await snapshot(f.projectRoot), before)
+})
+
+test('explicit invalid, numeric and boolean dates fail clearly rather than silently falling back or becoming 1970', async (t) => {
+  const f = await fixture(t)
+  await f.source('Blog/entry.md', minimalNote('date: 2026-10-05\n'))
+  await f.run()
+  const before = await snapshot(f.projectRoot)
+  for (const value of [
+    'nope',
+    20261005,
+    0,
+    true,
+    false,
+    [2026, 10, 5],
+    { year: 2026 },
+    '2026-02-30',
+    '2026-2-30',
+    '2026/02/30',
+    '2026-02-29',
+    '2026-13-01',
+    '2026-10-05T99:00:00Z'
+  ]) {
+    await f.source('Blog/entry.md', minimalNote(`date: ${JSON.stringify(value)}\n`))
+    await assert.rejects(f.run, /date/)
+    assert.deepEqual(await snapshot(f.projectRoot), before)
+  }
+})
+
+test('valid ISO timestamps retain their time and explicit metadata types still require valid values', async (t) => {
+  const f = await fixture(t)
+  const timestamp = '2026-10-05T01:23:45+02:00'
+  await f.source(
+    'Blog/entry.md',
+    minimalNote(`date: "${timestamp}"\nupdated: "2026-10-05T18:00:00Z"\n`)
+  )
+  await f.run()
+  const data = exportedMetadata(await f.output('src/content/notes/entry.md'))
+  assert.equal(typeof data.date, 'string')
+  assert.equal(new Date(data.date).getTime(), new Date(timestamp).getTime())
+  assert.match(data.date, /T/)
+  assert.equal(new Date(data.updated).getTime(), new Date('2026-10-05T18:00:00Z').getTime())
+  const before = await snapshot(f.projectRoot)
+  for (const [field, value] of [
+    ['title', 42],
+    ['description', {}],
+    ['topic', []]
+  ]) {
+    await f.source('Blog/entry.md', minimalNote(`${field}: ${JSON.stringify(value)}\n`))
+    await assert.rejects(f.run, new RegExp(field))
+    assert.deepEqual(await snapshot(f.projectRoot), before)
+  }
 })
 
 test('relative images, PDFs, reference definitions and Obsidian embeds resolve to stable public assets', async (t) => {

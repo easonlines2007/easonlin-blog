@@ -129,6 +129,52 @@ function frontmatter(source, label) {
   return { data, document, body: source.slice(match[0].length) }
 }
 
+const emptyProperty = (value) =>
+  value === undefined || value === null || (typeof value === 'string' && !value.trim())
+
+function validNoteDate(value) {
+  if (typeof value !== 'string' && !(value instanceof Date)) return false
+  const parsed = new Date(value)
+  if (!Number.isFinite(parsed.getTime())) return false
+  if (typeof value === 'string') {
+    const day = value.trim().match(/^(\d{4}-\d{2}-\d{2})(?:$|[T ])/u)?.[1]
+    if (!day) return false
+    const calendar = new Date(`${day}T00:00:00.000Z`)
+    if (!Number.isFinite(calendar.getTime()) || calendar.toISOString().slice(0, 10) !== day)
+      return false
+  }
+  return true
+}
+
+// Defaults belong to the generated copy, never to the iCloud source note.
+function completeMetadata(note, sourceStat, previousBytes) {
+  const defaults = {
+    title: basename(note.output, '.md'),
+    description: '',
+    topic: note.output.includes('/') ? note.output.split('/')[0] : '随笔',
+    tags: []
+  }
+  if (emptyProperty(note.data.date)) {
+    const previousDate = previousBytes
+      ? frontmatter(previousBytes.toString('utf8'), `已同步笔记 ${note.output}`).data.date
+      : undefined
+    // Once exported, the date stays stable even when iCloud replaces or edits the source.
+    defaults.date = validNoteDate(previousDate)
+      ? previousDate
+      : new Date(sourceStat.mtimeMs).toISOString().slice(0, 10)
+  }
+  for (const [field, value] of Object.entries(defaults)) {
+    if (!emptyProperty(note.data[field])) continue
+    note.data[field] = value
+    note.document.set(field, value)
+  }
+  for (const field of ['updated', 'status', 'pdf', 'sample']) {
+    if (!emptyProperty(note.data[field])) continue
+    delete note.data[field]
+    note.document.delete(field)
+  }
+}
+
 function validateNote(data, label) {
   for (const [field, maximum] of [
     ['title', 100],
@@ -144,8 +190,8 @@ function validateNote(data, label) {
   }
   for (const field of ['date', 'updated']) {
     if (field === 'updated' && data[field] === undefined) continue
-    if (data[field] === undefined || !Number.isFinite(new Date(data[field]).getTime()))
-      fail(`${label} 的 ${field} 无效`)
+    if (!validNoteDate(data[field]))
+      fail(`${label} 的 ${field} 无效，请填写真实日期（例如 2026-10-05）；留空可自动补齐 date`)
   }
   if (
     data.tags !== undefined &&
@@ -378,7 +424,6 @@ export async function syncObsidian({ vaultPath, projectRoot }) {
     if (!safeRelative(output)) fail(`笔记路径无效：${output}`)
     const bytes = await readSource(path)
     const parsed = frontmatter(new TextDecoder('utf-8', { fatal: true }).decode(bytes), output)
-    if (parsed.data.publish === true) validateNote(parsed.data, output)
     allNotes.push({ path, output, ...parsed, published: parsed.data.publish === true })
   }
   const published = allNotes.filter((note) => note.published)
@@ -425,6 +470,8 @@ export async function syncObsidian({ vaultPath, projectRoot }) {
     }
   }
   for (const note of published) {
+    completeMetadata(note, snapshots.get(note.path), backup.get(join(notesRoot, note.output)))
+    validateNote(note.data, note.output)
     note.id = obsidianNoteId(note.output, note.data)
     claimRoute(note.id, note.output)
     const destination = join(notesRoot, note.output)

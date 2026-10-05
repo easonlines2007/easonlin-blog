@@ -4,3 +4,5 @@ dist/
 public/pdfjs/
 artifacts/
 pnpm-lock.yaml
+# Obsidian owns note content; formatting generated copies breaks their ownership hashes.
+src/content/notes/
