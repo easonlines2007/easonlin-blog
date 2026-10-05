@@ -509,7 +509,6 @@ summary::-webkit-details-marker {
 .avatar {
   width: 116px;
   height: 116px;
-  transform: rotate(-3deg);
 }
 .avatar img {
   display: block;

@@ -73,7 +73,7 @@ export async function startHomeEntrance() {
       )
     }
 
-    moveIntoPlace(avatar, groupTop + avatarHeight / 2, avatarScale, -3)
+    moveIntoPlace(avatar, groupTop + avatarHeight / 2, avatarScale, 0)
     moveIntoPlace(name, groupTop + avatarHeight + gap + nameHeight / 2, nameScale, 0)
 
     // Keep every other element hidden until both moving elements have landed.
