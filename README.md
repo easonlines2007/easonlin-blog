@@ -127,6 +127,34 @@ git push origin main
 
 工作流是 **Obsidian/iCloud → Blog → 本机同步 → Git push → Vercel 自动部署**。Vercel 构建只读取已提交的副本，不需要访问你的 iCloud，也不需要 Vault 路径。新公开笔记引用的附件也会公开；将 `publish` 改回 false 后，需同步并推送清理结果才会从新部署中移除。
 
+## 网页文章管理
+
+访问 `/admin`，使用与首页格言编辑相同的作者口令登录。后台沿用静态页面与根目录 Vercel Functions，不需要数据库或全站 SSR。登录不依赖格言的 Blob 存储；两个编辑入口共享作者会话，退出会同时注销。
+
+- 查看和搜索全部仓库文章，包括草稿；修改标题、简介、分类、标签及发布状态。标签用逗号分隔，可直接改名或点击 × 移除。
+- 新增时上传或粘贴不超过 256 KB 的 UTF-8 Markdown，填写文章信息，保存到 `src/content/notes/web/`。表单属性优先，保留文件中其余 frontmatter；缺少日期时使用创建日（UTC）。文章网址由文件名决定，第一版不提供重命名与正文编辑。
+- 网页／手写文章直接更新 Markdown frontmatter；正文和其他属性保留。可以取消发布，也可以删除整个 Markdown。附件不会随文章自动删除。
+- Obsidian 文章只修改 `src/data/note-overrides.json` 中的网站属性，不改同步副本或同步清单。只记录实际改动的字段；标签列表整体替换，空数组表示清空。取消发布表示从网站下架，Vault 原文保留。“恢复 Obsidian 设置”清除这篇文章的全部网站覆盖值，包括下架设置。
+- 构建先合并网站设置，再过滤 `publish`。首页、文章、分类、标签、RSS 与 Pagefind 搜索统一生效。源文件不再存在时，覆盖值不会生成文章；源路径重命名后，需在后台重新设置新路径。覆盖值不会写回 Obsidian。
+
+在 **Vercel Production** 环境配置（Preview 禁用管理接口）：
+
+| 变量 | 用途 |
+| --- | --- |
+| `BLOG_GITHUB_TOKEN` | 仅限该仓库、具有 Contents 读写权限的 fine-grained Token |
+| `BLOG_GITHUB_OWNER` | `easonlines2007` |
+| `BLOG_GITHUB_REPO` | `easonlin-blog` |
+| `BLOG_GITHUB_BRANCH` | `main` |
+| `MOTTO_ADMIN_PASSWORD_HASH`、`MOTTO_SESSION_SECRET` | 沿用已有高强度作者口令哈希与独立签名密钥 |
+
+Token 仅由服务端 `process.env` 读取，不能使用 `PUBLIC_` 前缀，不填写在浏览器或提交到 Git。`/admin` 只输出空页面框架，文章数据在鉴权后读取；API 禁止缓存，并检查写操作的 Origin、路径、属性和请求大小。错误响应不会回显 Token 或 GitHub 原始错误。
+
+每次保存创建 Git 提交，继续由现有 Vercel Git 集成自动部署。界面显示“已提交”只表示 GitHub 保存成功，部署状态在 Vercel 查看；构建失败时旧网站继续服务。GitHub 使用读取时的完整仓库版本作为父提交，更新分支时始终 `force: false`；如果网页、Obsidian 或定时任务已提交新版本，保存返回冲突，保留输入，需核对并重新加载，不自动覆盖。受保护分支必须允许该作者按现有规则提交，后台不会绕过分支规则。
+
+本机后续同步前，先确认工作区并拉取网页端的新提交，再运行现有 `obsidian:sync` / `obsidian:watch`。覆盖文件需要随代码保留，同步脚本不会改写它。下架不是附件访问控制，也不会清除 Git 历史或旧部署。
+
+`pnpm dev` 仍只提供 Astro 页面，不执行根目录 `api/`；完整联调使用已配置环境的 `vercel dev` 或 Vercel Production 部署。自动化测试直接调用同一组管理处理函数和模拟 GitHub API，使用临时 Vault 验证再次同步不会覆盖网站设置，不写真实仓库或 Vault。
+
 ## PDF 附件
 
 将准备公开的 PDF 放入 `public/attachments/`，再在笔记头部填写：
