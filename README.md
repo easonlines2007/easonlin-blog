@@ -189,7 +189,7 @@ PDF.js 仅在附件接近视口时加载。`scripts/prepare-pdf-assets.mjs` 在�
 
 同步会重试暂时的网络错误，并在验证仓库字段、日期完整性和贡献数字后原子替换快照。接口异常时工作流失败并保留上一次可用数据，网站构建不依赖 GitHub 网络请求。运行 `pnpm github:update` 仍可手动更新；不需要个人 GitHub Token 或 Vercel Token，工作流仅使用 GitHub 内置的当前仓库写入凭据。
 
-“关于”页的微信、QQ、Instagram、小红书卡片使用一致的 4:5 展示框，原图以 `object-fit: contain` 完整显示。桌面悬停或键盘聚焦显示图片，点击可打开原比例大图；触屏设备直接显示图片。素材位于 `src/assets/contact/`，请仅放准备公开的联系方式。
+“关于”页的微信、QQ、Instagram、小红书卡片使用一致的 4:5 展示框，图片填满卡片、不加内边距。前三张以二维码为中心放大，让二维码统一占卡片宽度的 84%；更换素材时需同步调整 `ContactCards.astro` 中的二维码宽度和中心位置。小红书单独按封面方式填充。桌面悬停或键盘聚焦显示图片，点击可打开完整原比例大图；触屏设备直接显示图片。素材位于 `src/assets/contact/`，请仅放准备公开的联系方式。
 
 浏览器与主屏幕图标使用同一张史努比头像；PNG、ICO 和 iPhone 的 `apple-touch-icon` 已配置。更换头像后运行 `pnpm icons`，提交生成的图标。Manifest 仅提供名称和图标，不包含离线缓存。
 

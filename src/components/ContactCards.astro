@@ -5,11 +5,18 @@ import qq from '../assets/contact/qq.png'
 import instagram from '../assets/contact/instagram.jpg'
 import xiaohongshu from '../assets/contact/xiaohongshu.png'
 const contacts = [
-  { name: '微信', image: wechat, detail: '扫码添加好友' },
-  { name: 'QQ', image: qq, detail: '1042822846' },
-  { name: 'Instagram', image: instagram, detail: '@eason_._lin' },
+  { name: '微信', image: wechat, detail: '扫码添加好友', qr: { width: 900, centerY: 859 } },
+  { name: 'QQ', image: qq, detail: '1042822846', qr: { width: 862, centerY: 940 } },
+  {
+    name: 'Instagram',
+    image: instagram,
+    detail: '@eason_._lin',
+    qr: { width: 402, centerY: 533.5 }
+  },
   { name: '小红书', image: xiaohongshu, detail: '990246975' }
 ]
+// Center the three QR codes at the same 84% of the card width; keep the full originals in dialogs.
+const qrCardWidth = 0.84
 ---
 
 <div class="contact-grid">
@@ -17,6 +24,12 @@ const contacts = [
     <figure class="contact-card">
       <button
         class="contact-image"
+        class:list={{ 'contact-image-qr': Boolean(contact.qr) }}
+        style={
+          contact.qr
+            ? `--image-width: ${(contact.image.width / contact.qr.width) * qrCardWidth * 100}%; --image-center-y: ${(contact.qr.centerY / contact.image.height) * 100}%`
+            : undefined
+        }
         type="button"
         data-contact-open={`contact-${index}`}
         aria-haspopup="dialog"
@@ -101,7 +114,7 @@ const contacts = [
     aspect-ratio: 4 / 5;
     border: 1px solid var(--line);
     border-radius: 10px;
-    padding: 12px;
+    padding: 0;
     overflow: hidden;
     background: #fff;
     color: var(--text);
@@ -110,7 +123,19 @@ const contacts = [
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
+  }
+  .contact-image-qr img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--image-width);
+    max-width: none;
+    height: auto;
+    transform: translate(-50%, calc(-1 * var(--image-center-y)));
+  }
+  .contact-image:not(.contact-image-qr) img {
+    transform: scale(1.06);
   }
   .contact-cover {
     position: absolute;
