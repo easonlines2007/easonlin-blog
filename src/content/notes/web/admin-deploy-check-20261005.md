@@ -1,10 +1,10 @@
 ---
-title: 后台上线验证
+title: 后台上线验证（标签已更新）
 description: 临时测试草稿，仅用于验证生产后台，完成后删除。
 topic: 上线验证
 tags:
   - 部署检查
-  - 标签测试
+  - 标签编辑
 publish: false
 date: 2026-10-05
 ---
