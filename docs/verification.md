@@ -107,3 +107,13 @@
 - 浏览器通过真实管理处理函数连接隔离内存仓库，验证登录、Markdown 上传与粘贴新增、元信息和标签保存、下架、恢复 Obsidian 设置、删除确认与取消、退出。双标签页并发保存返回冲突且保留输入，切换文章前的放弃修改确认可取消。
 - 桌面、390px 和 320px 布局检查通过，无页面横向溢出；浅色与深色界面正常，测试后恢复跟随系统。浏览器未发现运行错误。预览截图：`artifacts/admin-desktop.jpg`、`artifacts/admin-dark.jpg`、`artifacts/admin-mobile.jpg`。
 - 本次未向真实 GitHub 写入，也未触发 Vercel 部署。上线需按 README 在 Vercel Production 配置仓库 Token 等变量，并完成生产接口和自动部署联调；本机内存测试中的“已提交”仅表示模拟保存成功。
+
+## 管理后台生产上线（2026-10-05）
+
+- 正式入口：`https://easonlin-blog.vercel.app/admin`。沿用原有作者口令与会话；已实际登录并读取 GitHub 中的 6 篇文章。
+- `BLOG_GITHUB_TOKEN` 已配置为 Vercel Production 的 Sensitive 变量，仓库 owner/repo/main 也仅配置于 Production；原有作者鉴权变量保持不变。Token 没有写入源码或本机环境文件。
+- 修复 Vercel Functions 单独编译时的 Node 类型与现代标准库识别问题：显式声明 Node 24 类型开发依赖及 TypeScript lib/types。没有新增运行时依赖；后续生产构建日志未再出现服务端类型错误。
+- 经作者允许，用始终未发布的 `web/admin-deploy-check-20261005.md` 验证生产新增（`e28f748`）、标题与标签修改（`951dee9`）、删除（`7ceacc0`）。三次 GitHub API 提交均触发已有 Git 集成，三次生产部署均 READY。
+- 直接读取 GitHub 提交确认标签改动持久化、Markdown 正文逐字保留；删除后测试文件不存在。公开笔记列表与 RSS 不含测试草稿，草稿文章网址返回 404。
+- 匿名文章读取返回 401，跨站写入返回 403，无效作者口令返回 401；管理接口返回 private/no-store。原有公开页面与 RSS 返回 200，后台含 noindex。
+- 测试结束后的 Git diff 确认原有文章、网站覆盖文件、同步清单与 Obsidian 脚本完全未变；网页创建的三个提交已快进同步至本机。生产截图：`artifacts/admin-production-create.jpg`、`artifacts/admin-production.jpg`。
