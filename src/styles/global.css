@@ -447,6 +447,8 @@ summary::-webkit-details-marker {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
   color: var(--secondary);
   font-size: 14px;
 }
@@ -458,6 +460,12 @@ summary::-webkit-details-marker {
 }
 .footer-credit {
   font-size: 13px;
+}
+.footer-links {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 14px;
 }
 .enter {
   animation: fade-in-up 300ms ease both;

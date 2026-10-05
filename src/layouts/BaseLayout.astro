@@ -92,9 +92,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
             </a>
           </span>
         </div>
-        <a href="/rss.xml" class="icon-button" aria-label="订阅 RSS" title="订阅 RSS">
-          <Icon name="rss" />
-        </a>
+        <nav class="footer-links" aria-label="页脚链接">
+          <a href="/admin">
+            <span class="lift-text">文章管理</span>
+          </a>
+          <a href="/rss.xml" class="icon-button" aria-label="订阅 RSS" title="订阅 RSS">
+            <Icon name="rss" />
+          </a>
+        </nav>
       </footer>
     </div>
   </body>
