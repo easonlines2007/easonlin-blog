@@ -1,6 +1,6 @@
 # Eason's Notes
 
-一个基于 Astro + Astro Theme Pure 的个人笔记网站。内容以 Markdown 保存，构建为静态网页；不需要数据库。
+一个基于 Astro + Astro Theme Pure 的个人笔记网站。笔记以 Markdown 保存并构建为静态网页；首页格言通过独立的 Vercel Functions 与私有 Blob 存储保存。
 
 ## 本地运行
 
@@ -71,11 +71,21 @@ PDF.js 仅在附件接近视口时加载。`scripts/prepare-pdf-assets.mjs` 在�
 
 站点信息与导航在 `src/site.config.ts`；颜色、间距和响应式规则在 `src/styles/global.css`。头像保存在 `src/assets/avatar.png`，使用用户提供的原图，由 Astro 在构建时优化。
 
-视觉采用暖白、炭灰与少量砖红，标题搭配衬线字体。桌面顶栏在悬停或键盘聚焦时沿横轴翻转，从文字切换为插画；手机保留文字。映射集中在 `src/components/NavCharacter.astro`，素材和生成提示词见 [视觉说明](docs/visual-style.md)。
+视觉采用暖白、炭灰与少量砖红，顶栏和标题使用本地托管的霞鹜漫黑与 Schoolbell，中文标题为 22px，首页姓名为 48px；正文保留系统字体。字体许可位于 `public/fonts/`。首页四块内容共用分栏行组件，统一分隔线、箭头和悬停反馈。桌面顶栏在悬停或键盘聚焦时沿横轴翻转，从文字切换为插画；手机保留文字。映射集中在 `src/components/NavCharacter.astro`，素材和生成提示词见 [视觉说明](docs/visual-style.md)。
 
 首页首次进入时，头像与姓名先居中出现，再移动到实际布局位置；等两者完全归位后，其余内容才依次淡入，全程约 2.7 秒。一次标签页会话中返回首页不会重复播放，主动刷新可重播。历史返回、锚点访问和减少动态效果模式跳过动画；操作页面或调整窗口会立即结束动画。逻辑独立在 `src/components/HomeEntrance.astro` 和 `src/scripts/home-entrance.ts`，不依赖动画库。
 
 桌面顶栏上方留白为 32px，滚动时固定在距顶部 24px 处。滚动后导航上方显示随主题变化的渐变毛玻璃；导航收起时一起淡出。`--header-top` 和 `--reading-offset` 集中控制顶部位置与阅读锚点间距。
+
+## 首页格言
+
+首页姓名下方的格言保持纯文字外观。点击旁边的“编辑”，输入作者口令后，直接点击文字修改；按 Enter 或离开文字自动保存，Escape 取消当前编辑。普通访客只读。成功保存后，新访客和刷新页面的访客都会读取最新内容，无需重新部署。
+
+私有 Blob 固定保存 `site/motto.json`，读取不使用缓存，写入通过 ETag 防止多个页面互相覆盖。保存失败保留草稿并提供重试；冲突需主动选择最新内容。会话使用 HttpOnly、Secure、SameSite=Strict Cookie，期限七天；服务端检查同源请求和 120 字限制。明文口令不进入代码、Git 或客户端。
+
+在 Vercel 连接私有 Blob（OIDC 方式，注入 `BLOB_STORE_ID`），并配置生产环境的 `MOTTO_ADMIN_PASSWORD_HASH` 和 `MOTTO_SESSION_SECRET`。前者是高强度随机口令的 SHA-256，后者是独立的至少 32 字符随机密钥；不要用日常短密码。修改任一验证变量会使现有会话失效。预览环境未配置作者验证，保持只读。默认文字位于 `src/data/motto.json`，存储暂不可用时使用该内容。
+
+本地 `pnpm dev` 只提供静态 Astro 页面；实际编辑接口由根目录 `api/` 的 Vercel Functions 提供，需要在 Vercel 部署中验证。
 
 ## 项目边界
 

@@ -8,7 +8,11 @@
   --border: 35 15% 83%;
   --input: 35 15% 85%;
   --ring: 12 34% 38%;
-  --font-editorial: Georgia, 'Times New Roman', 'Songti SC', 'Noto Serif CJK SC', serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+  --font-editorial: 'Schoolbell', 'LXGW Marker Gothic', var(--font-sans);
+  --heading-size: 22px;
   --radius: 0.5rem;
   --header-top: 24px;
   --reading-offset: 112px;
@@ -44,9 +48,7 @@ body {
   margin: 0;
   background: var(--page-bg);
   color: var(--text);
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', sans-serif;
+  font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
@@ -153,6 +155,13 @@ h3,
 p {
   margin: 0;
 }
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-editorial);
+  font-synthesis: none;
+}
 ul {
   margin: 0;
   padding: 0;
@@ -200,8 +209,9 @@ img {
 }
 .desktop-nav a {
   min-width: 34px;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--heading-size);
+  font-family: var(--font-editorial);
+  font-weight: 400;
   white-space: nowrap;
 }
 .character-link {
@@ -420,8 +430,8 @@ summary::-webkit-details-marker {
   margin: 32px 0 40px;
 }
 .page-heading h1 {
-  font-size: clamp(28px, 4vw, 32px);
-  font-weight: 600;
+  font-size: var(--heading-size);
+  font-weight: 400;
   line-height: 1.35;
   letter-spacing: -0.75px;
 }
@@ -499,46 +509,13 @@ summary::-webkit-details-marker {
   height: 100%;
   object-fit: cover;
 }
-.intro-eyebrow {
-  display: inline-block;
-  color: var(--secondary);
-  font-size: 10px;
-  letter-spacing: 0.25em;
-}
 .home-intro h1 {
-  margin-top: 7px;
+  margin: 0;
   font-family: var(--font-editorial);
-  font-size: 42px;
+  font-size: 48px;
   font-weight: 400;
   line-height: 1.2;
   letter-spacing: -1.1px;
-}
-.home-intro p {
-  color: var(--secondary);
-  font-family: var(--font-editorial);
-  font-size: 15px;
-  letter-spacing: 0.12em;
-}
-.pill-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 17px;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  font-size: 14px;
-  background: var(--page-bg);
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease;
-}
-.pill-link:hover {
-  background: var(--soft);
-  border-color: var(--accent);
-}
-.pill-link svg {
-  width: 16px;
-  height: 16px;
 }
 .home-sections {
   max-width: 870px;
@@ -553,9 +530,9 @@ summary::-webkit-details-marker {
   gap: 24px;
 }
 .home-section > h2 {
-  font-size: 20px;
+  font-size: var(--heading-size);
   font-family: var(--font-editorial);
-  font-weight: 500;
+  font-weight: 400;
   padding-top: 5px;
 }
 .section-index {
@@ -573,38 +550,38 @@ summary::-webkit-details-marker {
   flex-direction: column;
   gap: 14px;
 }
-.section-body > p {
-  color: var(--secondary);
-}
-.compact-notes {
+.home-row-list {
   display: flex;
   flex-direction: column;
   border-top: 1px solid var(--line);
 }
-.compact-note {
-  display: flex;
+.home-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 16px;
   align-items: center;
   gap: 16px;
-  padding: 14px 2px;
+  min-height: 60px;
+  padding: 14px 8px;
   border-bottom: 1px solid var(--line);
   transition:
-    background-color 160ms,
-    padding 160ms;
+    background-color 220ms ease,
+    color 160ms ease;
 }
-.compact-note:hover {
+.home-row:is(:hover, :focus-visible) {
   background: var(--soft);
-  padding-inline: 8px;
 }
-.compact-note .type {
+.home-row-label {
   font-size: 13px;
   color: var(--secondary);
-  min-width: 48px;
 }
-.compact-note .title {
-  flex: 1;
-  font-size: 15px;
+.home-row-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-editorial);
+  font-size: var(--heading-size);
+  line-height: 1.5;
 }
-.compact-note svg {
+.home-row svg {
   width: 16px;
   height: 16px;
   color: var(--secondary);
@@ -614,31 +591,6 @@ summary::-webkit-details-marker {
   font-size: 14px;
   color: var(--secondary);
   border-bottom: 1px solid var(--line);
-}
-.topic-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 8px 0;
-}
-.topic-row span:last-child {
-  color: var(--secondary);
-  font-size: 14px;
-}
-.home-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 28px;
-  color: var(--secondary);
-  font-size: 14px;
-  padding-top: 4px;
-}
-.home-stats strong {
-  color: var(--text);
-  font-weight: 500;
-  margin-right: 5px;
-  font-size: 20px;
 }
 .listing-grid {
   display: grid;
@@ -678,8 +630,8 @@ summary::-webkit-details-marker {
   gap: 16px;
 }
 .note-card h2 {
-  font-size: 18px;
-  font-weight: 550;
+  font-size: var(--heading-size);
+  font-weight: 400;
   line-height: 1.5;
 }
 .note-title::after {
@@ -842,8 +794,8 @@ summary::-webkit-details-marker {
   background: var(--soft);
 }
 .index-card h2 {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: var(--heading-size);
+  font-weight: 400;
 }
 .index-card p {
   font-size: 14px;
@@ -867,10 +819,10 @@ summary::-webkit-details-marker {
   margin-bottom: 42px;
 }
 .article-header h1 {
-  font-size: clamp(28px, 4vw, 34px);
+  font-size: var(--heading-size);
   line-height: 1.4;
   letter-spacing: -0.75px;
-  font-weight: 600;
+  font-weight: 400;
   margin: 14px 0 10px;
   text-wrap: balance;
 }
@@ -955,13 +907,13 @@ summary::-webkit-details-marker {
   overflow-wrap: break-word;
 }
 .prose h2 {
-  font-size: 25px;
-  font-weight: 600;
+  font-size: var(--heading-size);
+  font-weight: 400;
   margin-top: 2em;
 }
 .prose h3 {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--heading-size);
+  font-weight: 400;
 }
 .prose h2,
 .prose h3,
@@ -1279,7 +1231,8 @@ summary::-webkit-details-marker {
   .mobile-menu a {
     display: block;
     padding: 9px 12px;
-    font-size: 15px;
+    font-size: var(--heading-size);
+    font-family: var(--font-editorial);
     border-radius: 6px;
   }
   .mobile-menu a:hover {
@@ -1293,15 +1246,11 @@ summary::-webkit-details-marker {
     width: 108px;
     height: 108px;
   }
-  .home-intro h1 {
-    font-size: 37px;
-  }
   .home-section {
     display: block;
   }
   .home-section > h2 {
     margin-bottom: 14px;
-    font-size: 19px;
   }
   .section-index {
     display: inline-block;
@@ -1311,25 +1260,19 @@ summary::-webkit-details-marker {
   .home-sections {
     gap: 30px;
   }
-  .compact-note {
+  .home-row {
+    grid-template-columns: 40px minmax(0, 1fr) 16px;
     gap: 10px;
     padding: 13px 0;
   }
-  .compact-note .type {
-    min-width: 40px;
+  .home-row-label {
     font-size: 12px;
-  }
-  .compact-note .title {
-    font-size: 14px;
   }
   .page-heading {
     margin: 26px 0 30px;
   }
   .note-card {
     padding: 16px;
-  }
-  .note-card h2 {
-    font-size: 17px;
   }
   .note-card-heading {
     gap: 10px;
@@ -1357,9 +1300,6 @@ summary::-webkit-details-marker {
   }
   .prose {
     line-height: 1.9;
-  }
-  .prose h2 {
-    font-size: 23px;
   }
   .copy-code {
     opacity: 1;

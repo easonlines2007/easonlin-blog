@@ -1,0 +1,24 @@
+---
+import Icon from './Icon.astro'
+
+interface Props {
+  label: string
+  title: string
+  href: string
+  external?: boolean
+}
+const { label, title, href, external = false } = Astro.props
+---
+
+<li>
+  <a
+    class="home-row"
+    {href}
+    target={external ? '_blank' : undefined}
+    rel={external ? 'noopener noreferrer' : undefined}
+  >
+    <span class="home-row-label">{label}</span>
+    <span class="home-row-title lift-text">{title}</span>
+    <Icon name="next" />
+  </a>
+</li>

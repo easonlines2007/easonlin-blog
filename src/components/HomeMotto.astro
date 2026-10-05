@@ -1,0 +1,213 @@
+---
+import motto from '../data/motto.json'
+---
+
+<div class="home-motto" data-home-motto data-intro-reveal>
+  <p class="motto-text" data-motto-text spellcheck="false">
+    {motto.text}
+  </p>
+  <div class="motto-actions">
+    <button type="button" data-motto-edit aria-label="编辑首页格言">
+      编辑
+    </button>
+    <button type="button" data-motto-logout hidden>
+      退出编辑
+    </button>
+  </div>
+  <div class="motto-feedback" data-motto-feedback hidden>
+    <p class="motto-status" role="status" aria-live="polite" data-motto-status></p>
+    <div class="motto-recovery">
+      <button type="button" data-motto-retry hidden>
+        重试保存
+      </button>
+      <button type="button" data-motto-use-latest hidden>
+        使用最新格言
+      </button>
+    </div>
+  </div>
+  <dialog class="motto-dialog" data-motto-dialog aria-labelledby="motto-dialog-title">
+    <form method="dialog" data-motto-login>
+      <h2 id="motto-dialog-title">编辑格言</h2>
+      <p>输入作者口令，修改首页的这一句话。</p>
+      <label for="motto-password">作者口令</label>
+      <input
+        id="motto-password"
+        data-motto-password
+        type="password"
+        autocomplete="current-password"
+        required
+      />
+      <p class="motto-login-status" role="status" aria-live="polite" data-motto-login-status></p>
+      <div class="motto-dialog-actions">
+        <button type="button" data-motto-cancel>
+          取消
+        </button>
+        <button type="submit" data-motto-submit>
+          开始编辑
+        </button>
+      </div>
+    </form>
+  </dialog>
+</div>
+
+<script>
+  import { setupHomeMotto } from '../scripts/home-motto'
+  const motto = document.querySelector<HTMLElement>('[data-home-motto]')
+  if (motto) setupHomeMotto(motto)
+</script>
+
+<style>
+  .home-motto {
+    position: relative;
+    width: min(100%, 680px);
+  }
+  .home-motto .motto-text {
+    min-height: 1.7em;
+    margin: 0;
+    color: var(--secondary);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.7;
+    letter-spacing: 0.08em;
+    overflow-wrap: anywhere;
+  }
+  .motto-text[contenteditable='plaintext-only'] {
+    cursor: text;
+  }
+  .motto-text:focus {
+    outline: none;
+  }
+  .motto-text:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-underline-offset: 5px;
+  }
+  .motto-actions {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    display: flex;
+    gap: 14px;
+    padding-top: 4px;
+    opacity: 0;
+    transform: translateX(-50%);
+    transition: opacity 160ms ease;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .home-motto:hover .motto-actions,
+  .home-motto:focus-within .motto-actions {
+    opacity: 0.7;
+    pointer-events: auto;
+  }
+  .motto-actions button,
+  .motto-recovery button {
+    border: 0;
+    padding: 2px;
+    background: none;
+    color: var(--secondary);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .motto-actions button:hover,
+  .motto-recovery button:hover {
+    color: var(--text);
+  }
+  .motto-feedback {
+    margin-top: 28px;
+  }
+  .home-motto .motto-status {
+    margin: 0;
+    color: var(--secondary);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 1.7;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+  }
+  .motto-recovery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .motto-dialog {
+    width: min(calc(100% - 40px), 360px);
+    margin: auto;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 26px;
+    background: var(--page-bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    text-align: left;
+    box-shadow: 0 12px 44px #0002;
+  }
+  .motto-dialog::backdrop {
+    background: #0003;
+    backdrop-filter: blur(3px);
+  }
+  .motto-dialog h2 {
+    margin: 0 0 12px;
+    font-size: 22px;
+    font-weight: 400;
+  }
+  .motto-dialog p {
+    color: var(--secondary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.7;
+    letter-spacing: 0;
+  }
+  .motto-dialog label {
+    display: block;
+    margin-top: 20px;
+    font-size: 13px;
+  }
+  .motto-dialog input {
+    width: 100%;
+    margin-top: 7px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 9px 10px;
+    background: var(--page-bg);
+    color: var(--text);
+    font-size: 16px;
+  }
+  .motto-dialog .motto-login-status {
+    margin-top: 8px;
+    font-size: 12px;
+  }
+  .motto-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .motto-dialog-actions button {
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 7px 12px;
+    background: var(--page-bg);
+    color: var(--text);
+    font-size: 13px;
+  }
+  @media (hover: none), (pointer: coarse) {
+    .motto-actions {
+      opacity: 0.55;
+      pointer-events: auto;
+    }
+    .motto-actions button {
+      padding-inline: 7px;
+      min-height: 32px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .motto-actions {
+      transition: none;
+    }
+  }
+</style>

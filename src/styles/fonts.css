@@ -1,0 +1,15 @@
+@font-face {
+  font-family: 'Schoolbell';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/schoolbell-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'LXGW Marker Gothic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/lxgw-marker-gothic-regular.woff2') format('woff2');
+}

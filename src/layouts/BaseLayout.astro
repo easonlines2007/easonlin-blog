@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro'
 import Icon from '../components/Icon.astro'
 import { theme } from '../site.config'
+import '../styles/fonts.css'
 import '../styles/global.css'
 interface Props {
   title: string
@@ -30,6 +31,20 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     <meta name="apple-mobile-web-app-title" content="Eason's Notes" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href={canonical} />
+    <link
+      rel="preload"
+      href="/fonts/schoolbell-regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/lxgw-marker-gothic-regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="alternate" type="application/rss+xml" title={theme.title} href="/rss.xml" />
     <meta property="og:title" content={`${title} · ${theme.title}`} />
     <meta property="og:description" content={description} />

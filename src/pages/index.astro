@@ -1,31 +1,24 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import Icon from '../components/Icon.astro'
 import { getNotes } from '../lib/notes'
 import { countValues, noteUrl } from '../lib/note-utils'
 import { projects } from '../lib/projects'
 import { theme } from '../site.config'
 import HomeAvatar from '../components/HomeAvatar.astro'
 import HomeEntrance from '../components/HomeEntrance.astro'
+import HomeRow from '../components/HomeRow.astro'
+import HomeMotto from '../components/HomeMotto.astro'
 const notes = await getNotes()
 const topics = countValues(notes, 'topic')
+const pdfNotes = notes.filter((note) => note.data.pdf)
 ---
 
 <BaseLayout title="首页" home>
   <HomeEntrance slot="head" />
   <section class="home-intro">
     <HomeAvatar />
-    <div class="intro-heading">
-      <span class="intro-eyebrow" data-intro-reveal>
-        笔记与日常
-      </span>
-      <h1 data-intro-name>{theme.author}</h1>
-    </div>
-    <p data-intro-reveal>记录、整理，慢慢理解。</p>
-    <a class="pill-link" href="/notes" data-intro-reveal>
-      <Icon name="book" />
-      <span class="lift-text">翻开笔记</span>
-    </a>
+    <h1 data-intro-name>{theme.author}</h1>
+    <HomeMotto />
   </section>
   <div class="home-sections">
     <section class="home-section" data-intro-reveal>
@@ -36,7 +29,9 @@ const topics = countValues(notes, 'topic')
         关于
       </h2>
       <div class="section-body">
-        <p>一个存放学习笔记、阅读批注和零散思考的地方。</p>
+        <ul class="home-row-list">
+          <HomeRow label="日常" title="学习笔记、阅读批注与零散思考" href="/about" />
+        </ul>
         <a class="more-link" href="/about">
           <span class="lift-text">更多关于这里</span>
         </a>
@@ -50,15 +45,13 @@ const topics = countValues(notes, 'topic')
         最近笔记
       </h2>
       <div class="section-body">
-        <ul class="compact-notes">
+        <ul class="home-row-list">
           {notes.slice(0, 5).map((note) => (
-            <li>
-              <a class="compact-note" href={noteUrl(note.id)}>
-                <span class="type">{note.data.pdf ? 'PDF' : '笔记'}</span>
-                <span class="title lift-text">{note.data.title}</span>
-                <Icon name="next" />
-              </a>
-            </li>
+            <HomeRow
+              label={note.data.pdf ? 'PDF' : '笔记'}
+              title={note.data.title}
+              href={noteUrl(note.id)}
+            />
           ))}
         </ul>
         <a class="more-link" href="/notes">
@@ -74,17 +67,12 @@ const topics = countValues(notes, 'topic')
         项目
       </h2>
       <div class="section-body">
-        <ul>
+        <ul class="home-row-list">
           {projects
             .filter((project) => !project.fork)
             .slice(0, 3)
             .map((project) => (
-              <li>
-                <a class="topic-row" href={project.url} target="_blank" rel="noopener noreferrer">
-                  <span class="lift-text">{project.name}</span>
-                  <span class="lift-text">GitHub ↗</span>
-                </a>
-              </li>
+              <HomeRow label="GitHub" title={project.name} href={project.url} external />
             ))}
         </ul>
         <a class="more-link" href="/projects">
@@ -99,16 +87,12 @@ const topics = countValues(notes, 'topic')
         </span>
         笔记一览
       </h2>
-      <div class="home-stats">
-        <span>
-          <strong>{notes.length}</strong>篇笔记
-        </span>
-        <span>
-          <strong>{topics.length}</strong>个专题
-        </span>
-        <span>
-          <strong>{notes.filter((note) => note.data.pdf).length}</strong>份 PDF
-        </span>
+      <div class="section-body">
+        <ul class="home-row-list">
+          <HomeRow label="总计" title={`${notes.length} 篇笔记`} href="/notes" />
+          <HomeRow label="专题" title={`${topics.length} 个笔记专题`} href="/notes/topics" />
+          <HomeRow label="PDF" title={`${pdfNotes.length} 份手写与批注`} href="/notes/pdf" />
+        </ul>
       </div>
     </section>
   </div>
