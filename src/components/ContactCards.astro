@@ -135,7 +135,9 @@ const qrCardWidth = 0.84
     transform: translate(-50%, calc(-1 * var(--image-center-y)));
   }
   .contact-image:not(.contact-image-qr) img {
+    object-position: center bottom;
     transform: scale(1.06);
+    transform-origin: center bottom;
   }
   .contact-cover {
     position: absolute;
