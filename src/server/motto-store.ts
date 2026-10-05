@@ -58,7 +58,9 @@ export function createBlobMottoStore({
   return {
     get configured() {
       const env = environment()
-      return Boolean((env.BLOB_STORE_ID && env.VERCEL_OIDC_TOKEN) || env.BLOB_READ_WRITE_TOKEN)
+      // In deployed Functions the SDK obtains OIDC from the request context;
+      // VERCEL_OIDC_TOKEN is not necessarily an environment variable there.
+      return Boolean(env.BLOB_STORE_ID || env.BLOB_READ_WRITE_TOKEN)
     },
     async read() {
       const result = await client.get(pathname, {
