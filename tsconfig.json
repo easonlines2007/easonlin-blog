@@ -2,5 +2,8 @@
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist", "node_modules", "tests", "public"],
-  "compilerOptions": { "paths": { "@/*": ["./src/*"] } }
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"] },
+    "rewriteRelativeImportExtensions": true
+  }
 }
