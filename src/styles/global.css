@@ -248,7 +248,7 @@ img {
   transform: translate(-50%, -50%) rotateX(180deg);
 }
 .brand .nav-character {
-  width: 58px;
+  width: 100%;
   height: 58px;
 }
 .nav-character img {

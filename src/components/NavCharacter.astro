@@ -1,15 +1,15 @@
 ---
 import { Image } from 'astro:assets'
-import woodstockCool from '../assets/characters/woodstock-cool.png'
+import peanutsLineup from '../assets/characters/peanuts-lineup.png'
 import doghouse from '../assets/characters/doghouse.png'
-import woodstock from '../assets/characters/woodstock.png'
+import woodstockWriting from '../assets/characters/woodstock-writing.png'
 import snoopyReading from '../assets/characters/snoopy-reading.png'
 import charlieBrown from '../assets/characters/charlie-brown.png'
 
 const characters = {
-  '/': woodstockCool,
-  '/notes': doghouse,
-  '/projects': woodstock,
+  '/': peanutsLineup,
+  '/notes': woodstockWriting,
+  '/projects': doghouse,
   '/blog': snoopyReading,
   '/about': charlieBrown
 }
@@ -18,14 +18,15 @@ interface Props {
 }
 const { href } = Astro.props
 const character = characters[href as keyof typeof characters]
+const imageWidth = href === '/' ? 480 : 160
 ---
 
 {character && (
   <span class="nav-character" aria-hidden="true">
     <Image
       src={character}
-      width={160}
-      height={160}
+      width={imageWidth}
+      height={Math.round((imageWidth * character.height) / character.width)}
       format="webp"
       alt=""
       loading="eager"
