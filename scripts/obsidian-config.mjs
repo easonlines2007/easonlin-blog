@@ -21,7 +21,12 @@ export async function loadObsidianConfig({ root = projectRoot, environment = pro
   if (!isAbsolute(vaultPath) || vaultPath.includes('\0')) {
     throw new Error('OBSIDIAN_VAULT_PATH 必须是绝对路径，不能使用相对路径或 ~。')
   }
-  return { projectRoot: root, vaultPath }
+  const publishMode =
+    environment.OBSIDIAN_PUBLISH_ALL ?? localEnvironment.OBSIDIAN_PUBLISH_ALL ?? 'false'
+  if (!['true', 'false'].includes(publishMode)) {
+    throw new Error('OBSIDIAN_PUBLISH_ALL 只能设置为 true 或 false。')
+  }
+  return { projectRoot: root, vaultPath, ...(publishMode === 'true' ? { publishAll: true } : {}) }
 }
 
 export function syncSummary({ notes, attachments, written, removed }) {

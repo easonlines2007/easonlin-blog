@@ -12,7 +12,7 @@ import {
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fromMarkdown } from 'mdast-util-from-markdown'
 import { slug as githubSlug } from 'github-slugger'
-import { parseDocument } from 'yaml'
+import { Document, parseDocument } from 'yaml'
 
 const attachmentExtensions = new Set([
   '.png',
@@ -108,7 +108,7 @@ function sameStat(a, b) {
   )
 }
 
-function frontmatter(source, label) {
+function frontmatter(source, label, { publishAll = false } = {}) {
   const match = source.match(/^\uFEFF?---[ \t]*\r?\n([\s\S]*?)^---[ \t]*(?:\r?\n|$)/m)
   if (!match || match.index !== 0) {
     if (/^\uFEFF?---[ \t]*(?:\r?\n|$)/.test(source)) fail(`${label} 的 frontmatter 未结束`)
@@ -124,7 +124,7 @@ function frontmatter(source, label) {
   }
   if (!data || typeof data !== 'object' || Array.isArray(data))
     fail(`${label} 的 frontmatter 必须是对象`)
-  if (data.publish !== undefined && typeof data.publish !== 'boolean')
+  if (!publishAll && data.publish !== undefined && typeof data.publish !== 'boolean')
     fail(`${label} 的 publish 必须是布尔值 true 或 false`)
   return { data, document, body: source.slice(match[0].length) }
 }
@@ -386,7 +386,8 @@ function parseManifest(bytes) {
 }
 
 /** Reads the Vault only; changes only manifest-owned copies inside the project. */
-export async function syncObsidian({ vaultPath, projectRoot }) {
+export async function syncObsidian({ vaultPath, projectRoot, publishAll = false }) {
+  if (typeof publishAll !== 'boolean') fail('publishAll 必须是布尔值，不能隐式启用全量发布')
   if (!isAbsolute(vaultPath || '') || !isAbsolute(projectRoot || ''))
     fail('Vault 和项目路径必须是绝对路径')
   for (const root of [resolve(vaultPath), resolve(projectRoot)]) {
@@ -397,7 +398,8 @@ export async function syncObsidian({ vaultPath, projectRoot }) {
   const project = await realpath(projectRoot)
   if (within(vault, project) || within(project, vault)) fail('Vault 与博客项目不能互相包含')
   const blog = join(vault, 'Blog')
-  await checkPath(vault, blog, { directory: true })
+  const sourceRoot = publishAll ? vault : blog
+  await checkPath(vault, sourceRoot, { directory: true })
   const notesRoot = join(project, 'src/content/notes')
   const assetsRoot = join(project, 'public/attachments')
   const manifestPath = join(project, 'src/data/obsidian-sync.json')
@@ -419,11 +421,24 @@ export async function syncObsidian({ vaultPath, projectRoot }) {
     return bytes
   }
   const allNotes = []
-  for (const path of await walk(vault, blog, (path) => extname(path).toLowerCase() === '.md')) {
-    const output = posix(relative(blog, path)).replace(/\.md$/i, '.md')
+  for (const path of await walk(
+    vault,
+    sourceRoot,
+    (path) => extname(path).toLowerCase() === '.md'
+  )) {
+    // Keep existing Blog routes when opting into whole-Vault publishing.
+    const outputRoot = publishAll && within(blog, path) ? blog : sourceRoot
+    const output = posix(relative(outputRoot, path)).replace(/\.md$/i, '.md')
     if (!safeRelative(output)) fail(`笔记路径无效：${output}`)
     const bytes = await readSource(path)
-    const parsed = frontmatter(new TextDecoder('utf-8', { fatal: true }).decode(bytes), output)
+    const parsed = frontmatter(new TextDecoder('utf-8', { fatal: true }).decode(bytes), output, {
+      publishAll
+    })
+    if (publishAll) {
+      parsed.document ??= new Document(parsed.data)
+      parsed.data.publish = true
+      parsed.document.set('publish', true)
+    }
     allNotes.push({ path, output, ...parsed, published: parsed.data.publish === true })
   }
   const published = allNotes.filter((note) => note.published)
@@ -615,7 +630,7 @@ export async function syncObsidian({ vaultPath, projectRoot }) {
       fail(`规划期间源文件发生变化，请重试：${posix(relative(vault, path))}`)
   }
   // Catch note additions/removals during a run too; never clean up from a partial iCloud view.
-  const finalNotes = await walk(vault, blog, (path) => extname(path).toLowerCase() === '.md')
+  const finalNotes = await walk(vault, sourceRoot, (path) => extname(path).toLowerCase() === '.md')
   if (
     finalNotes.length !== allNotes.length ||
     finalNotes.some((path, index) => path !== allNotes[index].path)

@@ -84,6 +84,20 @@ OBSIDIAN_VAULT_PATH="/你的/iCloud/Vault/绝对路径"
 
 每篇笔记只需上面的最简 frontmatter；只有布尔值 `publish: true` 会导出，缺失或 false 不会发布；字符串 `"true"` 会报错，不能代替布尔值。同步器补齐缺失属性后再按现有博客规则校验；手动填写但类型或格式错误的属性仍会报错，避免把格式错误带进构建。
 
+### 全量发布 FC
+
+按作者后续要求，本机 FC Vault 已启用全量发布。在 `.env.local` 设置：
+
+```dotenv
+OBSIDIAN_PUBLISH_ALL=true
+```
+
+这会同步整个 Vault 的 Markdown，包含未填写 `publish`、`publish: false` 的笔记；只在博客副本中设置公开，原文件不写回。`.obsidian`、隐藏目录和符号链接仍排除，只有被笔记引用的图片/PDF 会复制。保留源子目录，并保持已有 Blog 笔记网址。将该选项改为 `false` 或移除，即恢复默认的 Blog/publish:true 筛选；再次同步会清理不再符合范围的受管理副本。
+
+全量模式下 `watch` 也监控整个 Vault。后续说“帮我同步 FC 笔记”时，沿用本机当前配置完成导入、构建、提交与推送，并确认 Vercel 部署。
+
+### 运行同步
+
 ```sh
 pnpm obsidian:sync
 pnpm obsidian:watch

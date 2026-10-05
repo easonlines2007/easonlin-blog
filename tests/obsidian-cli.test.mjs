@@ -36,6 +36,34 @@ test('Obsidian configuration uses the project file and respects environment over
   )
 })
 
+test('whole-Vault config is explicit and its watch sees new notes outside Blog without scanning hidden folders', async (t) => {
+  const root = await fixture(t)
+  const vaultPath = join(root, 'vault')
+  await mkdir(join(vaultPath, 'FC'), { recursive: true })
+  await mkdir(join(vaultPath, '.obsidian'))
+  await writeFile(
+    join(root, '.env.local'),
+    `OBSIDIAN_VAULT_PATH="${vaultPath}"\nOBSIDIAN_PUBLISH_ALL=true\n`
+  )
+  const config = await loadObsidianConfig({ root, environment: {} })
+  assert.equal(config.publishAll, true)
+  const snapshot = createSourceSnapshot(config.vaultPath, config)
+  const initial = await snapshot()
+  await writeFile(join(vaultPath, '.obsidian', 'private.md'), 'excluded')
+  assert.equal(await snapshot(), initial)
+  await writeFile(join(vaultPath, 'FC', 'new.md'), 'new note')
+  assert.notEqual(await snapshot(), initial)
+  assert.ok((await snapshot()).includes('FC/new.md'))
+  assert.equal(
+    (await loadObsidianConfig({ root, environment: { OBSIDIAN_PUBLISH_ALL: 'false' } })).publishAll,
+    undefined
+  )
+  await assert.rejects(
+    loadObsidianConfig({ root, environment: { OBSIDIAN_PUBLISH_ALL: 'yes' } }),
+    /true 或 false/
+  )
+})
+
 test('watch fingerprints nested Markdown and referenced assets while excluding .obsidian', async (t) => {
   const vaultPath = await fixture(t)
   const note = join(vaultPath, 'Blog', 'nested', 'note.md')

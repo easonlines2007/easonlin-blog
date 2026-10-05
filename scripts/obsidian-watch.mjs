@@ -24,8 +24,8 @@ async function digestFile(path) {
 }
 
 /** Polling works across iCloud file replacements, unlike inode-bound native watchers. */
-export function createSourceSnapshot(vaultPath) {
-  const blogPath = join(vaultPath, 'Blog')
+export function createSourceSnapshot(vaultPath, { publishAll = false } = {}) {
+  const sourceRoot = publishAll ? vaultPath : join(vaultPath, 'Blog')
   const cache = new Map()
 
   return async function snapshot(sourcePaths = []) {
@@ -71,7 +71,7 @@ export function createSourceSnapshot(vaultPath) {
           return
         }
         for (const entry of await readdir(safeDirectory.path, { withFileTypes: true })) {
-          if (entry.name.toLowerCase() === '.obsidian' || entry.isSymbolicLink()) continue
+          if (entry.name.startsWith('.') || entry.isSymbolicLink()) continue
           const path = join(safeDirectory.path, entry.name)
           if (entry.isDirectory()) await scan(path)
           else if (entry.isFile()) files.set(path, /\.md$/i.test(entry.name))
@@ -84,7 +84,7 @@ export function createSourceSnapshot(vaultPath) {
       }
     }
 
-    await scan(blogPath)
+    await scan(sourceRoot)
     for (const path of sourcePaths) {
       if (excludesObsidian(path)) continue
       try {
@@ -129,7 +129,7 @@ export async function watchObsidian(
   config,
   {
     sync = syncObsidian,
-    snapshot = createSourceSnapshot(config.vaultPath),
+    snapshot = createSourceSnapshot(config.vaultPath, { publishAll: config.publishAll }),
     log = console,
     pollInterval = POLL_INTERVAL,
     debounceInterval = DEBOUNCE_INTERVAL
@@ -173,7 +173,7 @@ export async function watchObsidian(
   // Establish the input snapshot before syncing, so changes during a sync trigger a rerun.
   let observed = await snapshot(sourcePaths)
   await synchronize()
-  log.log('正在监控 Blog/ 和已引用附件；按 Ctrl+C 停止。')
+  log.log(`正在监控 ${config.publishAll ? '整个 Vault' : 'Blog/'} 和已引用附件；按 Ctrl+C 停止。`)
 
   const done = (async () => {
     let pendingSince

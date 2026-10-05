@@ -196,6 +196,41 @@ test('valid ISO timestamps retain their time and explicit metadata types still r
   }
 })
 
+test('whole-Vault publishing is explicit, includes drafts, preserves Blog routes and never changes source bytes', async (t) => {
+  const f = await fixture(t)
+  await f.source('Blog/entry.md', note('原网址'))
+  await f.run()
+  await f.source('FC/Laboratory/Lab.md', '# 实验\n\n[[entry|测试笔记]]\n\n![[image.png]]')
+  await f.source('FC/Teoria/draft.md', '---\npublish: false\n---\n\n草稿')
+  await f.source('Assets/image.png', 'image')
+  await f.source('.obsidian/secret.md', '不能导入')
+  await f.source('.hidden/private.md', '不能导入')
+  const before = await snapshot(f.vaultPath)
+  const result = await syncObsidian({ ...f, publishAll: true })
+  assert.equal(result.notes, 3)
+  assert.equal(result.attachments, 1)
+  const lab = await f.output('src/content/notes/FC/Laboratory/Lab.md')
+  assert.match(lab, /publish: true/)
+  assert.match(lab, /\/notes\/entry/)
+  assert.match(lab, /\/attachments\/obsidian-[a-f\d]{24}\.png/)
+  assert.match(await f.output('src/content/notes/FC/Teoria/draft.md'), /publish: true/)
+  assert.match(await f.output('src/content/notes/entry.md'), /原网址/)
+  assert.deepEqual(await snapshot(f.vaultPath), before)
+  assert.equal((await syncObsidian({ ...f, publishAll: true })).written, 0)
+  await assert.rejects(() => syncObsidian({ ...f, publishAll: 'true' }), /布尔值/)
+  const restored = await f.run()
+  assert.equal(restored.notes, 1)
+  assert.equal(restored.removed, 3)
+})
+
+test('whole-Vault mode also works without a Blog folder', async (t) => {
+  const f = await fixture(t)
+  await rm(join(f.vaultPath, 'Blog'), { recursive: true })
+  await f.source('FC/lesson.md', '课程正文')
+  assert.equal((await syncObsidian({ ...f, publishAll: true })).notes, 1)
+  assert.match(await f.output('src/content/notes/FC/lesson.md'), /publish: true/)
+})
+
 test('relative images, PDFs, reference definitions and Obsidian embeds resolve to stable public assets', async (t) => {
   const f = await fixture(t)
   const image = Buffer.from('image contents')
