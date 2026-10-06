@@ -11,6 +11,7 @@ export const noteSchema = z.object({
   date: z.coerce.date(),
   updated: z.coerce.date().optional(),
   topic: z.string().min(1),
+  order: z.number().int().positive().optional(),
   tags: z
     .array(z.string().min(1))
     .default([])
@@ -74,7 +75,7 @@ export function noteId(path: string, data: { slug?: unknown } = {}) {
   if (
     typeof id !== 'string' ||
     !safeNotePath(`${id}.md`) ||
-    ['index', 'pdf', 'tags', 'topics'].includes(id.split('/')[0]!)
+    ['index', 'all', 'pdf', 'tags', 'topics', 'status'].includes(id.split('/')[0]!)
   ) {
     throw new Error('文章网址无效或占用了现有栏目。')
   }

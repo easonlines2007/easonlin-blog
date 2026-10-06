@@ -1,0 +1,16 @@
+---
+import type { GetStaticPaths } from 'astro'
+import NotesLayout from '../../../layouts/NotesLayout.astro'
+import { getNotes } from '../../../lib/notes'
+import { statusLabels } from '../../../lib/note-utils'
+export const getStaticPaths = (async () => {
+  const allNotes = await getNotes()
+  return Object.entries(statusLabels).map(([status, title]) => ({
+    params: { status },
+    props: { title, allNotes, notes: allNotes.filter((note) => note.data.status === status) }
+  }))
+}) satisfies GetStaticPaths
+const { title, notes, allNotes } = Astro.props
+---
+
+<NotesLayout {title} {notes} {allNotes} back="/notes/status" backLabel="整理状态" filters={false} />

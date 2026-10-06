@@ -6,23 +6,44 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import Icon from '../../components/Icon.astro'
 import TableOfContents from '../../components/TableOfContents.astro'
 import ArticleTools from '../../components/ArticleTools.astro'
+import MermaidDiagrams from '../../components/MermaidDiagrams.astro'
 import PdfReader from '../../components/PdfReader.astro'
 import { getNotes } from '../../lib/notes'
-import { formatDate, tagUrl, topicUrl, statusLabels } from '../../lib/note-utils'
-export const getStaticPaths = (async () =>
-  (await getNotes()).map((note) => ({
-    params: { id: note.id },
-    props: { note }
-  }))) satisfies GetStaticPaths
-const { note } = Astro.props
+import {
+  formatDate,
+  noteUrl,
+  tagUrl,
+  topicUrl,
+  statusUrl,
+  statusLabels,
+  sortTopicNotes
+} from '../../lib/note-utils'
+export const getStaticPaths = (async () => {
+  const notes = await getNotes()
+  return notes.map((note) => {
+    const modules = sortTopicNotes(
+      notes.filter((item) => item.data.topic === note.data.topic && item.data.order !== undefined)
+    )
+    const index = modules.findIndex((item) => item.id === note.id)
+    return {
+      params: { id: note.id },
+      props: {
+        note,
+        previous: index > 0 ? modules[index - 1] : undefined,
+        next: index >= 0 ? modules[index + 1] : undefined
+      }
+    }
+  })
+}) satisfies GetStaticPaths
+const { note, previous, next } = Astro.props
 const { Content, headings } = await render(note)
 const { title, description, tags, topic, date, updated, status, sample, pdf } = note.data
 ---
 
 <BaseLayout {title} {description}>
-  <a class="back-link" href="/notes">
+  <a class="back-link" href={note.data.order ? topicUrl(topic) : '/notes/all'}>
     <Icon name="back" />
-    <span class="lift-text">笔记</span>
+    <span class="lift-text">{note.data.order ? topic : '全部笔记'}</span>
   </a>
   <div class="article-grid">
     <article class="article-body enter" data-pagefind-body>
@@ -31,7 +52,9 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
           <a href={topicUrl(topic)}>
             <span class="lift-text">{topic}</span>
           </a>
-          <span class:list={['status', status]}>{statusLabels[status]}</span>
+          <a class:list={['status', status]} href={statusUrl(status)}>
+            {statusLabels[status]}
+          </a>
           {sample && (
             <span class="sample-label" data-pagefind-ignore>
               示例笔记
@@ -63,10 +86,26 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
             </a>
           ))}
         </div>
-        <a href="/notes">
+        <a href="/notes/all">
           <span class="lift-text">返回全部笔记</span>
         </a>
       </footer>
+      {(previous || next) && (
+        <nav class="module-navigation" aria-label="专题阅读顺序" data-pagefind-ignore>
+          {previous && (
+            <a href={noteUrl(previous.id)}>
+              <span>上一篇</span>
+              <strong class="lift-text">{previous.data.title}</strong>
+            </a>
+          )}
+          {next && (
+            <a class="module-next" href={noteUrl(next.id)}>
+              <span>下一篇</span>
+              <strong class="lift-text">{next.data.title}</strong>
+            </a>
+          )}
+        </nav>
+      )}
     </article>
     <aside class="toc-sidebar enter delay-1">
       <h2 class="toc-title">本页目录</h2>
@@ -74,4 +113,5 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
     </aside>
   </div>
   <ArticleTools />
+  <MermaidDiagrams />
 </BaseLayout>

@@ -26,7 +26,29 @@ export async function loadObsidianConfig({ root = projectRoot, environment = pro
   if (!['true', 'false'].includes(publishMode)) {
     throw new Error('OBSIDIAN_PUBLISH_ALL 只能设置为 true 或 false。')
   }
-  return { projectRoot: root, vaultPath, ...(publishMode === 'true' ? { publishAll: true } : {}) }
+  let noteImports
+  const attachmentRoot =
+    (environment.OBSIDIAN_ATTACHMENT_PATH ?? localEnvironment.OBSIDIAN_ATTACHMENT_PATH)?.trim() ||
+    undefined
+  if (
+    attachmentRoot !== undefined &&
+    (!isAbsolute(attachmentRoot) || attachmentRoot.includes('\0'))
+  )
+    throw new Error('OBSIDIAN_ATTACHMENT_PATH 必须是附件目录的绝对路径。')
+  try {
+    noteImports = JSON.parse(await readFile(join(root, 'src/data/obsidian-imports.json'), 'utf8'))
+    if (!noteImports || typeof noteImports !== 'object' || Array.isArray(noteImports))
+      throw new Error('导入规则必须是对象。')
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw new Error('无法读取 Obsidian 导入规则。', { cause: error })
+  }
+  return {
+    projectRoot: root,
+    vaultPath,
+    ...(publishMode === 'true' ? { publishAll: true } : {}),
+    ...(attachmentRoot ? { attachmentRoot } : {}),
+    ...(noteImports ? { noteImports } : {})
+  }
 }
 
 export function syncSummary({ notes, attachments, written, removed }) {

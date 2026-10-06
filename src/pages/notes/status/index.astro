@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PageHeader from '../../../components/PageHeader.astro'
+import Icon from '../../../components/Icon.astro'
+import { getNotes } from '../../../lib/notes'
+import { statusLabels, statusUrl } from '../../../lib/note-utils'
+const notes = await getNotes()
+---
+
+<BaseLayout title="整理状态">
+  <PageHeader
+    title="整理状态"
+    description="看看仍在生长的想法，以及已经整理好的笔记。"
+    back="/notes"
+    backLabel="笔记"
+  />
+  <div class="index-grid enter delay-1">
+    {Object.entries(statusLabels).map(([status, label]) => (
+      <a class="index-card" href={statusUrl(status as keyof typeof statusLabels)}>
+        <div>
+          <h2 class="lift-text">{label}</h2>
+          <p>{notes.filter((note) => note.data.status === status).length} 篇笔记</p>
+        </div>
+        <Icon name="next" />
+      </a>
+    ))}
+  </div>
+</BaseLayout>

@@ -13,6 +13,7 @@ import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } 
 import { fromMarkdown } from 'mdast-util-from-markdown'
 import { slug as githubSlug } from 'github-slugger'
 import { Document, parseDocument } from 'yaml'
+import { expandObsidianNote } from './obsidian-imports.mjs'
 
 const attachmentExtensions = new Set([
   '.png',
@@ -200,6 +201,8 @@ function validateNote(data, label) {
     fail(`${label} 的 tags 必须是字符串数组`)
   if (data.status !== undefined && !['growing', 'ready'].includes(data.status))
     fail(`${label} 的 status 必须是 growing 或 ready`)
+  if (data.order !== undefined && (!Number.isInteger(data.order) || data.order < 1))
+    fail(`${label} 的 order 必须是正整数`)
   if (data.sample !== undefined && typeof data.sample !== 'boolean')
     fail(`${label} 的 sample 必须是布尔值`)
   if (data.pdf !== undefined && typeof data.pdf !== 'string')
@@ -217,7 +220,7 @@ export function obsidianNoteId(path, data = {}) {
       .join('/')
       .replace(/\/index$/, '')
   if (!safeRelative(id) || typeof id !== 'string') fail(`笔记无法生成有效网址：${path}`)
-  if (['pdf', 'tags', 'topics'].includes(id.split('/')[0]))
+  if (['index', 'all', 'pdf', 'tags', 'topics', 'status'].includes(id.split('/')[0]))
     fail(`笔记网址占用了现有栏目：/notes/${id}`)
   return id
 }
@@ -386,7 +389,13 @@ function parseManifest(bytes) {
 }
 
 /** Reads the Vault only; changes only manifest-owned copies inside the project. */
-export async function syncObsidian({ vaultPath, projectRoot, publishAll = false }) {
+export async function syncObsidian({
+  vaultPath,
+  projectRoot,
+  publishAll = false,
+  noteImports = {},
+  attachmentRoot
+}) {
   if (typeof publishAll !== 'boolean') fail('publishAll 必须是布尔值，不能隐式启用全量发布')
   if (!isAbsolute(vaultPath || '') || !isAbsolute(projectRoot || ''))
     fail('Vault 和项目路径必须是绝对路径')
@@ -395,6 +404,13 @@ export async function syncObsidian({ vaultPath, projectRoot, publishAll = false 
     if (!stat?.isDirectory() || stat.isSymbolicLink()) fail(`目录不存在或是符号链接：${root}`)
   }
   const vault = await realpath(vaultPath)
+  let externalAssets
+  if (attachmentRoot) {
+    if (!isAbsolute(attachmentRoot)) fail('附件目录必须是绝对路径')
+    const stat = await exists(attachmentRoot)
+    if (!stat?.isDirectory() || stat.isSymbolicLink()) fail('附件目录不存在或是符号链接')
+    externalAssets = await realpath(attachmentRoot)
+  }
   const project = await realpath(projectRoot)
   if (within(vault, project) || within(project, vault)) fail('Vault 与博客项目不能互相包含')
   const blog = join(vault, 'Blog')
@@ -409,23 +425,26 @@ export async function syncObsidian({ vaultPath, projectRoot, publishAll = false 
   const manifestBytes = (await exists(manifestPath)) ? await readFile(manifestPath) : null
   const previous = parseManifest(manifestBytes)
   const snapshots = new Map()
+  const snapshotRoots = new Map()
   const sourcePaths = new Set()
-  async function readSource(path) {
-    const before = await checkPath(vault, path)
+  async function readSource(path, root = vault) {
+    const before = await checkPath(root, path)
     const bytes = await readFile(path)
-    const after = await checkPath(vault, path)
+    const after = await checkPath(root, path)
     if (!sameStat(before, after) || bytes.length !== after.size)
       fail(`读取期间文件发生变化，请重试：${posix(relative(vault, path))}`)
     snapshots.set(path, after)
+    snapshotRoots.set(path, root)
     sourcePaths.add(path)
     return bytes
   }
   const allNotes = []
-  for (const path of await walk(
+  const sourceNotePaths = await walk(
     vault,
     sourceRoot,
     (path) => extname(path).toLowerCase() === '.md'
-  )) {
+  )
+  for (const path of sourceNotePaths) {
     // Keep existing Blog routes when opting into whole-Vault publishing.
     const outputRoot = publishAll && within(blog, path) ? blog : sourceRoot
     const output = posix(relative(outputRoot, path)).replace(/\.md$/i, '.md')
@@ -439,7 +458,16 @@ export async function syncObsidian({ vaultPath, projectRoot, publishAll = false 
       parsed.data.publish = true
       parsed.document.set('publish', true)
     }
-    allNotes.push({ path, output, ...parsed, published: parsed.data.publish === true })
+    const rule = noteImports[posix(relative(vault, path))]
+    const expanded = expandObsidianNote(
+      { path, output, ...parsed, published: parsed.data.publish === true },
+      rule
+    )
+    for (const note of expanded) {
+      if (!safeRelative(note.output) || !note.output.endsWith('.md'))
+        fail(`笔记路径无效：${note.output}`)
+      allNotes.push(note)
+    }
   }
   const published = allNotes.filter((note) => note.published)
   const routeOwners = new Map()
@@ -524,12 +552,19 @@ export async function syncObsidian({ vaultPath, projectRoot, publishAll = false 
       await checkPath(vault, path)
       const canonical = await realpath(path)
       if (!within(vault, canonical)) fail(`附件路径超出 Vault：${target}`)
-      return canonical
+      return { path: canonical, root: vault }
     }
     if (!target.includes('/') && !target.includes('\\')) {
       const matches = (await indexAttachments()).get(key(target)) || []
-      if (matches.length === 1) return matches[0]
+      if (matches.length === 1) return { path: matches[0], root: vault }
       if (matches.length > 1) fail(`${note.output} 的附件文件名不唯一，请写完整路径：${target}`)
+    }
+    if (externalAssets && !target.startsWith('/') && !target.includes('\\')) {
+      const path = resolve(externalAssets, target)
+      if (within(externalAssets, path) && (await exists(path))) {
+        await checkPath(externalAssets, path)
+        return { path, root: externalAssets }
+      }
     }
     fail(`${note.output} 引用的附件不存在或 iCloud 尚未下载：${target}`)
   }
@@ -584,14 +619,15 @@ export async function syncObsidian({ vaultPath, projectRoot, publishAll = false 
     if (attachmentExtensions.has(extension)) {
       if (pdf && (extension !== '.pdf' || suffix))
         fail(`${note.output} 的 pdf 必须是 PDF 文件路径，不能带页面片段`)
-      const path = await resolveAttachment(target, note)
-      const name = `obsidian-${hash(posix(relative(vault, path))).slice(0, 24)}${extension}`
+      const { path, root } = await resolveAttachment(target, note)
+      const sourceKey = `${root === vault ? '' : 'external/'}${posix(relative(root, path))}`
+      const name = `obsidian-${hash(sourceKey).slice(0, 24)}${extension}`
       if (!plannedAssets.has(name)) {
         const destination = join(assetsRoot, name)
         await checkPath(project, destination, { missing: true })
         if (!Object.hasOwn(previous.attachments, name) && (await exists(destination)))
           fail(`不能覆盖非同步附件：${name}`)
-        const bytes = await readSource(path)
+        const bytes = await readSource(path, root)
         if (!bytes.length) fail(`${note.output} 的附件为空或 iCloud 尚未下载完成：${target}`)
         plannedAssets.set(name, bytes)
       }
@@ -626,14 +662,14 @@ export async function syncObsidian({ vaultPath, projectRoot, publishAll = false 
   }
   // A file changing while other notes are being planned must not produce a mixed snapshot.
   for (const [path, stat] of snapshots) {
-    if (!sameStat(stat, await checkPath(vault, path)))
+    if (!sameStat(stat, await checkPath(snapshotRoots.get(path), path)))
       fail(`规划期间源文件发生变化，请重试：${posix(relative(vault, path))}`)
   }
   // Catch note additions/removals during a run too; never clean up from a partial iCloud view.
   const finalNotes = await walk(vault, sourceRoot, (path) => extname(path).toLowerCase() === '.md')
   if (
-    finalNotes.length !== allNotes.length ||
-    finalNotes.some((path, index) => path !== allNotes[index].path)
+    finalNotes.length !== sourceNotePaths.length ||
+    finalNotes.some((path, index) => path !== sourceNotePaths[index])
   )
     fail('规划期间 Blog 目录发生变化，请重试')
   const next = { version: 1, notes: {}, attachments: {} }

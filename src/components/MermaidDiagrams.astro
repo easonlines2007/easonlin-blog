@@ -1,0 +1,43 @@
+<script>
+  const diagrams = [...document.querySelectorAll<HTMLPreElement>('pre[data-language="mermaid"]')]
+  if (diagrams.length) {
+    let renderer: ReturnType<typeof importRenderer> | undefined
+    let queue = Promise.resolve()
+    const importRenderer = async () => {
+      const { default: mermaid } = await import('mermaid')
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'strict',
+        theme: 'neutral',
+        suppressErrorRendering: true
+      })
+      return mermaid
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          const pre = entry.target as HTMLPreElement
+          observer.unobserve(pre)
+          const index = diagrams.indexOf(pre)
+          queue = queue.then(async () => {
+            try {
+              renderer ??= importRenderer()
+              const mermaid = await renderer
+              const { svg } = await mermaid.render(`note-diagram-${index}`, pre.textContent ?? '')
+              const figure = document.createElement('figure')
+              figure.className = 'mermaid-diagram'
+              figure.setAttribute('aria-label', '笔记流程图')
+              figure.innerHTML = svg
+              ;(pre.closest('.code-wrapper') ?? pre).replaceWith(figure)
+            } catch {
+              // Keep the original readable diagram source if an imported chart has invalid syntax.
+            }
+          })
+        }
+      },
+      { rootMargin: '600px' }
+    )
+    diagrams.forEach((diagram) => observer.observe(diagram))
+  }
+</script>

@@ -8,7 +8,12 @@ const topics = countValues(await getNotes(), 'topic')
 ---
 
 <BaseLayout title="专题">
-  <PageHeader title="专题" description="把相关的笔记放在一起，沿着一个主题慢慢读。" />
+  <PageHeader
+    title="专题"
+    description="把相关的笔记放在一起，沿着一个主题慢慢读。"
+    back="/notes"
+    backLabel="笔记"
+  />
   <div class="index-grid enter delay-1">
     {topics.map(([topic, count]) => (
       <a class="index-card" href={topicUrl(topic)}>

@@ -64,6 +64,43 @@ test('whole-Vault config is explicit and its watch sees new notes outside Blog w
   )
 })
 
+test('configuration loads course rules and the watcher includes only referenced external attachments', async (t) => {
+  const root = await fixture(t)
+  const vaultPath = join(root, 'vault')
+  const attachmentRoot = join(root, 'videobook')
+  await mkdir(join(vaultPath, 'Blog'), { recursive: true })
+  await mkdir(attachmentRoot)
+  await mkdir(join(root, 'src/data'), { recursive: true })
+  await writeFile(
+    join(root, '.env.local'),
+    `OBSIDIAN_VAULT_PATH="${vaultPath}"\nOBSIDIAN_ATTACHMENT_PATH="${attachmentRoot}"\n`
+  )
+  const noteImports = { 'course.md': { topic: 'MIT 18.06', tags: ['lineal algebra'], modules: [] } }
+  await writeFile(join(root, 'src/data/obsidian-imports.json'), JSON.stringify(noteImports))
+  const config = await loadObsidianConfig({ root, environment: {} })
+  assert.equal(config.attachmentRoot, attachmentRoot)
+  assert.equal(
+    (await loadObsidianConfig({ root, environment: { OBSIDIAN_ATTACHMENT_PATH: '' } }))
+      .attachmentRoot,
+    undefined
+  )
+  assert.deepEqual(config.noteImports, noteImports)
+  const image = join(attachmentRoot, 'image.png')
+  await writeFile(image, 'first image')
+  const snapshot = createSourceSnapshot(vaultPath, config)
+  const first = await snapshot([image])
+  assert.ok(first.includes('image.png'))
+  assert.ok(!first.includes('UNSAFE_PATH'))
+  await writeFile(join(attachmentRoot, 'unreferenced.png'), 'not imported')
+  assert.equal(await snapshot([image]), first)
+  await writeFile(image, 'second image')
+  assert.notEqual(await snapshot([image]), first)
+  await assert.rejects(
+    loadObsidianConfig({ root, environment: { OBSIDIAN_ATTACHMENT_PATH: '../outside' } }),
+    /绝对路径/
+  )
+})
+
 test('watch fingerprints nested Markdown and referenced assets while excluding .obsidian', async (t) => {
   const vaultPath = await fixture(t)
   const note = join(vaultPath, 'Blog', 'nested', 'note.md')

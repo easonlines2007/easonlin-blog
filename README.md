@@ -64,7 +64,13 @@ publish: true
 - `sample: true` 显示示例标识；替换当前三篇示例时可以删除此字段。
 - 使用标准 Markdown 内部链接，例如 `[另一篇笔记](/notes/example)`。
 
-正文支持代码高亮/复制、KaTeX 数学公式、表格、折叠区块和文章目录。Obsidian 导入支持公开笔记和附件链接转换；Dataview、Canvas 和 Obsidian 插件动态渲染不在同步范围内。
+正文支持代码高亮/复制、KaTeX 数学公式、Mermaid 流程图、表格、折叠区块和文章目录。图片与流程图接近视口时加载。Obsidian 导入支持公开笔记和附件链接转换；Dataview、Canvas 和 Obsidian 插件动态渲染不在同步范围内。
+
+顶栏“笔记”进入 `/notes`，提供全部笔记、专题、标签和整理状态四个入口；全部专题直接展开。`/notes/all` 按最近更新列出笔记，`/notes/status` 可进入“进行中”和“已整理”。专题内可通过可选的正整数 `order` 指定阅读顺序，不影响首页和全部笔记的时间排序；有顺序的文章提供上一篇／下一篇导航。
+
+MIT 18.06 原稿按五个一级 Lecture 模块同步为五篇：01–05、06–13、14–20、21–27（含 24b 复习）、28–34。导入规则保存在 `src/data/obsidian-imports.json`，统一专题 `MIT 18.06` 与标签 `lineal algebra`。只拆分网站副本，保留原稿与附件；目录与配置不一致时同步停止并保留上一份结果。不要直接修改生成的五篇笔记。
+
+原稿的板书图片位于 VideoBook 输出目录时，在本机 `.env.local` 设置 `OBSIDIAN_ATTACHMENT_PATH` 为该目录的绝对路径。同步先查找 Vault，再按原引用的相对路径查找这个附件目录，仅复制实际引用的图片/PDF；`watch` 会监控这些附件的更新。路径不进入 Git 或 Vercel，源文件不写回。
 
 ## 从 iCloud Obsidian 同步
 
@@ -109,7 +115,7 @@ pnpm obsidian:watch
 
 笔记中的图片/PDF、Obsidian `![[附件]]` 和 frontmatter `pdf` 引用会复制到 `public/attachments/`，转换为网站路径。生成附件名使用稳定哈希与原扩展名，以支持中文、空格并兼容现有 PDF viewer。笔记内部链接只连接 Blog 内已公开的笔记。附件解析支持笔记相对路径、Vault 相对路径及唯一文件名；同名歧义或缺失附件会报错，不能猜测。代码块与行内代码保持原样。
 
-`![[笔记]]` 与 `![[文件.pdf]]` 转换为普通链接，不执行 Obsidian 转引；需要内嵌 PDF 阅读器时使用 frontmatter `pdf` 字段。块定位 `#^block-id`、本地 HTML `srcset` 与 CSS `url()` 暂不支持，遇到时会明确报错。页面地址遵循现有 Astro 规则（如 `阅读/index.md` 对应 `/notes/阅读`）；`pdf`、`tags`、`topics` 是已有页面保留的首层名称，不能作为导入笔记地址。
+`![[笔记]]` 与 `![[文件.pdf]]` 转换为普通链接，不执行 Obsidian 转引；需要内嵌 PDF 阅读器时使用 frontmatter `pdf` 字段。块定位 `#^block-id`、本地 HTML `srcset` 与 CSS `url()` 暂不支持，遇到时会明确报错。页面地址遵循现有 Astro 规则（如 `阅读/index.md` 对应 `/notes/阅读`）；`index`、`all`、`status`、`pdf`、`tags`、`topics` 是已有页面保留的首层名称，不能作为导入笔记地址。
 
 脚本跳过 `.obsidian` 和符号链接，只读取 Blog Markdown 及被公开笔记引用的图片/PDF，不复制整个 Vault。同步清单 `src/data/obsidian-sync.json` 记录生成文件归属，需要随内容提交。把笔记改成草稿或删除源文件时，只清理同步清单拥有的项目副本及不再使用的附件，现有手写/示例内容保留；与手写文件重名或生成副本被手动修改时会报错。缺少 Blog、iCloud 文件尚未下载、链接解析或校验失败时保留上一份同步结果。
 

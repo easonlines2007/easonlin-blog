@@ -24,7 +24,7 @@ async function digestFile(path) {
 }
 
 /** Polling works across iCloud file replacements, unlike inode-bound native watchers. */
-export function createSourceSnapshot(vaultPath, { publishAll = false } = {}) {
+export function createSourceSnapshot(vaultPath, { publishAll = false, attachmentRoot } = {}) {
   const sourceRoot = publishAll ? vaultPath : join(vaultPath, 'Blog')
   const cache = new Map()
 
@@ -32,8 +32,10 @@ export function createSourceSnapshot(vaultPath, { publishAll = false } = {}) {
     const files = new Map()
     const entries = []
     let canonicalVault
+    let canonicalAttachments
     try {
       canonicalVault = await realpath(vaultPath)
+      canonicalAttachments = attachmentRoot ? await realpath(attachmentRoot) : undefined
       if (excludesObsidian(canonicalVault)) return '[["Blog","error:UNSAFE_PATH"]]'
     } catch (error) {
       return JSON.stringify([['Blog', `error:${error.code ?? 'read'}`]])
@@ -44,7 +46,13 @@ export function createSourceSnapshot(vaultPath, { publishAll = false } = {}) {
       if (isWithin(resolve(vaultPath), absolute)) {
         return join(canonicalVault, relative(resolve(vaultPath), absolute))
       }
-      return isWithin(canonicalVault, absolute) ? absolute : undefined
+      if (attachmentRoot && isWithin(resolve(attachmentRoot), absolute)) {
+        return join(canonicalAttachments, relative(resolve(attachmentRoot), absolute))
+      }
+      return isWithin(canonicalVault, absolute) ||
+        (canonicalAttachments && isWithin(canonicalAttachments, absolute))
+        ? absolute
+        : undefined
     }
 
     async function safePath(path) {
@@ -129,7 +137,7 @@ export async function watchObsidian(
   config,
   {
     sync = syncObsidian,
-    snapshot = createSourceSnapshot(config.vaultPath, { publishAll: config.publishAll }),
+    snapshot = createSourceSnapshot(config.vaultPath, config),
     log = console,
     pollInterval = POLL_INTERVAL,
     debounceInterval = DEBOUNCE_INTERVAL

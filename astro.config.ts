@@ -4,6 +4,7 @@ import pure from 'astro-pure'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import config from './src/site.config'
+import rehypeLazyImages from './src/lib/rehype-lazy-images'
 
 export default defineConfig({
   site:
@@ -16,7 +17,10 @@ export default defineConfig({
   trailingSlash: 'ignore',
   prefetch: { defaultStrategy: 'hover' },
   markdown: {
-    processor: unified({ remarkPlugins: [remarkMath], rehypePlugins: [rehypeKatex] }),
+    processor: unified({
+      remarkPlugins: [remarkMath],
+      rehypePlugins: [rehypeKatex, rehypeLazyImages]
+    }),
     shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' } }
   },
   integrations: [pure(config)]

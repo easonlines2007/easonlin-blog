@@ -45,9 +45,86 @@ async function fixture(t) {
     source: (path, contents) => put(join(vaultPath, path), contents),
     destination: (path, contents) => put(join(projectRoot, path), contents),
     output: (path) => readFile(join(projectRoot, path), 'utf8'),
-    run: () => syncObsidian({ vaultPath, projectRoot })
+    run: (options = {}) => syncObsidian({ vaultPath, projectRoot, ...options })
   }
 }
+
+test('course imports split five modules, preserve formula bytes and external images, and remain repeatable', async (t) => {
+  const f = await fixture(t)
+  const sourcePath = 'MIT 18.06/course.md'
+  const attachmentRoot = join(f.projectRoot, 'external-assets')
+  await mkdir(join(attachmentRoot, 'p1'), { recursive: true })
+  await writeFile(join(attachmentRoot, 'p1/image.png'), 'original image bytes')
+  const modules = Array.from({ length: 5 }, (_, index) => ({
+    heading: `Lecture ${index + 1}`,
+    output: `MIT 18.06/module-${index + 1}.md`,
+    description: `第 ${index + 1} 份笔记`
+  }))
+  const formula = '$$\nA\n=\nB\n$$'
+  const content =
+    '> 作者与许可\n\n---\n\n## 导读\n保留导读。\n\n' +
+    modules
+      .map(
+        (module, index) =>
+          `# ${module.heading}\n\n## 第 ${index + 1} 讲\n正文 ${index + 1}\n\n${formula}\n\n![板书](p1/image.png)\n\n[原视频](https://www.bilibili.com/video/example/?p=${index + 1})\n\n` +
+          (index === 0 ? '```markdown\n# 不是模块\n```\n\n' : '')
+      )
+      .join('')
+  await f.source(sourcePath, content)
+  const options = {
+    publishAll: true,
+    attachmentRoot,
+    noteImports: { [sourcePath]: { topic: 'MIT 18.06', tags: ['lineal algebra'], modules } }
+  }
+  const vaultBefore = await snapshot(f.vaultPath)
+  const assetBefore = await snapshot(attachmentRoot)
+  const result = await f.run(options)
+  assert.equal(result.notes, 5)
+  assert.equal(result.attachments, 1)
+  for (const [index, module] of modules.entries()) {
+    const output = await f.output(`src/content/notes/${module.output}`)
+    const metadata = exportedMetadata(output)
+    assert.equal(metadata.order, index + 1)
+    assert.equal(metadata.topic, 'MIT 18.06')
+    assert.deepEqual(metadata.tags, ['lineal algebra'])
+    assert.match(output, new RegExp(`正文 ${index + 1}`))
+    assert.ok(output.includes(formula))
+    assert.match(output, /作者与许可/)
+    assert.match(output, /!\[板书\]\(<\/attachments\/obsidian-[a-f0-9]+\.png>\)/)
+    assert.equal(output.includes('保留导读'), index === 0)
+  }
+  assert.deepEqual(await snapshot(f.vaultPath), vaultBefore)
+  assert.deepEqual(await snapshot(attachmentRoot), assetBefore)
+  const beforeRepeat = await snapshot(f.projectRoot)
+  assert.equal((await f.run(options)).written, 0)
+  assert.deepEqual(await snapshot(f.projectRoot), beforeRepeat)
+  // A changed source outline must not silently truncate modules or clean up the last good export.
+  await f.source(sourcePath, content.replace('# Lecture 5', '# Unexpected module'))
+  await assert.rejects(f.run(options), /一级目录已变化/)
+  assert.deepEqual(await snapshot(f.projectRoot), beforeRepeat)
+})
+
+test('external attachment lookup rejects traversal and symlinked files without changing the project', async (t) => {
+  const f = await fixture(t)
+  const attachmentRoot = join(f.projectRoot, 'external-assets')
+  await mkdir(attachmentRoot)
+  await f.destination('secret.png', 'not a public image')
+  await f.source('Blog/note.md', note('![图](../secret.png)'))
+  let before = await snapshot(f.projectRoot)
+  await assert.rejects(f.run({ attachmentRoot }), /不存在/)
+  assert.deepEqual(await snapshot(f.projectRoot), before)
+  await symlink(join(f.projectRoot, 'secret.png'), join(attachmentRoot, 'image.png'))
+  await f.source('Blog/note.md', note('![图](image.png)'))
+  before = await snapshot(f.projectRoot)
+  await assert.rejects(f.run({ attachmentRoot }), /符号链接/)
+  assert.deepEqual(await snapshot(f.projectRoot), before)
+})
+
+test('note routes reserve all navigation entry points', () => {
+  for (const route of ['all', 'status', 'topics', 'tags', 'pdf', 'index']) {
+    assert.throws(() => obsidianNoteId(`${route}.md`), /占用/)
+  }
+})
 
 async function snapshot(root) {
   const result = {}

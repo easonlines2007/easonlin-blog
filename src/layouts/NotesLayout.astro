@@ -11,8 +11,9 @@ interface Props {
   description?: string
   back?: string
   backLabel?: string
+  filters?: boolean
 }
-const { title, notes, allNotes = notes, description, back, backLabel } = Astro.props
+const { title, notes, allNotes = notes, description, back, backLabel, filters = true } = Astro.props
 ---
 
 <BaseLayout {title}>
@@ -28,10 +29,10 @@ const { title, notes, allNotes = notes, description, back, backLabel } = Astro.p
         ))}
       </ul>
       <p class="empty-state" data-filter-empty hidden={notes.length > 0}>
-        {notes.length ? '这个状态下还没有笔记。' : '还没有公开笔记。'}
+        {notes.length ? '这个状态下还没有笔记。' : '还没有符合条件的公开笔记。'}
       </p>
     </div>
-    <NotesSidebar notes={allNotes} filterNotes={notes} filters={notes.length > 0} />
+    <NotesSidebar notes={allNotes} filterNotes={notes} filters={filters && notes.length > 0} />
   </div>
 </BaseLayout>
 <script>

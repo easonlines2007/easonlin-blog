@@ -1,7 +1,57 @@
 ---
-import NotesLayout from '../../layouts/NotesLayout.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import PageHeader from '../../components/PageHeader.astro'
+import Icon from '../../components/Icon.astro'
 import { getNotes } from '../../lib/notes'
+import { countValues, topicUrl } from '../../lib/note-utils'
 const notes = await getNotes()
+const topics = countValues(notes, 'topic')
+const tags = countValues(notes, 'tags')
 ---
 
-<NotesLayout title="笔记" {notes} />
+<BaseLayout title="笔记">
+  <PageHeader title="笔记" description="从一篇笔记、一个专题，或一个关键词开始读。" />
+  <div class="notes-hub enter delay-1">
+    <a class="index-card" href="/notes/all">
+      <div>
+        <h2 class="lift-text">全部笔记</h2>
+        <p>{notes.length} 篇笔记，按最近更新浏览</p>
+      </div>
+      <Icon name="next" />
+    </a>
+    <section class="notes-hub-topics" aria-labelledby="notes-topics-title">
+      <div class="notes-hub-heading">
+        <h2 id="notes-topics-title">专题</h2>
+        <span>{topics.length} 个专题</span>
+      </div>
+      <div class="index-grid">
+        {topics.map(([topic, count]) => (
+          <a class="index-card" href={topicUrl(topic)}>
+            <div>
+              <h3 class="lift-text">{topic}</h3>
+              <p>{count} 篇笔记</p>
+            </div>
+            <Icon name="next" />
+          </a>
+        ))}
+      </div>
+      {!topics.length && <p class="empty-state">还没有公开专题。</p>}
+    </section>
+    <div class="index-grid">
+      <a class="index-card" href="/notes/tags">
+        <div>
+          <h2 class="lift-text">标签</h2>
+          <p>{tags.length} 个关键词，找到相关笔记</p>
+        </div>
+        <Icon name="next" />
+      </a>
+      <a class="index-card" href="/notes/status">
+        <div>
+          <h2 class="lift-text">整理状态</h2>
+          <p>进行中与已整理的笔记</p>
+        </div>
+        <Icon name="next" />
+      </a>
+    </div>
+  </div>
+</BaseLayout>

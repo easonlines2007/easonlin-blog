@@ -1,0 +1,33 @@
+{
+  "MIT 18.06/MIT 18.06 线性代数 videobook.md": {
+    "topic": "MIT 18.06",
+    "tags": ["lineal algebra"],
+    "modules": [
+      {
+        "heading": "Lecture 01-05：线性方程组、消元与矩阵分解",
+        "output": "MIT 18.06/lecture-01-05.md",
+        "description": "第 1–5 讲：方程组的几何解释、高斯消元、逆矩阵、LU 分解与向量空间。"
+      },
+      {
+        "heading": "Lecture 06-13：向量空间与四个基本子空间",
+        "output": "MIT 18.06/lecture-06-13.md",
+        "description": "第 6–13 讲：列空间、零空间、方程组的完全解、基与维数、四个基本子空间及图与网络。"
+      },
+      {
+        "heading": "Lecture 14-20：正交性、投影与行列式",
+        "output": "MIT 18.06/lecture-14-20.md",
+        "description": "第 14–20 讲：正交子空间、投影、最小二乘法、格拉姆–施密特正交化与行列式。"
+      },
+      {
+        "heading": "Lecture 21-27：特征值、特征向量与正定性",
+        "output": "MIT 18.06/lecture-21-27.md",
+        "description": "第 21–27 讲（含第 24b 讲复习）：特征系统、对角化、微分方程、马尔可夫矩阵、傅里叶变换与正定性。"
+      },
+      {
+        "heading": "Lecture 28-34：相似矩阵、奇异值分解与线性变换",
+        "output": "MIT 18.06/lecture-28-34.md",
+        "description": "第 28–34 讲：相似矩阵、若尔当标准型、SVD、线性变换、基变换、图像压缩、伪逆与期末总结。"
+      }
+    ]
+  }
+}

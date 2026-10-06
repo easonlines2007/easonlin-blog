@@ -5,6 +5,8 @@ import {
   countValues,
   noteUrl,
   tagUrl,
+  statusUrl,
+  sortTopicNotes,
   type NoteMeta
 } from '../src/lib/note-utils.ts'
 
@@ -48,4 +50,22 @@ test('topic and tag counts reflect the actual collection', () => {
   const input = [note('a', true, '2026-10-01'), note('b', true, '2026-10-02')]
   assert.deepEqual(countValues(input, 'tags'), [['PDF', 2]])
   assert.deepEqual(countValues(input, 'topic'), [['笔记方法', 2]])
+})
+
+test('topic reading order takes precedence over update dates and leaves the recent list unchanged', () => {
+  const first = note('lecture-01-05', true, '2026-10-01')
+  const second = note('lecture-06-13', true, '2026-10-02', '2026-10-05')
+  first.data.order = 1
+  second.data.order = 2
+  const recent = publishedNotes([first, second, note('extra', true, '2026-10-03')])
+  assert.deepEqual(
+    sortTopicNotes(recent).map((item) => item.id),
+    ['lecture-01-05', 'lecture-06-13', 'extra']
+  )
+  assert.deepEqual(
+    recent.map((item) => item.id),
+    ['lecture-06-13', 'extra', 'lecture-01-05']
+  )
+  assert.equal(statusUrl('growing'), '/notes/status/growing')
+  assert.equal(statusUrl('ready'), '/notes/status/ready')
 })

@@ -54,7 +54,7 @@ const pdfNotes = notes.filter((note) => note.data.pdf)
             />
           ))}
         </ul>
-        <a class="more-link" href="/notes">
+        <a class="more-link" href="/notes/all">
           <span class="lift-text">全部笔记</span>
         </a>
       </div>
@@ -89,7 +89,7 @@ const pdfNotes = notes.filter((note) => note.data.pdf)
       </h2>
       <div class="section-body">
         <ul class="home-row-list">
-          <HomeRow label="总计" title={`${notes.length} 篇笔记`} href="/notes" />
+          <HomeRow label="总计" title={`${notes.length} 篇笔记`} href="/notes/all" />
           <HomeRow label="专题" title={`${topics.length} 个笔记专题`} href="/notes/topics" />
           <HomeRow label="PDF" title={`${pdfNotes.length} 份手写与批注`} href="/notes/pdf" />
         </ul>
