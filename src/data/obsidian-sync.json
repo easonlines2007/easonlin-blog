@@ -1,9 +1,10 @@
 {
   "version": 1,
   "notes": {
-    "FC/Laboratory/Lab 01 02.md": "6c910f9b9da870ed64c31957665f370bf3d661a629230a8963d6fad82836aa19",
-    "FC/Laboratory/Lab 03.md": "fc167a575a7568ddd4a2ece5d54d8f144223fc0dce18c0e4c3afc6c157dc5691",
-    "FC/Teoria/T1 数据表示与基本运算.md": "3c98b8434538329cfbf96bd35b8909bb7c7fccc1004d6c4b18bfed74eb140597",
+    "FC/Laboratory/Lab 01 02.md": "e5a2bcaf1007526280ccee6113b4f714d497af52ba4d849ab259b5485be21784",
+    "FC/Laboratory/Lab03 - Claude.md": "ee6f6144dba622bc06230fca301fc619e5b9295d0687410ce68ca1d1be4abaa9",
+    "FC/Teoria/T1 数据表示与基本运算.md": "2b64aacaa6635ee5559e0d5bd0e0354df9174ee72816831948fdad7d4f1b153d",
+    "FC/Teoria/T2.01数据对齐与处理器架构入门.md": "1a3e4f84d237984408e09020fe803572d65645cfc9c557209c3c5e0e84fbc3fc",
     "MIT 18.06/lecture-01-05.md": "55e4e72efa575717c552cfc69961306c19ed5111dc40d22927f9268a5b852ac7",
     "MIT 18.06/lecture-06-13.md": "05b6fb7be1cc6c1f08da6bc3bdff0589215c5c15e70d2c48582f00e921fab0f6",
     "MIT 18.06/lecture-14-20.md": "e08fba05ccd4566c1fba889f8f0cdddcad41c2ccdf3048805109d852d009c27a",
