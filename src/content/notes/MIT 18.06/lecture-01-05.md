@@ -5,6 +5,7 @@ description: 第 1–5 讲：方程组的几何解释、高斯消元、逆矩阵
 topic: MIT 18.06
 tags:
   - lineal algebra
+status: ready
 order: 1
 date: 2026-10-05
 ---

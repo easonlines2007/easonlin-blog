@@ -5,6 +5,7 @@ description: 第 21–27 讲（含第 24b 讲复习）：特征系统、对角�
 topic: MIT 18.06
 tags:
   - lineal algebra
+status: ready
 order: 4
 date: 2026-10-05
 ---

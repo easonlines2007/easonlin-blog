@@ -74,7 +74,9 @@ test('course imports split five modules, preserve formula bytes and external ima
   const options = {
     publishAll: true,
     attachmentRoot,
-    noteImports: { [sourcePath]: { topic: 'MIT 18.06', tags: ['lineal algebra'], modules } }
+    noteImports: {
+      [sourcePath]: { topic: 'MIT 18.06', tags: ['lineal algebra'], status: 'ready', modules }
+    }
   }
   const vaultBefore = await snapshot(f.vaultPath)
   const assetBefore = await snapshot(attachmentRoot)
@@ -87,6 +89,7 @@ test('course imports split five modules, preserve formula bytes and external ima
     assert.equal(metadata.order, index + 1)
     assert.equal(metadata.topic, 'MIT 18.06')
     assert.deepEqual(metadata.tags, ['lineal algebra'])
+    assert.equal(metadata.status, 'ready')
     assert.match(output, new RegExp(`正文 ${index + 1}`))
     assert.ok(output.includes(formula))
     assert.match(output, /作者与许可/)

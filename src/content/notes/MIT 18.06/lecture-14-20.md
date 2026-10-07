@@ -5,6 +5,7 @@ description: 第 14–20 讲：正交子空间、投影、最小二乘法、格�
 topic: MIT 18.06
 tags:
   - lineal algebra
+status: ready
 order: 3
 date: 2026-10-05
 ---

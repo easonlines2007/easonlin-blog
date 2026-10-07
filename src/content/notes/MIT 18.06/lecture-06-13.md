@@ -5,6 +5,7 @@ description: 第 6–13 讲：列空间、零空间、方程组的完全解、�
 topic: MIT 18.06
 tags:
   - lineal algebra
+status: ready
 order: 2
 date: 2026-10-05
 ---

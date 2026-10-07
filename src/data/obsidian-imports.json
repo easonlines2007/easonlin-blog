@@ -2,6 +2,7 @@
   "MIT 18.06/MIT 18.06 线性代数 videobook.md": {
     "topic": "MIT 18.06",
     "tags": ["lineal algebra"],
+    "status": "ready",
     "modules": [
       {
         "heading": "Lecture 01-05：线性方程组、消元与矩阵分解",

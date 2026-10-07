@@ -33,6 +33,7 @@ export function expandObsidianNote(note, rule) {
       description: module.description,
       topic: rule.topic,
       tags: rule.tags,
+      ...(rule.status ? { status: rule.status } : {}),
       order: index + 1
     }
     delete data.slug

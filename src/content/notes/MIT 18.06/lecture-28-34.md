@@ -5,6 +5,7 @@ description: 第 28–34 讲：相似矩阵、若尔当标准型、SVD、线性�
 topic: MIT 18.06
 tags:
   - lineal algebra
+status: ready
 order: 5
 date: 2026-10-05
 ---
