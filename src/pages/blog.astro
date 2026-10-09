@@ -1,14 +1,29 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import PageHeader from '../components/PageHeader.astro'
+import { getEssays } from '../lib/essays'
+import { essayUrl, formatWritingDate } from '../lib/essay-utils'
+const essays = await getEssays()
 ---
 
 <BaseLayout title="随笔">
-  <PageHeader title="随笔" />
+  <PageHeader title="随笔" description="一些感受，一些想法，写下来，留在这里。" />
   <div class="enter delay-1">
-    <p class="empty-state">暂时还没有随笔。先从一篇笔记开始。</p>
-    <a class="more-link" href="/notes">
-      <span class="lift-text">阅读笔记</span>
-    </a>
+    <p class="list-count">{essays.length} 篇随笔</p>
+    <ol class="essay-list">
+      {essays.map((essay) => (
+        <li class="essay-list-item">
+          <time datetime={essay.data.written}>写于 {formatWritingDate(essay.data.written)}</time>
+          <div>
+            <h2>
+              <a href={essayUrl(essay.id)}>
+                <span class="lift-text">{essay.data.title}</span>
+              </a>
+            </h2>
+            {essay.data.description && <p>{essay.data.description}</p>}
+          </div>
+        </li>
+      ))}
+    </ol>
   </div>
 </BaseLayout>

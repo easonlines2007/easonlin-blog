@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getNotes } from '../lib/notes'
+import { getEssays } from '../lib/essays'
+import { essayUrl } from '../lib/essay-utils'
 import { countValues, noteUrl } from '../lib/note-utils'
 import { projects } from '../lib/projects'
 import { theme } from '../site.config'
@@ -9,6 +11,7 @@ import HomeEntrance from '../components/HomeEntrance.astro'
 import HomeRow from '../components/HomeRow.astro'
 import HomeMotto from '../components/HomeMotto.astro'
 const notes = await getNotes()
+const essays = await getEssays()
 const topics = countValues(notes, 'topic')
 const pdfNotes = notes.filter((note) => note.data.pdf)
 ---
@@ -64,6 +67,24 @@ const pdfNotes = notes.filter((note) => note.data.pdf)
         <span class="section-index" aria-hidden="true">
           03
         </span>
+        最近随笔
+      </h2>
+      <div class="section-body">
+        <ul class="home-row-list">
+          {essays.slice(0, 3).map((essay) => (
+            <HomeRow label="随笔" title={essay.data.title} href={essayUrl(essay.id)} />
+          ))}
+        </ul>
+        <a class="more-link" href="/blog">
+          <span class="lift-text">全部随笔</span>
+        </a>
+      </div>
+    </section>
+    <section class="home-section" data-intro-reveal>
+      <h2>
+        <span class="section-index" aria-hidden="true">
+          04
+        </span>
         项目
       </h2>
       <div class="section-body">
@@ -83,7 +104,7 @@ const pdfNotes = notes.filter((note) => note.data.pdf)
     <section class="home-section" data-intro-reveal>
       <h2>
         <span class="section-index" aria-hidden="true">
-          04
+          05
         </span>
         笔记一览
       </h2>
