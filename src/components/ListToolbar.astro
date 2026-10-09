@@ -1,0 +1,64 @@
+---
+interface Props {
+  count: number
+  label?: string
+  dateLabel?: string
+}
+const { count, label = '笔记', dateLabel = '添加日期' } = Astro.props
+---
+
+<div class="listing-toolbar">
+  <p class="list-count" role="status" aria-live="polite" data-note-count>
+    共 {count} 篇{label}
+  </p>
+  <label class="list-sort">
+    <span>排序</span>
+    <select data-list-sort aria-label={`${label}排序`} disabled>
+      <option value="default">默认顺序</option>
+      <option value="date-desc">{dateLabel}：新到旧</option>
+      <option value="date-asc">{dateLabel}：旧到新</option>
+      <option value="title-asc">标题：正序</option>
+      <option value="title-desc">标题：倒序</option>
+    </select>
+  </label>
+</div>
+
+<style>
+  .listing-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    margin-bottom: 20px;
+  }
+  .listing-toolbar .list-count {
+    margin: 0;
+  }
+  .list-sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--secondary);
+    font-size: 14px;
+  }
+  .list-sort select {
+    min-height: 36px;
+    max-width: 100%;
+    padding: 5px 9px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: var(--page-bg);
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+  }
+  .list-sort select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+</style>
+
+<script>
+  import '../scripts/list-sort'
+</script>

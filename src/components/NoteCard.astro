@@ -8,7 +8,13 @@ const { note } = Astro.props
 const { title, description, tags, status, updated, date, pdf } = note.data
 ---
 
-<li class="note-card" data-note-status={status}>
+<li
+  class="note-card"
+  data-note-status={status}
+  data-list-item
+  data-sort-title={title}
+  data-sort-date={date.getTime()}
+>
   <div class="note-card-heading">
     <h2>
       <a class="note-title" href={noteUrl(note.id)}>

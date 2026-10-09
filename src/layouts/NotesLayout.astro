@@ -4,6 +4,7 @@ import BaseLayout from './BaseLayout.astro'
 import PageHeader from '../components/PageHeader.astro'
 import NotesSidebar from '../components/NotesSidebar.astro'
 import NoteCard from '../components/NoteCard.astro'
+import ListToolbar from '../components/ListToolbar.astro'
 interface Props {
   title: string
   notes: CollectionEntry<'notes'>[]
@@ -18,12 +19,10 @@ const { title, notes, allNotes = notes, description, back, backLabel, filters = 
 
 <BaseLayout {title}>
   <PageHeader {title} {description} {back} {backLabel} />
-  <div class="listing-grid enter delay-1">
+  <div class="listing-grid enter delay-1" data-sortable-listing data-list-label="笔记">
     <div>
-      <p class="list-count" role="status" aria-live="polite" data-note-count>
-        共 {notes.length} 篇笔记
-      </p>
-      <ul class="notes-list">
+      <ListToolbar count={notes.length} />
+      <ul class="notes-list" data-list-items>
         {notes.map((note) => (
           <NoteCard {note} />
         ))}
@@ -35,21 +34,3 @@ const { title, notes, allNotes = notes, description, back, backLabel, filters = 
     <NotesSidebar notes={allNotes} filterNotes={notes} filters={filters && notes.length > 0} />
   </div>
 </BaseLayout>
-<script>
-  const cards = [...document.querySelectorAll<HTMLElement>('[data-note-status]')]
-  const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-status-filter]')]
-  buttons.forEach((button) =>
-    button.addEventListener('click', () => {
-      const status = button.dataset.statusFilter
-      let visible = 0
-      cards.forEach((card) => {
-        card.hidden = status !== 'all' && card.dataset.noteStatus !== status
-        if (!card.hidden) visible++
-      })
-      buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)))
-      const count = document.querySelector('[data-note-count]')
-      if (count) count.textContent = `共 ${visible} 篇笔记`
-      document.querySelector<HTMLElement>('[data-filter-empty]')!.hidden = visible > 0
-    })
-  )
-</script>
