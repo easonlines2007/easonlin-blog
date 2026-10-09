@@ -7,7 +7,7 @@ export interface NoteMeta {
     topic: string
     order?: number
     tags: string[]
-    status: 'growing' | 'ready'
+    status: 'growing' | 'ready' | 'completed'
   }
 }
 
@@ -25,7 +25,7 @@ export const noteUrl = (id: string) => `/notes/${id.split('/').map(encodeURIComp
 export const tagUrl = (tag: string) => `/notes/tags/${encodeURIComponent(tag)}`
 export const topicUrl = (topic: string) => `/notes/topics/${encodeURIComponent(topic)}`
 export const statusUrl = (status: NoteMeta['data']['status']) => `/notes/status/${status}`
-export const statusLabels = { growing: '进行中', ready: '已整理' } as const
+export const statusLabels = { growing: '进行中', ready: '已整理', completed: '已完成' } as const
 
 // Unnumbered notes retain the collection's date order; course modules use reading order.
 export function sortTopicNotes<T extends NoteMeta>(notes: T[]): T[] {

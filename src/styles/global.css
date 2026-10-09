@@ -670,6 +670,7 @@ summary::-webkit-details-marker {
 }
 .note-meta time {
   margin: 0 4px;
+  white-space: nowrap;
 }
 .content-type {
   background: hsl(var(--primary) / 0.09);
@@ -704,14 +705,16 @@ summary::-webkit-details-marker {
   background: hsl(42 65% 50% / 0.1);
   color: hsl(37 70% 32%);
 }
-.status.ready {
+.status.ready,
+.status.completed {
   background: hsl(156 35% 45% / 0.09);
   color: hsl(155 30% 34%);
 }
 .dark .status.growing {
   color: hsl(44 50% 66%);
 }
-.dark .status.ready {
+.dark .status.ready,
+.dark .status.completed {
   color: hsl(151 31% 68%);
 }
 .notes-sidebar {
@@ -903,8 +906,14 @@ summary::-webkit-details-marker {
   font-size: 13px;
 }
 .article-date {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
   font-size: 14px;
   color: var(--secondary);
+}
+.article-date time {
+  white-space: nowrap;
 }
 .sample-label {
   color: var(--secondary);

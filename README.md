@@ -59,18 +59,30 @@ publish: true
 
 - `publish` 默认是 `false`；只有显式为 `true` 的笔记进入网页、导航、RSS 和搜索。
 - 如果主动填写日期，建议使用 `2026-10-05` 这样的真实日期字符串；数字 `20261005` 和不存在的日期会报错。`tags` 使用列表，如 `[阅读, 整理]`，可以在 Obsidian 属性面板中添加。
-- `status` 为 `growing`（进行中）或 `ready`（已整理），与是否公开独立。
+- `status` 为 `growing`（进行中）、`ready`（已整理）或 `completed`（已完成），与是否公开独立。
 - `updated` 可记录修订日期，列表按更新时间排序。
 - `sample: true` 显示示例标识；替换当前三篇示例时可以删除此字段。
 - 使用标准 Markdown 内部链接，例如 `[另一篇笔记](/notes/example)`。
 
 正文支持代码高亮/复制、KaTeX 数学公式、Mermaid 流程图、表格、折叠区块和文章目录。图片与流程图接近视口时加载。Obsidian 导入支持公开笔记和附件链接转换；Dataview、Canvas 和 Obsidian 插件动态渲染不在同步范围内。
 
-顶栏“笔记”进入 `/notes`，提供全部笔记、专题、标签和整理状态四个入口；全部专题直接展开。`/notes/all` 按最近更新列出笔记，`/notes/status` 可进入“进行中”和“已整理”。专题内可通过可选的正整数 `order` 指定阅读顺序，不影响首页和全部笔记的时间排序；有顺序的文章提供上一篇／下一篇导航。
+顶栏“笔记”进入 `/notes`，提供全部笔记、专题、标签和整理状态四个入口；全部专题直接展开。`/notes/all` 按最近更新列出笔记，`/notes/status` 可进入“进行中”、“已整理”和“已完成”。专题内可通过可选的正整数 `order` 指定阅读顺序，不影响首页和全部笔记的时间排序；有顺序的文章提供上一篇／下一篇导航。
 
 MIT 18.06 原稿按五个一级 Lecture 模块同步为五篇：01–05、06–13、14–20、21–27（含 24b 复习）、28–34。导入规则保存在 `src/data/obsidian-imports.json`，统一专题 `MIT 18.06` 与标签 `lineal algebra`。只拆分网站副本，保留原稿与附件；目录与配置不一致时同步停止并保留上一份结果。不要直接修改生成的五篇笔记。
 
 原稿的板书图片位于 VideoBook 输出目录时，在本机 `.env.local` 设置 `OBSIDIAN_ATTACHMENT_PATH` 为该目录的绝对路径。同步先查找 Vault，再按原引用的相对路径查找这个附件目录，仅复制实际引用的图片/PDF；`watch` 会监控这些附件的更新。路径不进入 Git 或 Vercel，源文件不写回。
+
+### CS61A 课程
+
+CS61A 全书按原稿正文的 Lecture 1–37 拆为 37 篇笔记，专题为 `CS61A`，统一标签 `cs61a`、状态 `completed`（已完成），添加日期为 `2026-10-09`。专题页按讲次排序，每篇提供上一篇／下一篇。原稿总目录的单讲链接转换为站内地址；577 张课堂配图保留原始字节，复制到 `public/attachments/cs61a-*.png`。
+
+从 VideoBook 全书原稿及同目录下的配图重新执行相同导入：
+
+```sh
+node scripts/import-cs61a.mjs /绝对路径/CS61A_Structure_and_Interpretation_of_Computer_Programs_Full_Book.md 2026-10-09
+```
+
+导入先在临时目录完成分讲、链接转换与附件校验，再复制到博客。相同原稿和添加日期重复执行会跳过相同文件；目标文件有不同内容时停止，避免覆盖。原稿及真实 Obsidian Vault 不写回；CS61A 不加入 `obsidian-sync.json`，后续同步其他笔记时保留本课程。
 
 ## 从 iCloud Obsidian 同步
 

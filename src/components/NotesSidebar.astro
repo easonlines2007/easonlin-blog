@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content'
-import { countValues, tagUrl, topicUrl } from '../lib/note-utils'
+import { countValues, statusLabels, tagUrl, topicUrl } from '../lib/note-utils'
 import Icon from './Icon.astro'
 interface Props {
   notes: CollectionEntry<'notes'>[]
@@ -57,14 +57,12 @@ const { notes, filterNotes = notes, filters = false } = Astro.props
           <span class="lift-text">全部笔记</span>
           <span>{filterNotes.length}</span>
         </button>
-        <button type="button" data-status-filter="growing" aria-pressed="false">
-          <span class="lift-text">进行中</span>
-          <span>{filterNotes.filter((note) => note.data.status === 'growing').length}</span>
-        </button>
-        <button type="button" data-status-filter="ready" aria-pressed="false">
-          <span class="lift-text">已整理</span>
-          <span>{filterNotes.filter((note) => note.data.status === 'ready').length}</span>
-        </button>
+        {Object.entries(statusLabels).map(([status, label]) => (
+          <button type="button" data-status-filter={status} aria-pressed="false">
+            <span class="lift-text">{label}</span>
+            <span>{filterNotes.filter((note) => note.data.status === status).length}</span>
+          </button>
+        ))}
       </div>
     </section>
   )}

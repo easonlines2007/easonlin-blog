@@ -62,11 +62,11 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
           )}
         </div>
         <h1 data-pagefind-meta="title">{title}</h1>
-        <p>{description}</p>
-        <time class="article-date" datetime={(updated ?? date).toISOString()}>
-          {updated ? '更新于 ' : ''}
-          {formatDate(updated ?? date)}
-        </time>
+        {description && <p>{description}</p>}
+        <div class="article-date">
+          <time datetime={date.toISOString()}>添加于 {formatDate(date)}</time>
+          {updated && <time datetime={updated.toISOString()}>更新于 {formatDate(updated)}</time>}
+        </div>
       </header>
       <details class="mobile-toc" data-pagefind-ignore>
         <summary>

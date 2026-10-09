@@ -16,7 +16,7 @@ export const noteSchema = z.object({
     .array(z.string().min(1))
     .default([])
     .transform((tags) => [...new Set(tags)]),
-  status: z.enum(['growing', 'ready']).default('growing'),
+  status: z.enum(['growing', 'ready', 'completed']).default('growing'),
   publish: z.boolean().default(false),
   sample: z.boolean().default(false),
   pdf: z

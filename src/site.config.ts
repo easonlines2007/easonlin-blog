@@ -12,7 +12,7 @@ export const theme = {
     menu: [
       { title: '笔记', link: '/notes' },
       { title: '项目', link: '/projects' },
-      { title: '文章', link: '/blog' },
+      { title: '随笔', link: '/blog' },
       { title: '关于', link: '/about' }
     ]
   },

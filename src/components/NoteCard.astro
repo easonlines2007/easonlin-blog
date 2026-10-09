@@ -17,10 +17,11 @@ const { title, description, tags, status, updated, date, pdf } = note.data
     </h2>
     <span class:list={['status', status]}>{statusLabels[status]}</span>
   </div>
-  <p class="note-description">{description}</p>
+  {description && <p class="note-description">{description}</p>}
   <div class="note-meta">
     <span class="content-type">{pdf ? 'PDF 笔记' : '笔记'}</span>
-    <time datetime={(updated ?? date).toISOString()}>{formatDate(updated ?? date)}</time>
+    <time datetime={date.toISOString()}>添加于 {formatDate(date)}</time>
+    {updated && <time datetime={updated.toISOString()}>更新于 {formatDate(updated)}</time>}
     {tags.map((tag) => (
       <a class="tag" href={tagUrl(tag)}>
         <span class="lift-text">{tag}</span>

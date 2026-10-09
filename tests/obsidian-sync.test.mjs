@@ -49,6 +49,22 @@ async function fixture(t) {
   }
 }
 
+test('completed and ready notes keep distinct statuses and invalid status changes preserve the last export', async (t) => {
+  const f = await fixture(t)
+  await f.source('Blog/ready.md', note())
+  await f.source('Blog/completed.md', note().replace('status: ready', 'status: completed'))
+  assert.equal((await f.run()).notes, 2)
+  assert.equal(exportedMetadata(await f.output('src/content/notes/ready.md')).status, 'ready')
+  assert.equal(
+    exportedMetadata(await f.output('src/content/notes/completed.md')).status,
+    'completed'
+  )
+  const before = await snapshot(f.projectRoot)
+  await f.source('Blog/completed.md', note().replace('status: ready', 'status: complete'))
+  await assert.rejects(f.run(), /status 必须是/)
+  assert.deepEqual(await snapshot(f.projectRoot), before)
+})
+
 test('course imports split five modules, preserve formula bytes and external images, and remain repeatable', async (t) => {
   const f = await fixture(t)
   const sourcePath = 'MIT 18.06/course.md'
