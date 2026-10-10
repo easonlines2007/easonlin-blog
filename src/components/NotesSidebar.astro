@@ -1,7 +1,11 @@
 ---
+import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
 import type { CollectionEntry } from 'astro:content'
 import { countValues, statusLabels, tagUrl, topicUrl } from '../lib/note-utils'
 import Icon from './Icon.astro'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
 interface Props {
   notes: CollectionEntry<'notes'>[]
   filterNotes?: CollectionEntry<'notes'>[]
@@ -10,20 +14,20 @@ interface Props {
 const { notes, filterNotes = notes, filters = false } = Astro.props
 ---
 
-<aside class="notes-sidebar" aria-label="笔记分类">
+<aside class="notes-sidebar" aria-label={t('笔记分类')}>
   <section>
     <div class="sidebar-title">
       <h2>
         <Icon name="tag" />
-        标签
+        {t('标签')}
       </h2>
-      <a href="/notes/tags">
-        <span class="lift-text">全部标签</span>
+      <a href={path('/notes/tags')}>
+        <span class="lift-text">{t('全部标签')}</span>
       </a>
     </div>
     <div class="tag-list">
       {countValues(notes, 'tags').map(([tag]) => (
-        <a class="tag" href={tagUrl(tag)}>
+        <a class="tag" href={path(tagUrl(tag))}>
           <span class="lift-text">{tag}</span>
         </a>
       ))}
@@ -33,13 +37,13 @@ const { notes, filterNotes = notes, filters = false } = Astro.props
     <div class="sidebar-title">
       <h2>
         <Icon name="book" />
-        专题
+        {t('专题')}
       </h2>
     </div>
     <ul class="sidebar-list">
       {countValues(notes, 'topic').map(([topic, count]) => (
         <li>
-          <a href={topicUrl(topic)}>
+          <a href={path(topicUrl(topic))}>
             <span class="lift-text">{topic}</span>
             <span>{count}</span>
           </a>
@@ -50,16 +54,16 @@ const { notes, filterNotes = notes, filters = false } = Astro.props
   {filters && (
     <section class="status-filter">
       <div class="sidebar-title">
-        <h2>整理状态</h2>
+        <h2>{t('整理状态')}</h2>
       </div>
-      <div class="filter-options" role="group" aria-label="按整理状态筛选">
+      <div class="filter-options" role="group" aria-label={t('按整理状态筛选')}>
         <button type="button" data-status-filter="all" aria-pressed="true">
-          <span class="lift-text">全部笔记</span>
+          <span class="lift-text">{t('全部笔记')}</span>
           <span>{filterNotes.length}</span>
         </button>
         {Object.entries(statusLabels).map(([status, label]) => (
           <button type="button" data-status-filter={status} aria-pressed="false">
-            <span class="lift-text">{label}</span>
+            <span class="lift-text">{t(label)}</span>
             <span>{filterNotes.filter((note) => note.data.status === status).length}</span>
           </button>
         ))}

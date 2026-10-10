@@ -1,0 +1,194 @@
+---
+import { localeFromPath, useTranslations } from '@/lib/i18n'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+import BaseLayout from '../layouts/BaseLayout.astro'
+import PageHeader from '../components/PageHeader.astro'
+import '../styles/admin.css'
+---
+
+<BaseLayout title={t('文章管理')} noindex>
+  <section class="admin" data-pagefind-ignore="all">
+    <PageHeader title={t('文章管理')} description={t('整理文章，让每一篇记录各得其所。')} />
+    <p id="admin-message" class="admin-message" role="status" aria-live="polite">
+      {t('正在检查登录状态…')}
+    </p>
+    <a id="admin-commit" class="admin-commit" hidden target="_blank" rel="noopener noreferrer">
+      {t('查看本次提交 ↗')}
+    </a>
+
+    <form id="admin-login" class="admin-login" hidden>
+      <label for="admin-password">{t('作者口令')}</label>
+      <p class="admin-help">{t('使用与首页格言编辑相同的作者口令。')}</p>
+      <div class="admin-login-row">
+        <input
+          id="admin-password"
+          type="password"
+          autocomplete="current-password"
+          required
+          maxlength="256"
+        />
+        <button class="admin-button primary" type="submit">
+          <span class="lift-text">{t('进入管理')}</span>
+        </button>
+      </div>
+    </form>
+
+    <div id="admin-workspace" hidden>
+      <div class="admin-toolbar">
+        <p id="admin-count" class="admin-help"></p>
+        <div class="admin-actions">
+          <button id="admin-refresh" type="button" class="admin-button">
+            {t('重新加载')}
+          </button>
+          <button id="admin-logout" type="button" class="admin-button">
+            {t('退出')}
+          </button>
+          <button id="admin-new" type="button" class="admin-button primary">
+            <span class="lift-text">{t('＋ 新增文章')}</span>
+          </button>
+        </div>
+      </div>
+      <div class="admin-grid">
+        <aside class="admin-list-panel" aria-label={t('文章列表')}>
+          <label class="sr-only" for="admin-search">
+            {t('搜索文章')}
+          </label>
+          <input
+            id="admin-search"
+            type="search"
+            placeholder={t('搜索标题、分类或标签…')}
+            autocomplete="off"
+          />
+          <label class="sr-only" for="admin-filter">
+            {t('发布状态')}
+          </label>
+          <select id="admin-filter">
+            <option value="all">{t('全部文章')}</option>
+            <option value="published">{t('已发布')}</option>
+            <option value="draft">{t('草稿 / 已下架')}</option>
+          </select>
+          <ul id="admin-list" class="admin-list"></ul>
+          <p id="admin-empty" class="admin-help" hidden>
+            {t('没有匹配的文章。')}
+          </p>
+        </aside>
+
+        <div class="admin-editor">
+          <div id="admin-placeholder" class="admin-placeholder">
+            <span aria-hidden="true">✎</span>
+            <h2>{t('留一点时间，整理记录。')}</h2>
+            <p>{t('选择左侧文章，或开始一篇新的记录。')}</p>
+          </div>
+          <form id="admin-form" hidden>
+            <fieldset id="admin-fields">
+              <div class="admin-editor-heading">
+                <h2 id="admin-editor-title">{t('文章信息')}</h2>
+                <a
+                  id="admin-view"
+                  class="admin-help"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  hidden
+                >
+                  {t('阅读文章 ↗')}
+                </a>
+              </div>
+              <p id="admin-source" class="admin-help"></p>
+              <div id="admin-create" hidden>
+                <label for="admin-filename">{t('文件名')}</label>
+                <div class="admin-path">
+                  <span>web /</span>
+                  <input id="admin-filename" maxlength="180" placeholder="my-first-note" />
+                  <span>.md</span>
+                </div>
+                <p class="admin-help">{t('文件名决定网址，创建后保持不变。')}</p>
+                <label for="admin-upload">{t('上传 Markdown')}</label>
+                <input id="admin-upload" type="file" accept=".md,text/markdown,text/plain" />
+                <label for="admin-markdown">{t('或粘贴 Markdown')}</label>
+                <textarea
+                  id="admin-markdown"
+                  class="admin-markdown"
+                  rows="8"
+                  placeholder={t('从这里开始一篇记录…')}
+                  spellcheck="false"
+                ></textarea>
+                <p class="admin-help">
+                  {t('最多 256 KB。文章信息以下方表单为准；其他原有属性会保留。')}
+                </p>
+              </div>
+              <label for="admin-title">{t('标题')}</label>
+              <input id="admin-title" required maxlength="100" />
+              <label for="admin-description">{t('简介')}</label>
+              <textarea
+                id="admin-description"
+                rows="3"
+                maxlength="200"
+                placeholder={t('用一两句话介绍这篇文章。')}
+              ></textarea>
+              <label for="admin-topic">{t('分类')}</label>
+              <input id="admin-topic" required list="admin-topics" />
+              <datalist id="admin-topics"></datalist>
+              <label for="admin-tags">{t('标签')}</label>
+              <input
+                id="admin-tags"
+                placeholder={t('用逗号分隔，如 阅读, 整理')}
+                aria-describedby="admin-tags-help"
+              />
+              <p id="admin-tags-help" class="admin-help">
+                {t('直接修改文字编辑标签，点击下方 × 移除。')}
+              </p>
+              <div id="admin-tag-list" class="tag-list admin-tags"></div>
+              <label class="admin-publish" for="admin-publish">
+                <input id="admin-publish" type="checkbox" />
+                <span>{t('在网站发布')}</span>
+              </label>
+              <p class="admin-help">{t('取消勾选即可下架，保存后随下一次部署生效。')}</p>
+              <div class="admin-form-actions">
+                <button id="admin-save" type="submit" class="admin-button primary">
+                  <span class="lift-text">{t('保存修改')}</span>
+                </button>
+                <button id="admin-reset" type="button" class="admin-button" hidden>
+                  {t('恢复 Obsidian 设置')}
+                </button>
+                <button id="admin-delete" type="button" class="admin-button danger" hidden>
+                  {t('删除文章')}
+                </button>
+              </div>
+            </fieldset>
+            <p
+              id="admin-form-message"
+              class="admin-message admin-form-message"
+              aria-hidden="true"
+            ></p>
+          </form>
+        </div>
+      </div>
+    </div>
+    <dialog
+      id="admin-confirm"
+      class="admin-confirm"
+      aria-labelledby="admin-confirm-title"
+      aria-describedby="admin-confirm-text"
+    >
+      <form method="dialog">
+        <h2 id="admin-confirm-title">{t('确认操作')}</h2>
+        <p id="admin-confirm-text"></p>
+        <div class="admin-actions">
+          <button type="submit" value="cancel" class="admin-button" autofocus>
+            {t('取消')}
+          </button>
+          <button type="submit" value="confirm" class="admin-button primary">
+            {t('确认')}
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <noscript>
+      <p>{t('文章管理需要 JavaScript，请启用后刷新页面。')}</p>
+    </noscript>
+  </section>
+</BaseLayout>
+<script>
+  import '../scripts/admin'
+</script>

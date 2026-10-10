@@ -1,5 +1,8 @@
 ---
+import { localeFromPath, useTranslations } from '@/lib/i18n'
 import type { MarkdownHeading } from 'astro'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
 interface Props {
   headings: MarkdownHeading[]
   mobile?: boolean
@@ -8,12 +11,12 @@ const { headings, mobile = false } = Astro.props
 const items = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3)
 ---
 
-<nav aria-label={mobile ? '文章目录（手机）' : '文章目录'}>
+<nav aria-label={t(mobile ? '文章目录（手机）' : '文章目录')}>
   <ul class="toc-list">
     {items.map((heading) => (
       <li>
         <a href={`#${heading.slug}`} class:list={[heading.depth > 2 && 'nested']} data-toc-link>
-          <span class="lift-text">{heading.text}</span>
+          <span class="lift-text">{t(heading.text)}</span>
         </a>
       </li>
     ))}

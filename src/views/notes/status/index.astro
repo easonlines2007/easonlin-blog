@@ -1,0 +1,32 @@
+---
+import { localeFromPath, localizePath, useTranslations, noteCount } from '@/lib/i18n'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PageHeader from '@/components/PageHeader.astro'
+import Icon from '@/components/Icon.astro'
+import { getNotes } from '@/lib/notes'
+import { statusLabels, statusUrl } from '@/lib/note-utils'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
+const notes = await getNotes(locale)
+---
+
+<BaseLayout title={t('整理状态')}>
+  <PageHeader
+    title={t('整理状态')}
+    description={t('看看仍在生长的想法，以及已经整理好的笔记。')}
+    back={path('/notes')}
+    backLabel={t('笔记')}
+  />
+  <div class="index-grid enter delay-1">
+    {Object.entries(statusLabels).map(([status, label]) => (
+      <a class="index-card" href={path(statusUrl(status as keyof typeof statusLabels))}>
+        <div>
+          <h2 class="lift-text">{t(label)}</h2>
+          <p>{noteCount(notes.filter((note) => note.data.status === status).length, locale)}</p>
+        </div>
+        <Icon name="next" />
+      </a>
+    ))}
+  </div>
+</BaseLayout>

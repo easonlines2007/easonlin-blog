@@ -1,0 +1,14 @@
+---
+import View from '@/views/blog/[...id].astro'
+import type { GetStaticPaths } from 'astro'
+import { getEssays } from '@/lib/essays'
+export const getStaticPaths = (async () => {
+  const essays = await getEssays('en')
+  return essays.map((essay, index) => ({
+    params: { id: essay.id },
+    props: { essay, newer: essays[index - 1], older: essays[index + 1] }
+  }))
+}) satisfies GetStaticPaths
+---
+
+<View {...Astro.props} />

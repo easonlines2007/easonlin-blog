@@ -1,12 +1,7 @@
 ---
+import View from '@/views/blog/[...id].astro'
 import type { GetStaticPaths } from 'astro'
-import { render } from 'astro:content'
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import Icon from '../../components/Icon.astro'
-import ArticleTools from '../../components/ArticleTools.astro'
-import { getEssays } from '../../lib/essays'
-import { essayUrl, formatWritingDate } from '../../lib/essay-utils'
-
+import { getEssays } from '@/lib/essays'
 export const getStaticPaths = (async () => {
   const essays = await getEssays()
   return essays.map((essay, index) => ({
@@ -14,48 +9,6 @@ export const getStaticPaths = (async () => {
     props: { essay, newer: essays[index - 1], older: essays[index + 1] }
   }))
 }) satisfies GetStaticPaths
-
-const { essay, newer, older } = Astro.props
-const { Content } = await render(essay)
-const { title, written, description } = essay.data
 ---
 
-<BaseLayout {title} {description}>
-  <a class="back-link" href="/blog">
-    <Icon name="back" />
-    <span class="lift-text">随笔</span>
-  </a>
-  <article class="article-body essay-article enter" data-pagefind-body>
-    <header class="article-header">
-      <h1 data-pagefind-meta="title">{title}</h1>
-      <div class="article-date">
-        <time datetime={written}>写于 {formatWritingDate(written)}</time>
-      </div>
-    </header>
-    <div class="prose essay-prose" id="article-content">
-      <Content />
-    </div>
-    <footer class="article-bottom" data-pagefind-ignore>
-      <a href="/blog">
-        <span class="lift-text">全部随笔</span>
-      </a>
-    </footer>
-    {(newer || older) && (
-      <nav class="module-navigation" aria-label="随笔阅读导航" data-pagefind-ignore>
-        {newer && (
-          <a href={essayUrl(newer.id)}>
-            <span>较新一篇</span>
-            <strong class="lift-text">{newer.data.title}</strong>
-          </a>
-        )}
-        {older && (
-          <a class="module-next" href={essayUrl(older.id)}>
-            <span>较早一篇</span>
-            <strong class="lift-text">{older.data.title}</strong>
-          </a>
-        )}
-      </nav>
-    )}
-  </article>
-  <ArticleTools />
-</BaseLayout>
+<View {...Astro.props} />

@@ -1,0 +1,15 @@
+---
+import View from '@/views/notes/status/[status].astro'
+import type { GetStaticPaths } from 'astro'
+import { getNotes } from '@/lib/notes'
+import { statusLabels } from '@/lib/note-utils'
+export const getStaticPaths = (async () => {
+  const allNotes = await getNotes('en')
+  return Object.entries(statusLabels).map(([status, title]) => ({
+    params: { status },
+    props: { title, allNotes, notes: allNotes.filter((note) => note.data.status === status) }
+  }))
+}) satisfies GetStaticPaths
+---
+
+<View {...Astro.props} />

@@ -104,9 +104,10 @@ export function createMottoHandlers({
   }
   return {
     async get(request: Request) {
+      const english = new URL(request.url).searchParams.get('lang') === 'en'
       const env = environment()
       const fallback = {
-        text: defaultMotto.text,
+        text: english ? defaultMotto.textEn : defaultMotto.text,
         updatedAt: null,
         revision: null,
         canEdit: false,
@@ -117,7 +118,9 @@ export function createMottoHandlers({
         const motto = await store.read()
         const ready = configured(env)
         return json({
-          text: motto?.text ?? defaultMotto.text,
+          text: english
+            ? (motto?.textEn ?? defaultMotto.textEn)
+            : (motto?.text ?? defaultMotto.text),
           updatedAt: motto?.updatedAt ?? null,
           revision: motto?.revision ?? null,
           canEdit: ready && hasSession(request, env, now()),
@@ -141,8 +144,21 @@ export function createMottoHandlers({
           (typeof body.revision !== 'string' || !/^[\x21-\x7E]{1,256}$/.test(body.revision))
         )
           throw new RequestError(400, '缺少有效的格言版本，请刷新后重试。')
-        const motto = await store.write(text, body.revision as string | null)
-        return json({ ...motto, canEdit: true, configured: true })
+        const english = new URL(request.url).searchParams.get('lang') === 'en'
+        const current = english ? await store.read() : null
+        const motto = english
+          ? await store.write(
+              current?.text ?? defaultMotto.text,
+              body.revision as string | null,
+              text
+            )
+          : await store.write(text, body.revision as string | null)
+        return json({
+          ...motto,
+          ...(english ? { text: motto.textEn ?? text } : {}),
+          canEdit: true,
+          configured: true
+        })
       } catch (error) {
         return error instanceof MottoConflictError
           ? json({ error: '格言已在另一处更新，请读取最新内容后再保存。' }, 409)

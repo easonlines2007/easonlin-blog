@@ -1,0 +1,10 @@
+---
+import { localeFromPath, useTranslations } from '@/lib/i18n'
+import NotesLayout from '@/layouts/NotesLayout.astro'
+import { getNotes } from '@/lib/notes'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const notes = (await getNotes(locale)).filter((note) => note.data.pdf)
+---
+
+<NotesLayout title={t('PDF 笔记')} {notes} />

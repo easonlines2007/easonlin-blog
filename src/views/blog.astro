@@ -1,0 +1,42 @@
+---
+import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PageHeader from '@/components/PageHeader.astro'
+import ListToolbar from '@/components/ListToolbar.astro'
+import { getEssays } from '@/lib/essays'
+import { essayUrl, formatWritingDate, writingTimestamp } from '@/lib/essay-utils'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
+const essays = await getEssays(locale)
+---
+
+<BaseLayout title={t('随笔')}>
+  <PageHeader title={t('随笔')} description={t('一些感受，一些想法，写下来，留在这里。')} />
+  <div class="enter delay-1" data-sortable-listing data-list-label="随笔">
+    <ListToolbar count={essays.length} label={t('随笔')} dateLabel={t('写作日期')} />
+    <ol class="essay-list" data-list-items>
+      {essays.map((essay) => (
+        <li
+          class="essay-list-item"
+          data-list-item
+          data-sort-title={essay.data.title}
+          data-sort-date={writingTimestamp(essay.data.written)}
+        >
+          <time datetime={essay.data.written}>
+            {locale === 'en' ? 'Written' : '写于'} {formatWritingDate(essay.data.written, locale)}
+          </time>
+          <div>
+            <h2>
+              <a href={path(essayUrl(essay.id))}>
+                <span class="lift-text">{essay.data.title}</span>
+              </a>
+            </h2>
+            {essay.data.description && <p>{essay.data.description}</p>}
+          </div>
+        </li>
+      ))}
+    </ol>
+    {!essays.length && <p class="empty-state">{t('暂时还没有随笔。')}</p>}
+  </div>
+</BaseLayout>

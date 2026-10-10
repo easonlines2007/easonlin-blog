@@ -1,4 +1,7 @@
 import { sortListItems, type ListSortOrder } from '../lib/list-sort'
+import { localeFromPath, useTranslations } from '../lib/i18n'
+const locale = localeFromPath(location.pathname)
+const t = useTranslations(locale)
 
 document.querySelectorAll<HTMLElement>('[data-sortable-listing]').forEach((root) => {
   const list = root.querySelector<HTMLElement>('[data-list-items]')
@@ -18,7 +21,9 @@ document.querySelectorAll<HTMLElement>('[data-sortable-listing]').forEach((root)
   select.addEventListener('change', () => {
     const order = orders.find((value) => value === select.value) ?? 'default'
     // Move the existing cards so status filters retain their state.
-    list.append(...sortListItems(items, order).map((item) => item.element))
+    list.append(
+      ...sortListItems(items, order, locale === 'en' ? 'en' : 'zh-CN').map((item) => item.element)
+    )
   })
 
   const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-status-filter]')]
@@ -32,7 +37,11 @@ document.querySelectorAll<HTMLElement>('[data-sortable-listing]').forEach((root)
       })
       buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)))
       const count = root.querySelector('[data-note-count]')
-      if (count) count.textContent = `共 ${visible} 篇${root.dataset.listLabel ?? '笔记'}`
+      if (count)
+        count.textContent =
+          locale === 'en'
+            ? `${visible} ${t(root.dataset.listLabel ?? '笔记').toLowerCase()}`
+            : `共 ${visible} 篇${root.dataset.listLabel ?? '笔记'}`
       const empty = root.querySelector<HTMLElement>('[data-filter-empty]')
       if (empty) empty.hidden = visible > 0
     })

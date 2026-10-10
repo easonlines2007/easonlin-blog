@@ -1,36 +1,5 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
-import PageHeader from '../components/PageHeader.astro'
-import ListToolbar from '../components/ListToolbar.astro'
-import { getEssays } from '../lib/essays'
-import { essayUrl, formatWritingDate, writingTimestamp } from '../lib/essay-utils'
-const essays = await getEssays()
+import View from '@/views/blog.astro'
 ---
 
-<BaseLayout title="随笔">
-  <PageHeader title="随笔" description="一些感受，一些想法，写下来，留在这里。" />
-  <div class="enter delay-1" data-sortable-listing data-list-label="随笔">
-    <ListToolbar count={essays.length} label="随笔" dateLabel="写作日期" />
-    <ol class="essay-list" data-list-items>
-      {essays.map((essay) => (
-        <li
-          class="essay-list-item"
-          data-list-item
-          data-sort-title={essay.data.title}
-          data-sort-date={writingTimestamp(essay.data.written)}
-        >
-          <time datetime={essay.data.written}>写于 {formatWritingDate(essay.data.written)}</time>
-          <div>
-            <h2>
-              <a href={essayUrl(essay.id)}>
-                <span class="lift-text">{essay.data.title}</span>
-              </a>
-            </h2>
-            {essay.data.description && <p>{essay.data.description}</p>}
-          </div>
-        </li>
-      ))}
-    </ol>
-    {!essays.length && <p class="empty-state">暂时还没有随笔。</p>}
-  </div>
-</BaseLayout>
+<View {...Astro.props} />

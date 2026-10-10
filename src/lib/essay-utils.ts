@@ -16,9 +16,16 @@ export function writingTimestamp(written: string): number {
   return new Date(`${written.length === 7 ? `${written}-01` : written}T00:00:00Z`).getTime()
 }
 
-export function formatWritingDate(written: string): string {
+export function formatWritingDate(written: string, locale: 'zh' | 'en' = 'zh'): string {
   if (!isWritingDate(written)) throw new Error(`无效的随笔写作日期：${written}`)
   const [year, month, day] = written.split('-').map(Number)
+  if (locale === 'en')
+    return new Intl.DateTimeFormat('en', {
+      year: 'numeric',
+      month: 'long',
+      ...(day && { day: 'numeric' }),
+      timeZone: 'UTC'
+    }).format(new Date(writingTimestamp(written)))
   return `${year}年${month}月${day ? `${day}日` : ''}`
 }
 

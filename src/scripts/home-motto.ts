@@ -1,3 +1,4 @@
+import { localeFromPath, useTranslations, formatMessage } from '../lib/i18n.ts'
 interface MottoState {
   text: string
   updatedAt: string | null
@@ -17,6 +18,9 @@ class MottoRequestError extends Error {
 
 /** Keep the published value separate from the author's draft until the server accepts it. */
 export function setupHomeMotto(root: HTMLElement) {
+  const t = useTranslations(
+    localeFromPath(typeof location === 'undefined' ? '/' : location.pathname)
+  )
   const editor = root.querySelector<HTMLElement>('[data-motto-text]')!
   const editButton = root.querySelector<HTMLButtonElement>('[data-motto-edit]')!
   const logoutButton = root.querySelector<HTMLButtonElement>('[data-motto-logout]')!
@@ -60,7 +64,7 @@ export function setupHomeMotto(root: HTMLElement) {
   function showStatus(message: string, retry = false) {
     clearTimeout(savedMessageTimer)
     feedback.hidden = !message
-    status.textContent = message
+    status.textContent = t(message)
     retryButton.hidden = !retry
     latestButton.hidden = !conflicted
   }
@@ -74,7 +78,7 @@ export function setupHomeMotto(root: HTMLElement) {
       editor.contentEditable = 'plaintext-only'
       editor.tabIndex = 0
       editor.setAttribute('role', 'textbox')
-      editor.setAttribute('aria-label', '首页格言，按 Enter 保存，Escape 取消')
+      editor.setAttribute('aria-label', t('首页格言，按 Enter 保存，Escape 取消'))
       editor.setAttribute('aria-multiline', 'false')
     } else {
       editor.removeAttribute('contenteditable')
@@ -89,19 +93,25 @@ export function setupHomeMotto(root: HTMLElement) {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 12000)
     try {
-      const response = await fetch(url, {
-        ...options,
-        cache: 'no-store',
-        credentials: 'same-origin',
-        signal: controller.signal,
-        headers: { Accept: 'application/json', ...options.headers }
-      })
+      const response = await fetch(
+        url.startsWith('/api/motto') &&
+          localeFromPath(typeof location === 'undefined' ? '/' : location.pathname) === 'en'
+          ? `${url}?lang=en`
+          : url,
+        {
+          ...options,
+          cache: 'no-store',
+          credentials: 'same-origin',
+          signal: controller.signal,
+          headers: { Accept: 'application/json', ...options.headers }
+        }
+      )
       const data: unknown = await response.json().catch(() => null)
       if (!response.ok) {
         const message =
           data && typeof data === 'object' && 'error' in data && typeof data.error === 'string'
             ? data.error
-            : '暂时没有连接上，请稍后重试。'
+            : t('暂时没有连接上，请稍后重试。')
         throw new MottoRequestError(message, response.status)
       }
       return data
@@ -124,7 +134,7 @@ export function setupHomeMotto(root: HTMLElement) {
       !('configured' in data) ||
       typeof data.configured !== 'boolean'
     ) {
-      throw new Error('暂时无法读取格言，请稍后重试。')
+      throw new Error(t('暂时无法读取格言，请稍后重试。'))
     }
     return data as MottoState
   }
@@ -143,14 +153,14 @@ export function setupHomeMotto(root: HTMLElement) {
       !('canEdit' in data) ||
       typeof data.canEdit !== 'boolean'
     ) {
-      throw new Error('暂时无法验证作者身份。')
+      throw new Error(t('暂时无法验证作者身份。'))
     }
     return data.canEdit
   }
 
   function errorMessage(error: unknown) {
-    if (error instanceof MottoRequestError) return error.message
-    return '连接失败，输入已保留，请稍后重试。'
+    if (error instanceof MottoRequestError) return t(error.message)
+    return t('连接失败，输入已保留，请稍后重试。')
   }
 
   function focusEditor() {
@@ -176,11 +186,11 @@ export function setupHomeMotto(root: HTMLElement) {
     const text = draft()
     if (text === published.text) return true
     if (!text) {
-      showStatus('格言不能留空，输入已保留。')
+      showStatus(t('格言不能留空，输入已保留。'))
       return false
     }
     if (Array.from(text).length > 120) {
-      showStatus('请把格言控制在 120 个字以内，输入已保留。')
+      showStatus(t('请把格言控制在 120 个字以内，输入已保留。'))
       return false
     }
 
@@ -190,7 +200,7 @@ export function setupHomeMotto(root: HTMLElement) {
     retryButton.disabled = true
     logoutButton.disabled = true
     editor.setAttribute('aria-busy', 'true')
-    showStatus('正在保存…')
+    showStatus(t('正在保存…'))
     try {
       const next = await request('/api/motto', {
         method: 'PUT',
@@ -202,9 +212,9 @@ export function setupHomeMotto(root: HTMLElement) {
       applyState(next, hasNewerDraft)
       if (hasNewerDraft) {
         saveAgain = document.activeElement !== editor
-        showStatus('上一句已保存；当前输入还有修改，按 Enter 保存。')
+        showStatus(t('上一句已保存；当前输入还有修改，按 Enter 保存。'))
       } else {
-        showStatus('已保存。')
+        showStatus(t('已保存。'))
         savedMessageTimer = window.setTimeout(() => showStatus(''), 2400)
       }
       return !hasNewerDraft
@@ -213,13 +223,15 @@ export function setupHomeMotto(root: HTMLElement) {
         conflicted = true
         try {
           conflict = await request('/api/motto')
-          showStatus(`格言已在另一处修改。你的输入已保留。最新格言：${conflict.text}`)
+          showStatus(
+            formatMessage(t('格言已在另一处修改。你的输入已保留。最新格言：{0}'), [conflict.text])
+          )
         } catch {
-          showStatus('格言已在另一处修改。你的输入已保留；先读取最新格言再继续。')
+          showStatus(t('格言已在另一处修改。你的输入已保留；先读取最新格言再继续。'))
         }
       } else if (error instanceof MottoRequestError && error.status === 401) {
         applyState({ ...published, canEdit: false }, true)
-        showStatus('作者登录已过期，输入已保留。点“编辑”重新登录后再保存。')
+        showStatus(t('作者登录已过期，输入已保留。点“编辑”重新登录后再保存。'))
       } else {
         showStatus(errorMessage(error), true)
       }
@@ -249,7 +261,7 @@ export function setupHomeMotto(root: HTMLElement) {
       return
     }
     if (!published.configured) {
-      showStatus('格言暂时无法修改，请稍后再试。')
+      showStatus(t('格言暂时无法修改，请稍后再试。'))
       return
     }
     loginStatus.textContent = ''
@@ -272,32 +284,34 @@ export function setupHomeMotto(root: HTMLElement) {
     sequence += 1
     submitButton.disabled = true
     password.disabled = true
-    loginStatus.textContent = '正在验证…'
+    loginStatus.textContent = t('正在验证…')
     const secret = password.value
     password.value = ''
     try {
       const canEdit = await requestSession('POST', secret)
-      if (!canEdit) throw new MottoRequestError('作者口令未通过，请重新输入。', 401)
+      if (!canEdit) throw new MottoRequestError(t('作者口令未通过，请重新输入。'), 401)
       const next = await request('/api/motto')
       if (!next.canEdit || !next.configured) {
-        throw new MottoRequestError('格言暂时无法修改，请稍后再试。', 503)
+        throw new MottoRequestError(t('格言暂时无法修改，请稍后再试。'), 503)
       }
       const preserveDraft = dirty()
       if (preserveDraft && next.revision !== published.revision && next.text !== published.text) {
         conflict = next
         conflicted = true
         applyState({ ...published, canEdit: true, configured: next.configured }, true)
-        showStatus(`格言已在另一处修改。你的输入已保留。最新格言：${next.text}`)
+        showStatus(
+          formatMessage(t('格言已在另一处修改。你的输入已保留。最新格言：{0}'), [next.text])
+        )
       } else {
         applyState(next, preserveDraft)
-        if (preserveDraft) showStatus('已重新登录，之前的输入已保留，按 Enter 保存。')
-        else showStatus('按 Enter 或点页面其他位置保存，Esc 取消。')
+        if (preserveDraft) showStatus(t('已重新登录，之前的输入已保留，按 Enter 保存。'))
+        else showStatus(t('按 Enter 或点页面其他位置保存，Esc 取消。'))
       }
       focusEditorAfterLogin = true
       dialog.close()
     } catch (error) {
       loginStatus.textContent =
-        error instanceof MottoRequestError ? error.message : '连接失败，请稍后再试。'
+        error instanceof MottoRequestError ? error.message : t('连接失败，请稍后再试。')
     } finally {
       authenticating = false
       submitButton.disabled = false
@@ -331,7 +345,7 @@ export function setupHomeMotto(root: HTMLElement) {
   })
   editor.addEventListener('input', () => {
     if (!published.canEdit || saving || loggingOut || conflicted) return
-    showStatus(dirty() ? '编辑中，按 Enter 保存，Esc 取消。' : '')
+    showStatus(dirty() ? t('编辑中，按 Enter 保存，Esc 取消。') : '')
   })
   editor.addEventListener('blur', (event) => {
     if (event.relatedTarget !== logoutButton && event.relatedTarget !== latestButton) {
@@ -370,7 +384,7 @@ export function setupHomeMotto(root: HTMLElement) {
       conflict = null
       conflicted = false
       applyState(next)
-      showStatus('已采用最新格言，现在可以重新编辑。')
+      showStatus(t('已采用最新格言，现在可以重新编辑。'))
       if (next.canEdit) focusEditor()
     } catch (error) {
       showStatus(errorMessage(error))
@@ -389,10 +403,10 @@ export function setupHomeMotto(root: HTMLElement) {
     sequence += 1
     try {
       const canEdit = await requestSession('DELETE')
-      if (canEdit) throw new MottoRequestError('暂时未能退出编辑，请重试。', 503)
+      if (canEdit) throw new MottoRequestError(t('暂时未能退出编辑，请重试。'), 503)
       const next = await request('/api/motto').catch(() => ({ ...published, canEdit: false }))
       applyState(next)
-      showStatus('已退出编辑。')
+      showStatus(t('已退出编辑。'))
       savedMessageTimer = window.setTimeout(() => showStatus(''), 2400)
     } catch (error) {
       showStatus(errorMessage(error))

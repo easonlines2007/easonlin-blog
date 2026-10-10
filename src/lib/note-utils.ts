@@ -32,8 +32,8 @@ export function sortTopicNotes<T extends NoteMeta>(notes: T[]): T[] {
   return [...notes].sort((a, b) => (a.data.order ?? Infinity) - (b.data.order ?? Infinity))
 }
 
-export const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('zh-CN', {
+export const formatDate = (date: Date, locale: 'zh' | 'en' = 'zh') =>
+  new Intl.DateTimeFormat(locale === 'en' ? 'en' : 'zh-CN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

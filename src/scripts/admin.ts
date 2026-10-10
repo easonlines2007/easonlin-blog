@@ -1,3 +1,5 @@
+import { localeFromPath, useTranslations, formatMessage } from '../lib/i18n'
+const t = useTranslations(localeFromPath(typeof location === 'undefined' ? '/' : location.pathname))
 import type { AdminListing, AdminNote } from '../lib/admin-types'
 
 const element = <T extends HTMLElement>(id: string) => document.getElementById(`admin-${id}`) as T
@@ -25,10 +27,10 @@ let dirty = false
 let busy = false
 
 function notice(text: string, error = false) {
-  message.textContent = text
+  message.textContent = t(text)
   message.dataset.error = String(error)
   const feedback = element('form-message')
-  feedback.textContent = text
+  feedback.textContent = t(text)
   feedback.dataset.error = String(error)
 }
 function confirmAction(text: string): Promise<boolean> {
@@ -59,17 +61,17 @@ async function api<T>(url: string, method = 'GET', body?: unknown): Promise<T> {
       : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
   })
   if (!response.headers.get('content-type')?.includes('application/json'))
-    throw new Error('管理接口未启动。请在 Vercel 环境访问，或按 README 启动本地完整预览。')
+    throw new Error(t('管理接口未启动。请在 Vercel 环境访问，或按 README 启动本地完整预览。'))
   const data = await response.json()
   if (response.status === 401) lock()
-  if (!response.ok) throw new Error(data.error || '操作失败，请稍后重试。')
+  if (!response.ok) throw new Error(data.error || t('操作失败，请稍后重试。'))
   return data as T
 }
 function failure(error: unknown) {
   notice(
     error instanceof Error && error.name !== 'TimeoutError'
       ? error.message
-      : '未能确认操作结果，请重新加载检查后再试。',
+      : t('未能确认操作结果，请重新加载检查后再试。'),
     true
   )
 }
@@ -108,7 +110,7 @@ function renderTags() {
     button.type = 'button'
     button.className = 'tag'
     button.textContent = `${tag} ×`
-    button.setAttribute('aria-label', `移除标签 ${tag}`)
+    button.setAttribute('aria-label', formatMessage(t('移除标签 {0}'), [tag]))
     button.addEventListener('click', () => {
       if (busy) return
       tags.value = tagValues()
@@ -143,7 +145,7 @@ function renderList() {
     const heading = document.createElement('strong')
     heading.textContent = note.data.title
     const meta = document.createElement('small')
-    meta.textContent = `${note.managed ? 'Obsidian' : '网页 / 仓库'} · ${note.data.publish ? '已发布' : '未发布'} · ${note.data.topic}`
+    meta.textContent = `${note.managed ? 'Obsidian' : t('网页 / 仓库')} · ${note.data.publish ? t('已发布') : t('未发布')} · ${note.data.topic}`
     button.append(heading, meta)
     button.addEventListener('click', async () => {
       if (!busy && (await discard())) openEditor(note)
@@ -152,11 +154,13 @@ function renderList() {
     list.append(item)
   }
   element('empty').hidden = notes.length > 0
-  element('count').textContent =
-    `${listing.notes.length} 篇文章 · ${listing.notes.filter((note) => note.data.publish).length} 篇已发布`
+  element('count').textContent = formatMessage(t('{0} 篇文章 · {1} 篇已发布'), [
+    listing.notes.length,
+    listing.notes.filter((note) => note.data.publish).length
+  ])
 }
 async function discard() {
-  return !dirty || (await confirmAction('还有未保存的修改，确定放弃这些修改吗？'))
+  return !dirty || (await confirmAction(t('还有未保存的修改，确定放弃这些修改吗？')))
 }
 function openEditor(note: AdminNote | null, preserveFeedback = false) {
   selected = note
@@ -172,12 +176,12 @@ function openEditor(note: AdminNote | null, preserveFeedback = false) {
   element('create').hidden = note !== null
   filename.required = note === null
   markdown.required = note === null
-  element('editor-title').textContent = note ? '文章信息' : '新的记录'
+  element('editor-title').textContent = note ? t('文章信息') : t('新的记录')
   element('source').textContent = note?.managed
-    ? '正文继续在 Obsidian 修改；这里的文章信息只用于网站，下架后原文仍会保留。'
+    ? t('正文继续在 Obsidian 修改；这里的文章信息只用于网站，下架后原文仍会保留。')
     : note
-      ? `保存位置：${note.path}。正文保持不变。`
-      : '填好文章信息，上传或粘贴 Markdown，便可保存一篇新文章。'
+      ? formatMessage(t('保存位置：{0}。正文保持不变。'), [note.path])
+      : t('填好文章信息，上传或粘贴 Markdown，便可保存一篇新文章。')
   element('reset').hidden = !note?.managed || !note.overridden.length
   element('delete').hidden = !note || note.managed
   const view = element<HTMLAnchorElement>('view')
@@ -228,7 +232,9 @@ async function save(method: 'POST' | 'PUT' | 'DELETE', extra: Record<string, unk
   link.hidden = !result.url
   if (result.url) link.href = result.url
   notice(
-    result.unchanged ? '内容没有变化，无需重新部署。' : '已提交到 GitHub，等待 Vercel 部署后生效。'
+    result.unchanged
+      ? t('内容没有变化，无需重新部署。')
+      : t('已提交到 GitHub，等待 Vercel 部署后生效。')
   )
   try {
     await loadList()
@@ -245,7 +251,7 @@ async function save(method: 'POST' | 'PUT' | 'DELETE', extra: Record<string, unk
     form.hidden = true
     element('placeholder').hidden = false
     selected = null
-    notice('保存已完成，但列表暂未刷新。请点击重新加载，勿重复提交。')
+    notice(t('保存已完成，但列表暂未刷新。请点击重新加载，勿重复提交。'))
   }
 }
 
@@ -258,21 +264,21 @@ filter.addEventListener('change', renderList)
 form.addEventListener('submit', (event) => {
   event.preventDefault()
   void perform(async () => {
-    notice('正在保存…')
+    notice(t('正在保存…'))
     await save(selected ? 'PUT' : 'POST')
   })
 })
 login.addEventListener('submit', (event) => {
   event.preventDefault()
   void perform(async () => {
-    notice('正在登录…')
+    notice(t('正在登录…'))
     try {
       await api('/api/admin-session', 'POST', { password: password.value })
     } finally {
       password.value = ''
     }
     await loadList()
-    notice(dirty ? '已登录，未保存的输入仍然保留。' : '选择文章开始整理。')
+    notice(dirty ? t('已登录，未保存的输入仍然保留。') : t('选择文章开始整理。'))
   })
 })
 element('new').addEventListener('click', async () => {
@@ -290,7 +296,7 @@ element('refresh').addEventListener('click', async () => {
       form.hidden = true
       element('placeholder').hidden = false
     }
-    notice('已读取仓库中的最新内容。')
+    notice(t('已读取仓库中的最新内容。'))
   })
 })
 element('logout').addEventListener('click', async () => {
@@ -305,13 +311,13 @@ element('logout').addEventListener('click', async () => {
     dirty = false
     list.replaceChildren()
     element('commit').hidden = true
-    notice('已退出文章管理。')
+    notice(t('已退出文章管理。'))
   })
 })
 element('reset').addEventListener('click', async () => {
   if (
     busy ||
-    !(await confirmAction('恢复这篇文章的全部 Obsidian 属性？网站侧的标签和发布设置也会清除。'))
+    !(await confirmAction(t('恢复这篇文章的全部 Obsidian 属性？网站侧的标签和发布设置也会清除。')))
   )
     return
   void perform(() => save('PUT', { reset: true }))
@@ -320,7 +326,9 @@ element('delete').addEventListener('click', async () => {
   if (
     busy ||
     !selected ||
-    !(await confirmAction(`确定从仓库删除「${selected.data.title}」？只想下架可取消“在网站发布”。`))
+    !(await confirmAction(
+      formatMessage(t('确定从仓库删除「{0}」？只想下架可取消“在网站发布”。'), [selected.data.title])
+    ))
   )
     return
   void perform(() => save('DELETE'))
@@ -330,13 +338,13 @@ upload.addEventListener('change', () => {
   if (!file || busy) return
   void perform(async () => {
     if (!/\.md$/i.test(file.name) || file.size > 256 * 1024)
-      throw new Error('请选择不超过 256 KB 的 .md 文件。')
+      throw new Error(t('请选择不超过 256 KB 的 .md 文件。'))
     markdown.value = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer())
     const name = file.name.replace(/\.md$/i, '')
     if (!filename.value) filename.value = name
     if (!title.value) title.value = name.slice(0, 100)
     dirty = true
-    notice('Markdown 已载入，请确认文章信息后保存。')
+    notice(t('Markdown 已载入，请确认文章信息后保存。'))
   })
 })
 window.addEventListener('beforeunload', (event) => {
@@ -346,9 +354,9 @@ void perform(async () => {
   const session = await api<{ authenticated: boolean }>('/api/admin-session')
   if (session.authenticated) {
     await loadList()
-    notice('选择文章开始整理。')
+    notice(t('选择文章开始整理。'))
   } else {
     lock()
-    notice('登录后管理文章与标签。')
+    notice(t('登录后管理文章与标签。'))
   }
 })

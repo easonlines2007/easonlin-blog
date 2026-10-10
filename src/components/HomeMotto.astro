@@ -1,35 +1,38 @@
 ---
+import { localeFromPath, useTranslations } from '@/lib/i18n'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
 import motto from '../data/motto.json'
 ---
 
 <div class="home-motto" data-home-motto data-intro-reveal>
   <p class="motto-text" data-motto-text spellcheck="false">
-    {motto.text}
+    {locale === 'en' ? motto.textEn : motto.text}
   </p>
   <div class="motto-actions">
-    <button type="button" data-motto-edit aria-label="编辑首页格言">
-      编辑
+    <button type="button" data-motto-edit aria-label={t('编辑首页格言')}>
+      {t('编辑')}
     </button>
     <button type="button" data-motto-logout hidden>
-      退出编辑
+      {t('退出编辑')}
     </button>
   </div>
   <div class="motto-feedback" data-motto-feedback hidden>
     <p class="motto-status" role="status" aria-live="polite" data-motto-status></p>
     <div class="motto-recovery">
       <button type="button" data-motto-retry hidden>
-        重试保存
+        {t('重试保存')}
       </button>
       <button type="button" data-motto-use-latest hidden>
-        使用最新格言
+        {t('使用最新格言')}
       </button>
     </div>
   </div>
   <dialog class="motto-dialog" data-motto-dialog aria-labelledby="motto-dialog-title">
     <form method="dialog" data-motto-login>
-      <h2 id="motto-dialog-title">编辑格言</h2>
-      <p>输入作者口令，修改首页的这一句话。</p>
-      <label for="motto-password">作者口令</label>
+      <h2 id="motto-dialog-title">{t('编辑格言')}</h2>
+      <p>{t('输入作者口令，修改首页的这一句话。')}</p>
+      <label for="motto-password">{t('作者口令')}</label>
       <input
         id="motto-password"
         data-motto-password
@@ -40,10 +43,10 @@ import motto from '../data/motto.json'
       <p class="motto-login-status" role="status" aria-live="polite" data-motto-login-status></p>
       <div class="motto-dialog-actions">
         <button type="button" data-motto-cancel>
-          取消
+          {t('取消')}
         </button>
         <button type="submit" data-motto-submit>
-          开始编辑
+          {t('开始编辑')}
         </button>
       </div>
     </form>

@@ -1,0 +1,11 @@
+---
+import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
+import NotesLayout from '@/layouts/NotesLayout.astro'
+import { getNotes } from '@/lib/notes'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
+const notes = await getNotes(locale)
+---
+
+<NotesLayout title={t('全部笔记')} {notes} back={path('/notes')} backLabel={t('笔记')} />

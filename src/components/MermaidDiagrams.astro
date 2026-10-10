@@ -27,7 +27,10 @@
               const { svg } = await mermaid.render(`note-diagram-${index}`, pre.textContent ?? '')
               const figure = document.createElement('figure')
               figure.className = 'mermaid-diagram'
-              figure.setAttribute('aria-label', '笔记流程图')
+              figure.setAttribute(
+                'aria-label',
+                document.documentElement.lang === 'en' ? 'Note diagram' : '笔记流程图'
+              )
               figure.innerHTML = svg
               ;(pre.closest('.code-wrapper') ?? pre).replaceWith(figure)
             } catch {

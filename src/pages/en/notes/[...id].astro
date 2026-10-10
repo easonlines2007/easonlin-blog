@@ -1,0 +1,25 @@
+---
+import View from '@/views/notes/[...id].astro'
+import type { GetStaticPaths } from 'astro'
+import { getNotes } from '@/lib/notes'
+import { sortTopicNotes } from '@/lib/note-utils'
+export const getStaticPaths = (async () => {
+  const notes = await getNotes('en')
+  return notes.map((note) => {
+    const modules = sortTopicNotes(
+      notes.filter((item) => item.data.topic === note.data.topic && item.data.order !== undefined)
+    )
+    const index = modules.findIndex((item) => item.id === note.id)
+    return {
+      params: { id: note.id },
+      props: {
+        note,
+        previous: index > 0 ? modules[index - 1] : undefined,
+        next: index >= 0 ? modules[index + 1] : undefined
+      }
+    }
+  })
+}) satisfies GetStaticPaths
+---
+
+<View {...Astro.props} />

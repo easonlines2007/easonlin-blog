@@ -487,3 +487,51 @@ test('Secure can only be relaxed for local HTTP development', () => {
     true
   )
 })
+
+test('English motto reads and edits share author authentication without changing the Chinese value', async () => {
+  let value: StoredMotto = {
+    text: '中文格言',
+    textEn: 'An English motto',
+    revision: '"1"',
+    updatedAt: new Date(now).toISOString()
+  }
+  const store: MottoStore = {
+    configured: true,
+    async read() {
+      return { ...value }
+    },
+    async write(text, revision, textEn) {
+      if (revision !== value.revision) throw new MottoConflictError()
+      value = {
+        text,
+        ...(textEn ? { textEn } : {}),
+        revision: '"2"',
+        updatedAt: new Date(now).toISOString()
+      }
+      return { ...value }
+    }
+  }
+  const api = handlers(store)
+  assert.equal(
+    (await (await api.get(request('/api/motto?lang=en'))).json()).text,
+    'An English motto'
+  )
+  const write = await api.put(
+    request('/api/motto?lang=en', {
+      method: 'PUT',
+      headers: { Cookie: authenticatedCookie() },
+      body: { text: 'A revised English motto', revision: '"1"' }
+    })
+  )
+  assert.equal(write.status, 200)
+  assert.equal((await write.json()).text, 'A revised English motto')
+  assert.equal((await (await api.get(request('/api/motto'))).json()).text, '中文格言')
+  const stale = await api.put(
+    request('/api/motto?lang=en', {
+      method: 'PUT',
+      headers: { Cookie: authenticatedCookie() },
+      body: { text: 'A stale edit', revision: '"1"' }
+    })
+  )
+  assert.equal(stale.status, 409)
+})

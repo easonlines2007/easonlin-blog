@@ -1,8 +1,8 @@
 ---
+import View from '@/views/notes/tags/[tag].astro'
 import type { GetStaticPaths } from 'astro'
-import NotesLayout from '../../../layouts/NotesLayout.astro'
-import { getNotes } from '../../../lib/notes'
-import { countValues } from '../../../lib/note-utils'
+import { getNotes } from '@/lib/notes'
+import { countValues } from '@/lib/note-utils'
 export const getStaticPaths = (async () => {
   const allNotes = await getNotes()
   return countValues(allNotes, 'tags').map(([tag]) => ({
@@ -10,7 +10,6 @@ export const getStaticPaths = (async () => {
     props: { tag, allNotes, notes: allNotes.filter((note) => note.data.tags.includes(tag)) }
   }))
 }) satisfies GetStaticPaths
-const { tag, notes, allNotes } = Astro.props
 ---
 
-<NotesLayout title={`# ${tag}`} {notes} {allNotes} back="/notes/tags" backLabel="全部标签" />
+<View {...Astro.props} />

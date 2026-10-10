@@ -1,6 +1,10 @@
 ---
+import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
 import type { CollectionEntry } from 'astro:content'
 import { formatDate, noteUrl, tagUrl, statusLabels } from '../lib/note-utils'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
 interface Props {
   note: CollectionEntry<'notes'>
 }
@@ -17,19 +21,25 @@ const { title, description, tags, status, updated, date, pdf } = note.data
 >
   <div class="note-card-heading">
     <h2>
-      <a class="note-title" href={noteUrl(note.id)}>
+      <a class="note-title" href={path(noteUrl(note.id))}>
         <span class="lift-text">{title}</span>
       </a>
     </h2>
-    <span class:list={['status', status]}>{statusLabels[status]}</span>
+    <span class:list={['status', status]}>{t(statusLabels[status])}</span>
   </div>
   {description && <p class="note-description">{description}</p>}
   <div class="note-meta">
-    <span class="content-type">{pdf ? 'PDF 笔记' : '笔记'}</span>
-    <time datetime={date.toISOString()}>添加于 {formatDate(date)}</time>
-    {updated && <time datetime={updated.toISOString()}>更新于 {formatDate(updated)}</time>}
+    <span class="content-type">{t(pdf ? 'PDF 笔记' : '笔记')}</span>
+    <time datetime={date.toISOString()}>
+      {locale === 'en' ? 'Added' : '添加于'} {formatDate(date, locale)}
+    </time>
+    {updated && (
+      <time datetime={updated.toISOString()}>
+        {locale === 'en' ? 'Updated' : '更新于'} {formatDate(updated, locale)}
+      </time>
+    )}
     {tags.map((tag) => (
-      <a class="tag" href={tagUrl(tag)}>
+      <a class="tag" href={path(tagUrl(tag))}>
         <span class="lift-text">{tag}</span>
       </a>
     ))}

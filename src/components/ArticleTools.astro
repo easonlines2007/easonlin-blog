@@ -1,11 +1,16 @@
 ---
+import { localeFromPath, useTranslations } from '@/lib/i18n'
 import Icon from './Icon.astro'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
 ---
 
-<button class="back-to-top icon-button" type="button" aria-label="回到顶部">
+<button class="back-to-top icon-button" type="button" aria-label={t('回到顶部')}>
   <Icon name="top" />
 </button>
 <script>
+  import { localeFromPath, useTranslations } from '../lib/i18n'
+  const t = useTranslations(localeFromPath(location.pathname))
   const topButton = document.querySelector<HTMLButtonElement>('.back-to-top')!
   const update = () => topButton.classList.toggle('visible', window.scrollY > 500)
   window.addEventListener('scroll', update, { passive: true })
@@ -27,9 +32,9 @@ import Icon from './Icon.astro'
     button.className = 'copy-code'
     const label = document.createElement('span')
     label.className = 'lift-text'
-    label.textContent = '复制'
+    label.textContent = t('复制')
     button.append(label)
-    button.setAttribute('aria-label', '复制代码')
+    button.setAttribute('aria-label', t('复制代码'))
     button.setAttribute('aria-live', 'polite')
     wrapper.append(button)
     let timer: ReturnType<typeof setTimeout>
@@ -37,12 +42,12 @@ import Icon from './Icon.astro'
       clearTimeout(timer)
       try {
         await navigator.clipboard.writeText(pre.querySelector('code')?.textContent ?? '')
-        label.textContent = '已复制'
+        label.textContent = t('已复制')
       } catch {
-        label.textContent = '请选中后复制'
+        label.textContent = t('请选中后复制')
       }
       timer = setTimeout(() => {
-        label.textContent = '复制'
+        label.textContent = t('复制')
       }, 2000)
     })
   })

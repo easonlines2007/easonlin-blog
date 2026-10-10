@@ -1,0 +1,126 @@
+---
+import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
+import { render } from 'astro:content'
+import 'katex/dist/katex.min.css'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import Icon from '@/components/Icon.astro'
+import TableOfContents from '@/components/TableOfContents.astro'
+import ArticleTools from '@/components/ArticleTools.astro'
+import MermaidDiagrams from '@/components/MermaidDiagrams.astro'
+import PdfReader from '@/components/PdfReader.astro'
+import { getNotes } from '@/lib/notes'
+import { formatDate, noteUrl, tagUrl, topicUrl, statusUrl, statusLabels } from '@/lib/note-utils'
+
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
+type Entry = Awaited<ReturnType<typeof getNotes>>[number]
+interface Props {
+  note: Entry
+  previous?: Entry
+  next?: Entry
+}
+const { note, previous, next } = Astro.props
+const { Content, headings } = await render(note.translation ?? note)
+const { title, description, tags, topic, date, updated, status, sample, pdf } = note.data
+---
+
+<BaseLayout
+  {title}
+  {description}
+  alternatePath={
+    locale === 'en'
+      ? noteUrl(note.id)
+      : (await getNotes('en')).some((entry) => entry.id === note.id)
+        ? localizePath(noteUrl(note.id), 'en')
+        : null
+  }
+>
+  <a class="back-link" href={path(note.data.order ? topicUrl(topic) : '/notes/all')}>
+    <Icon name="back" />
+    <span class="lift-text">{t(note.data.order ? topic : '全部笔记')}</span>
+  </a>
+  <div class="article-grid">
+    <article class="article-body enter" data-pagefind-body>
+      <header class="article-header">
+        <div class="article-kicker">
+          <a href={path(topicUrl(topic))}>
+            <span class="lift-text">{topic}</span>
+          </a>
+          <a class:list={['status', status]} href={path(statusUrl(status))}>
+            {t(statusLabels[status])}
+          </a>
+          {sample && (
+            <span class="sample-label" data-pagefind-ignore>
+              {t('示例笔记')}
+            </span>
+          )}
+        </div>
+        <h1 data-pagefind-meta="title">{title}</h1>
+        {description && <p>{description}</p>}
+        <div class="article-date">
+          <time datetime={date.toISOString()}>
+            {locale === 'en' ? 'Added' : '添加于'} {formatDate(date, locale)}
+          </time>
+          {updated && (
+            <time datetime={updated.toISOString()}>
+              {locale === 'en' ? 'Updated' : '更新于'} {formatDate(updated, locale)}
+            </time>
+          )}
+        </div>
+      </header>
+      <details class="mobile-toc" data-pagefind-ignore>
+        <summary>
+          <span class="lift-text">{t('本页目录')}</span>
+        </summary>
+        <TableOfContents {headings} mobile />
+      </details>
+      <div class="prose" id="article-content">
+        <Content />
+      </div>
+      {pdf && <PdfReader src={pdf} {title} />}
+      {locale === 'en' && (
+        <p class="translation-credit" data-pagefind-ignore>
+          {note.translation?.data.translationMethod === 'machine-assisted'
+            ? 'Machine-assisted translation'
+            : 'English translation'}{' '}
+          · <a href={noteUrl(note.id)}>Read Chinese original</a>
+        </p>
+      )}
+      <footer class="article-bottom" data-pagefind-ignore>
+        <div class="tag-list">
+          {tags.map((tag) => (
+            <a class="tag" href={path(tagUrl(tag))}>
+              <span class="lift-text">{tag}</span>
+            </a>
+          ))}
+        </div>
+        <a href={path('/notes/all')}>
+          <span class="lift-text">{t('返回全部笔记')}</span>
+        </a>
+      </footer>
+      {(previous || next) && (
+        <nav class="module-navigation" aria-label={t('专题阅读顺序')} data-pagefind-ignore>
+          {previous && (
+            <a href={path(noteUrl(previous.id))}>
+              <span>{t('上一篇')}</span>
+              <strong class="lift-text">{previous.data.title}</strong>
+            </a>
+          )}
+          {next && (
+            <a class="module-next" href={path(noteUrl(next.id))}>
+              <span>{t('下一篇')}</span>
+              <strong class="lift-text">{next.data.title}</strong>
+            </a>
+          )}
+        </nav>
+      )}
+    </article>
+    <aside class="toc-sidebar enter delay-1">
+      <h2 class="toc-title">{t('本页目录')}</h2>
+      <TableOfContents {headings} />
+    </aside>
+  </div>
+  <ArticleTools />
+  <MermaidDiagrams />
+</BaseLayout>

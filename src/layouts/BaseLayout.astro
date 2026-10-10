@@ -4,23 +4,31 @@ import Icon from '../components/Icon.astro'
 import { theme } from '../site.config'
 import '../styles/fonts.css'
 import '../styles/global.css'
+import { localeFromPath, localizePath, useTranslations } from '../lib/i18n'
 interface Props {
   title: string
   description?: string
   home?: boolean
   noindex?: boolean
+  alternatePath?: string | null
 }
 const { title, description = theme.description, home = false, noindex = false } = Astro.props
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const alternatePath =
+  Astro.props.alternatePath === undefined
+    ? localizePath(Astro.url.pathname, locale === 'en' ? 'zh' : 'en')
+    : Astro.props.alternatePath
 const canonical = new URL(Astro.url.pathname, Astro.site)
 ---
 
 <!doctype html>
-<html lang="zh-CN" data-theme-preference="system">
+<html lang={locale === 'en' ? 'en' : 'zh-CN'} data-theme-preference="system">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>{title} · {theme.title}</title>
-    <meta name="description" content={description} />
+    <title>{t(title)} · {theme.title}</title>
+    <meta name="description" content={t(description)} />
     <meta name="theme-color" content="#f7f6f2" />
     <meta name="color-scheme" content="light dark" />
     <meta name="generator" content={Astro.generator} />
@@ -31,6 +39,23 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     <meta name="apple-mobile-web-app-title" content="Eason's Notes" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href={canonical} />
+    {alternatePath && (
+      <>
+        <link rel="alternate" hreflang={locale === 'en' ? 'en' : 'zh-CN'} href={canonical} />
+        <link
+          rel="alternate"
+          hreflang={locale === 'en' ? 'zh-CN' : 'en'}
+          href={
+            new URL(
+              alternatePath.endsWith('/') || /\.[a-z0-9]+$/i.test(alternatePath)
+                ? alternatePath
+                : `${alternatePath}/`,
+              Astro.site
+            )
+          }
+        />
+      </>
+    )}
     <link
       rel="preload"
       href="/fonts/schoolbell-regular.woff2"
@@ -45,9 +70,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
       type="font/woff2"
       crossorigin
     />
-    <link rel="alternate" type="application/rss+xml" title={theme.title} href="/rss.xml" />
-    <meta property="og:title" content={`${title} · ${theme.title}`} />
-    <meta property="og:description" content={description} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={theme.title}
+      href={localizePath('/rss.xml', locale)}
+    />
+    <meta property="og:title" content={`${t(title)} · ${theme.title}`} />
+    <meta property="og:description" content={t(description)} />
+    <meta property="og:locale" content={locale === 'en' ? 'en_US' : 'zh_CN'} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <script is:inline>
@@ -70,10 +101,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
   </head>
   <body class:list={[home && 'home-page']}>
     <a class="skip-link" href="#main">
-      跳转到正文
+      {t('跳转到正文')}
     </a>
     <div class="site-container">
-      <Header />
+      <Header {alternatePath} />
       <main id="main" class="page-content" tabindex="-1">
         <slot />
       </main>
@@ -92,11 +123,16 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
             </a>
           </span>
         </div>
-        <nav class="footer-links" aria-label="页脚链接">
-          <a href="/admin">
-            <span class="lift-text">文章管理</span>
+        <nav class="footer-links" aria-label={t('页脚链接')}>
+          <a href={localizePath('/admin', locale)}>
+            <span class="lift-text">{t('文章管理')}</span>
           </a>
-          <a href="/rss.xml" class="icon-button" aria-label="订阅 RSS" title="订阅 RSS">
+          <a
+            href={localizePath('/rss.xml', locale)}
+            class="icon-button"
+            aria-label={t('订阅 RSS')}
+            title={t('订阅 RSS')}
+          >
             <Icon name="rss" />
           </a>
         </nav>

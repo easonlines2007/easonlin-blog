@@ -159,13 +159,13 @@ git push origin main
 
 在 **Vercel Production** 环境配置（Preview 禁用管理接口）：
 
-| 变量 | 用途 |
-| --- | --- |
-| `BLOG_GITHUB_TOKEN` | 仅限该仓库、具有 Contents 读写权限的 fine-grained Token |
-| `BLOG_GITHUB_OWNER` | `easonlines2007` |
-| `BLOG_GITHUB_REPO` | `easonlin-blog` |
-| `BLOG_GITHUB_BRANCH` | `main` |
-| `MOTTO_ADMIN_PASSWORD_HASH`、`MOTTO_SESSION_SECRET` | 沿用已有高强度作者口令哈希与独立签名密钥 |
+| 变量                                                | 用途                                                    |
+| --------------------------------------------------- | ------------------------------------------------------- |
+| `BLOG_GITHUB_TOKEN`                                 | 仅限该仓库、具有 Contents 读写权限的 fine-grained Token |
+| `BLOG_GITHUB_OWNER`                                 | `easonlines2007`                                        |
+| `BLOG_GITHUB_REPO`                                  | `easonlin-blog`                                         |
+| `BLOG_GITHUB_BRANCH`                                | `main`                                                  |
+| `MOTTO_ADMIN_PASSWORD_HASH`、`MOTTO_SESSION_SECRET` | 沿用已有高强度作者口令哈希与独立签名密钥                |
 
 Token 仅由服务端 `process.env` 读取，不能使用 `PUBLIC_` 前缀，不填写在浏览器或提交到 Git。`/admin` 只输出空页面框架，文章数据在鉴权后读取；API 禁止缓存，并检查写操作的 Origin、路径、属性和请求大小。错误响应不会回显 Token 或 GitHub 原始错误。
 
@@ -256,3 +256,34 @@ Vercel 项目使用 Node.js 24，生产与预览环境均设置 `SITE_URL=https:
 主题：https://github.com/cworld1/astro-theme-pure
 
 使用官方 `astro-pure` 包及经过调整的排版配置，保留 Apache-2.0 许可证与 NOTICE。未使用参考博客的个人资料、头像或文章。
+
+## 中英文双语
+
+中文页面保留现有网址，英文页面位于 `/en/`。顶栏深浅色按钮旁的语言切换器显示 `中/EN` 或 `EN/中`，当前语言在前，点击后以小幅交换动效进入同一页面的另一种语言；系统减少动态效果时直接跳转。语言由网址决定，不强制按浏览器语言重定向。
+
+所有公共页面以及文章管理、搜索、目录、排序、主题与 PDF 阅读器提示均提供中英文界面。中英文分别生成 Pagefind 索引和 RSS（`/rss.xml`、`/en/rss.xml`），每个真实译文页面有独立 canonical 和双向 hreflang。图片、代码与数学公式共用原始资源，图片和 PDF 内的文字仍属于原附件。
+
+英文正文单独保存于 `src/content/translations/en/{notes,essays}/`，通过 `kind` 和 `source` 关联原文；不是访问时调用翻译服务。原文继续由 Obsidian／网页管理维护，译文不会进入 Obsidian 同步清单。译文标题、简介与正文独立维护，写作日期、专题、标签、状态和附件继承原文。下架或删除原文也会使关联译文从页面、列表、RSS 和搜索消失。缺少译文的新文章只生成中文页，切换器明确提示暂无英文译文。
+
+现有随笔和部分实验笔记使用 AI 辅助译文，其余技术笔记使用机器辅助译文；`translationMethod` 保存来源，英文文章提供返回原文的链接。英文格言通过同一作者会话单独编辑；中文格言修改后应相应更新英文值。
+
+检查译文覆盖和原文更新：
+
+```sh
+pnpm translations:check
+```
+
+源文件及实际发布的标题、简介哈希保存在译文的 `sourceHash` 中；原文修改或网页管理覆盖标题、简介后，该命令会指出待更新译文。日期、代码和公式不被翻译脚本重写。更新译文时可手动编辑英文 Markdown，或生成可审核的分段翻译草稿：
+
+```sh
+pnpm translations:prepare artifacts/translation-draft.json
+# 填写 JSON 的 dictionary，保留各原文键，只翻译对应值。
+pnpm translations:apply artifacts/translation-draft.json --update
+pnpm translations:check
+pnpm verify
+pnpm translations:verify
+```
+
+草稿先按 Markdown 结构提取文字、图注及 Mermaid 中文标签，排除程序代码、行内代码和数学公式，并附带术语表供翻译时参考。应用时先校验原文是否仍与草稿版本一致，再生成整个批次，重写有英文版本的站内链接及标题锚点。已有译文必须显式传入 `--update` 才会覆盖；更新前请保留人工修订。翻译工具不内置远程服务或密钥，构建和读者访问均不调用翻译 API。
+
+`translations:verify` 在构建后检查英文页面链接、锚点、语言与 canonical，并确认机器辅助译文保留原文代码、公式及图片引用。

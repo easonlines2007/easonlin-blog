@@ -1,0 +1,19 @@
+---
+import View from '@/views/notes/topics/[topic].astro'
+import type { GetStaticPaths } from 'astro'
+import { getNotes } from '@/lib/notes'
+import { countValues, sortTopicNotes } from '@/lib/note-utils'
+export const getStaticPaths = (async () => {
+  const allNotes = await getNotes('en')
+  return countValues(allNotes, 'topic').map(([topic]) => ({
+    params: { topic },
+    props: {
+      topic,
+      allNotes,
+      notes: sortTopicNotes(allNotes.filter((note) => note.data.topic === topic))
+    }
+  }))
+}) satisfies GetStaticPaths
+---
+
+<View {...Astro.props} />

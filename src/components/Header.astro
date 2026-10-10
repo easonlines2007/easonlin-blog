@@ -3,44 +3,59 @@ import { theme } from '../site.config'
 import Icon from './Icon.astro'
 import ThemePicker from './ThemePicker.astro'
 import NavCharacter from './NavCharacter.astro'
+import LanguageSwitch from './LanguageSwitch.astro'
+import { localeFromPath, localizePath, useTranslations } from '../lib/i18n'
+interface Props {
+  alternatePath: string | null
+}
+const { alternatePath } = Astro.props
 const pathname = Astro.url.pathname
+const locale = localeFromPath(pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
 const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 ---
 
 <header class="site-header" data-pagefind-ignore>
-  <a class="brand character-link" href="/">
+  <a class="brand character-link" href={path('/')}>
     <span class="nav-flip">
       <span class="nav-label">Eason's blog</span>
       <NavCharacter href="/" />
     </span>
   </a>
   <div class="header-actions">
-    <nav class="desktop-nav" aria-label="主导航">
+    <nav class="desktop-nav" aria-label={t('主导航')}>
       {theme.header.menu.map((item) => (
         <a
           class="character-link"
-          href={item.link}
-          aria-current={active(item.link) ? 'page' : undefined}
+          href={path(item.link)}
+          aria-current={active(path(item.link)) ? 'page' : undefined}
         >
           <span class="nav-flip">
-            <span class="nav-label">{item.title}</span>
+            <span class="nav-label">{t(item.title)}</span>
             <NavCharacter href={item.link} />
           </span>
         </a>
       ))}
     </nav>
-    <a class="search-link icon-button" href="/search" aria-label="搜索文章" title="搜索文章">
+    <a
+      class="search-link icon-button"
+      href={path('/search')}
+      aria-label={t('搜索文章')}
+      title={t('搜索文章')}
+    >
       <Icon name="search" />
     </a>
     <ThemePicker />
+    <LanguageSwitch href={alternatePath} />
     <details class="mobile-menu header-disclosure">
-      <summary class="icon-button" aria-label="打开导航菜单">
+      <summary class="icon-button" aria-label={t('打开导航菜单')}>
         <Icon name="menu" />
       </summary>
-      <nav aria-label="手机导航">
+      <nav aria-label={t('手机导航')}>
         {theme.header.menu.map((item) => (
-          <a href={item.link} aria-current={active(item.link) ? 'page' : undefined}>
-            {item.title}
+          <a href={path(item.link)} aria-current={active(path(item.link)) ? 'page' : undefined}>
+            {t(item.title)}
           </a>
         ))}
       </nav>

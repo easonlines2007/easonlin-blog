@@ -13,6 +13,11 @@ export default defineConfig({
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : 'http://localhost:4321'),
   output: 'static',
+  i18n: {
+    locales: ['zh', 'en'],
+    defaultLocale: 'zh',
+    routing: { prefixDefaultLocale: false }
+  },
   // Pagefind discovers directory-style URLs; accept both forms in dev and preview.
   trailingSlash: 'ignore',
   prefetch: { defaultStrategy: 'hover' },

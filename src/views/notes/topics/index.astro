@@ -1,0 +1,32 @@
+---
+import { localeFromPath, localizePath, useTranslations, noteCount } from '@/lib/i18n'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PageHeader from '@/components/PageHeader.astro'
+import Icon from '@/components/Icon.astro'
+import { getNotes } from '@/lib/notes'
+import { countValues, topicUrl } from '@/lib/note-utils'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
+const topics = countValues(await getNotes(locale), 'topic')
+---
+
+<BaseLayout title={t('专题')}>
+  <PageHeader
+    title={t('专题')}
+    description={t('把相关的笔记放在一起，沿着一个主题慢慢读。')}
+    back={path('/notes')}
+    backLabel={t('笔记')}
+  />
+  <div class="index-grid enter delay-1">
+    {topics.map(([topic, count]) => (
+      <a class="index-card" href={path(topicUrl(topic))}>
+        <div>
+          <h2 class="lift-text">{topic}</h2>
+          <p>{noteCount(count, locale)}</p>
+        </div>
+        <Icon name="next" />
+      </a>
+    ))}
+  </div>
+</BaseLayout>

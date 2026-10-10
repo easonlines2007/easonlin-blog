@@ -1,0 +1,86 @@
+---
+import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PageHeader from '@/components/PageHeader.astro'
+import '@pagefind/default-ui/css/ui.css'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
+---
+
+<BaseLayout title={t('搜索')} noindex>
+  <PageHeader title={t('搜索')} description={t('输入一个关键词，找回读过、写过的内容。')} />
+  <div class="search-container enter delay-1" id="search" data-development={import.meta.env.DEV}>
+    <p class="search-message" id="search-message" role="status">
+      {t('正在准备搜索…')}
+    </p>
+  </div>
+  <noscript>
+    <p class="search-message">
+      {t('搜索需要 JavaScript。你也可以通过')}
+      <a href={path('/notes/topics')}>
+        <span class="lift-text">{t('专题')}</span>
+      </a>
+      {t('或')}
+      <a href={path('/notes/tags')}>
+        <span class="lift-text">{t('标签')}</span>
+      </a>
+      {t('浏览笔记，也可以阅读')}
+      <a href={path('/blog')}>
+        <span class="lift-text">{t('随笔')}</span>
+      </a>
+      。
+    </p>
+  </noscript>
+</BaseLayout>
+<script>
+  import { localeFromPath, useTranslations } from '@/lib/i18n'
+  const locale = localeFromPath(location.pathname)
+  const t = useTranslations(locale)
+  async function setupSearch() {
+    const container = document.querySelector<HTMLElement>('#search')!
+    const message = document.querySelector<HTMLElement>('#search-message')!
+    // Pagefind is generated after build; preview serves the complete, production search.
+    if (container.dataset.development === 'true') {
+      message.textContent = t('开发预览不包含搜索索引，请在构建预览中使用完整搜索。')
+      return
+    }
+    try {
+      // The upstream package ships no TypeScript declaration.
+      // @ts-expect-error -- @pagefind/default-ui has no bundled types.
+      const { PagefindUI } = await import('@pagefind/default-ui')
+      new PagefindUI({
+        element: '#search',
+        bundlePath: '/pagefind/',
+        showImages: false,
+        showSubResults: true,
+        translations:
+          locale === 'en'
+            ? {
+                placeholder: 'Search notes and essays…',
+                zero_results: 'No results for “[SEARCH_TERM]”',
+                clear_search: 'Clear',
+                search_label: 'Search notes and essays',
+                searching: 'Searching…',
+                one_result: '[COUNT] article found',
+                many_results: '[COUNT] articles found',
+                load_more: 'Load more'
+              }
+            : {
+                placeholder: '搜索笔记与随笔…',
+                zero_results: '没有找到 “[SEARCH_TERM]” 的相关文章',
+                clear_search: '清除',
+                search_label: '搜索笔记与随笔',
+                searching: '正在搜索…',
+                one_result: '找到 [COUNT] 篇文章',
+                many_results: '找到 [COUNT] 篇文章',
+                load_more: '更多结果'
+              }
+      })
+      message.remove()
+    } catch {
+      message.textContent = t('搜索暂时未能加载，请刷新页面重试。')
+    }
+  }
+  setupSearch()
+</script>

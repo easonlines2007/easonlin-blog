@@ -1,0 +1,15 @@
+---
+import View from '@/views/notes/tags/[tag].astro'
+import type { GetStaticPaths } from 'astro'
+import { getNotes } from '@/lib/notes'
+import { countValues } from '@/lib/note-utils'
+export const getStaticPaths = (async () => {
+  const allNotes = await getNotes('en')
+  return countValues(allNotes, 'tags').map(([tag]) => ({
+    params: { tag },
+    props: { tag, allNotes, notes: allNotes.filter((note) => note.data.tags.includes(tag)) }
+  }))
+}) satisfies GetStaticPaths
+---
+
+<View {...Astro.props} />

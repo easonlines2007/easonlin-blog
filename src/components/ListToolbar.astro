@@ -1,4 +1,7 @@
 ---
+import { localeFromPath, useTranslations } from '@/lib/i18n'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
 interface Props {
   count: number
   label?: string
@@ -9,16 +12,24 @@ const { count, label = '笔记', dateLabel = '添加日期' } = Astro.props
 
 <div class="listing-toolbar">
   <p class="list-count" role="status" aria-live="polite" data-note-count>
-    共 {count} 篇{label}
+    {locale === 'en' ? `${count} ${t(label).toLowerCase()}` : `共 ${count} 篇${label}`}
   </p>
   <label class="list-sort">
-    <span>排序</span>
-    <select data-list-sort aria-label={`${label}排序`} disabled>
-      <option value="default">默认顺序</option>
-      <option value="date-desc">{dateLabel}：新到旧</option>
-      <option value="date-asc">{dateLabel}：旧到新</option>
-      <option value="title-asc">标题：正序</option>
-      <option value="title-desc">标题：倒序</option>
+    <span>{t('排序')}</span>
+    <select
+      data-list-sort
+      aria-label={locale === 'en' ? `Sort ${t(label).toLowerCase()}` : `${label}排序`}
+      disabled
+    >
+      <option value="default">{t('默认顺序')}</option>
+      <option value="date-desc">
+        {locale === 'en' ? `${t(dateLabel)}: newest first` : `${dateLabel}：新到旧`}
+      </option>
+      <option value="date-asc">
+        {locale === 'en' ? `${t(dateLabel)}: oldest first` : `${dateLabel}：旧到新`}
+      </option>
+      <option value="title-asc">{locale === 'en' ? 'Title: A–Z' : '标题：正序'}</option>
+      <option value="title-desc">{locale === 'en' ? 'Title: Z–A' : '标题：倒序'}</option>
     </select>
   </label>
 </div>

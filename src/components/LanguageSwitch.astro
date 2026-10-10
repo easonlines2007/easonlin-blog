@@ -1,0 +1,137 @@
+---
+import { localeFromPath } from '../lib/i18n'
+interface Props {
+  href: string | null
+}
+const { href } = Astro.props
+const locale = localeFromPath(Astro.url.pathname)
+const label = href
+  ? locale === 'en'
+    ? '切换到中文'
+    : 'Switch to English'
+  : '暂无英文译文 · English translation unavailable'
+const Tag = href ? 'a' : 'button'
+---
+
+<Tag
+  class="language-switch"
+  href={href ?? undefined}
+  type={href ? undefined : 'button'}
+  disabled={!href}
+  aria-label={label}
+  title={label}
+  data-language={locale}
+  data-language-target={locale === 'en' ? 'zh' : 'en'}
+  hreflang={href ? (locale === 'en' ? 'zh-CN' : 'en') : undefined}
+>
+  <span class="language-track" aria-hidden="true">
+    <span class="language-en">EN</span>
+    <span class="language-divider">/</span>
+    <span class="language-zh">中</span>
+  </span>
+</Tag>
+
+<style>
+  .language-switch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 55px;
+    min-height: 36px;
+    padding: 6px 2px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--secondary);
+    cursor: pointer;
+    font: 11px/1.2 var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .language-switch:hover {
+    color: var(--text);
+  }
+  .language-switch:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .language-track {
+    position: relative;
+    display: block;
+    width: 47px;
+    height: 16px;
+  }
+  .language-track > span {
+    position: absolute;
+    top: 0;
+    transition:
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 260ms ease,
+      opacity 260ms ease;
+  }
+  .language-en,
+  .language-zh {
+    left: 0;
+    width: 22px;
+    text-align: center;
+  }
+  .language-divider {
+    left: 22px;
+    width: 3px;
+    opacity: 0.45;
+  }
+  [data-language='zh'] .language-en {
+    transform: translateX(25px);
+    opacity: 0.55;
+  }
+  [data-language='zh'] .language-zh {
+    transform: translateX(0);
+    color: var(--text);
+  }
+  [data-language='en'] .language-en {
+    transform: translateX(0);
+    color: var(--text);
+  }
+  [data-language='en'] .language-zh {
+    transform: translateX(25px);
+    opacity: 0.55;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .language-track > span {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const switcher = document.querySelector<HTMLAnchorElement>('a.language-switch')
+  if (switcher) {
+    let switching = false
+    switcher.addEventListener('click', (event) => {
+      // Keep normal links usable with keyboards, modifier keys, and without JavaScript.
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      event.preventDefault()
+      if (switching) return
+      switching = true
+      const current = switcher.dataset.language
+      for (const [name, language] of [
+        ['en', 'en'],
+        ['zh', 'zh']
+      ]) {
+        const label = switcher.querySelector<HTMLElement>(`.language-${name}`)!
+        const wasFirst = current === language
+        label.animate(
+          [
+            { transform: `translate(${wasFirst ? 0 : 25}px, 0)` },
+            { transform: `translate(12.5px, ${wasFirst ? -5 : 5}px)`, offset: 0.5 },
+            { transform: `translate(${wasFirst ? 25 : 0}px, 0)` }
+          ],
+          { duration: 260, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+        )
+      }
+      switcher.dataset.language = switcher.dataset.languageTarget
+      window.setTimeout(() => window.location.assign(switcher.href), 260)
+    })
+  }
+</script>

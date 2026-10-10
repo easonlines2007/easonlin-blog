@@ -1,0 +1,75 @@
+---
+import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
+import { render } from 'astro:content'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import Icon from '@/components/Icon.astro'
+import ArticleTools from '@/components/ArticleTools.astro'
+import { getEssays } from '@/lib/essays'
+import { essayUrl, formatWritingDate } from '@/lib/essay-utils'
+
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
+type Entry = Awaited<ReturnType<typeof getEssays>>[number]
+interface Props {
+  essay: Entry
+  newer?: Entry
+  older?: Entry
+}
+const { essay, newer, older } = Astro.props
+const { Content } = await render(essay.translation ?? essay)
+const { title, written, description } = essay.data
+---
+
+<BaseLayout
+  {title}
+  {description}
+  alternatePath={
+    locale === 'en'
+      ? essayUrl(essay.id)
+      : (await getEssays('en')).some((entry) => entry.id === essay.id)
+        ? localizePath(essayUrl(essay.id), 'en')
+        : null
+  }
+>
+  <a class="back-link" href={path('/blog')}>
+    <Icon name="back" />
+    <span class="lift-text">{t('随笔')}</span>
+  </a>
+  <article class="article-body essay-article enter" data-pagefind-body>
+    <header class="article-header">
+      <h1 data-pagefind-meta="title">{title}</h1>
+      <div class="article-date">
+        <time datetime={written}>
+          {locale === 'en' ? 'Written' : '写于'} {formatWritingDate(written, locale)}
+        </time>
+      </div>
+    </header>
+    <div class="prose essay-prose" id="article-content">
+      <Content />
+    </div>
+    <footer class="article-bottom" data-pagefind-ignore>
+      {locale === 'en' && <a href={essayUrl(essay.id)}>Read Chinese original</a>}
+      <a href={path('/blog')}>
+        <span class="lift-text">{t('全部随笔')}</span>
+      </a>
+    </footer>
+    {(newer || older) && (
+      <nav class="module-navigation" aria-label={t('随笔阅读导航')} data-pagefind-ignore>
+        {newer && (
+          <a href={path(essayUrl(newer.id))}>
+            <span>{t('较新一篇')}</span>
+            <strong class="lift-text">{newer.data.title}</strong>
+          </a>
+        )}
+        {older && (
+          <a class="module-next" href={path(essayUrl(older.id))}>
+            <span>{t('较早一篇')}</span>
+            <strong class="lift-text">{older.data.title}</strong>
+          </a>
+        )}
+      </nav>
+    )}
+  </article>
+  <ArticleTools />
+</BaseLayout>

@@ -1,7 +1,5 @@
 ---
-import NotesLayout from '../../layouts/NotesLayout.astro'
-import { getNotes } from '../../lib/notes'
-const notes = (await getNotes()).filter((note) => note.data.pdf)
+import View from '@/views/notes/pdf.astro'
 ---
 
-<NotesLayout title="PDF 笔记" {notes} />
+<View {...Astro.props} />

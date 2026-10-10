@@ -1,0 +1,144 @@
+---
+import { localeFromPath, localizePath, useTranslations, noteCount } from '@/lib/i18n'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getNotes } from '@/lib/notes'
+import { getEssays } from '@/lib/essays'
+import { essayUrl } from '@/lib/essay-utils'
+import { countValues, noteUrl } from '@/lib/note-utils'
+import { projects } from '@/lib/projects'
+import { theme } from '@/site.config'
+import HomeAvatar from '@/components/HomeAvatar.astro'
+import HomeEntrance from '@/components/HomeEntrance.astro'
+import HomeRow from '@/components/HomeRow.astro'
+import HomeMotto from '@/components/HomeMotto.astro'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
+const notes = await getNotes(locale)
+const essays = await getEssays(locale)
+const topics = countValues(notes, 'topic')
+const pdfNotes = notes.filter((note) => note.data.pdf)
+---
+
+<BaseLayout title={t('首页')} home>
+  <HomeEntrance slot="head" />
+  <section class="home-intro">
+    <HomeAvatar />
+    <h1 data-intro-name>{theme.author}</h1>
+    <HomeMotto />
+  </section>
+  <div class="home-sections">
+    <section class="home-section" data-intro-reveal>
+      <h2>
+        <span class="section-index" aria-hidden="true">
+          01
+        </span>
+        {t('关于')}
+      </h2>
+      <div class="section-body">
+        <ul class="home-row-list">
+          <HomeRow
+            label={t('日常')}
+            title={t('学习笔记、阅读批注与零散思考')}
+            href={path('/about')}
+          />
+        </ul>
+        <a class="more-link" href={path('/about')}>
+          <span class="lift-text">{t('更多关于这里')}</span>
+        </a>
+      </div>
+    </section>
+    <section class="home-section" data-intro-reveal>
+      <h2>
+        <span class="section-index" aria-hidden="true">
+          02
+        </span>
+        {t('最近笔记')}
+      </h2>
+      <div class="section-body">
+        <ul class="home-row-list">
+          {notes.slice(0, 5).map((note) => (
+            <HomeRow
+              label={note.data.pdf ? 'PDF' : t('笔记')}
+              title={note.data.title}
+              href={path(noteUrl(note.id))}
+            />
+          ))}
+        </ul>
+        <a class="more-link" href={path('/notes/all')}>
+          <span class="lift-text">{t('全部笔记')}</span>
+        </a>
+      </div>
+    </section>
+    <section class="home-section" data-intro-reveal>
+      <h2>
+        <span class="section-index" aria-hidden="true">
+          03
+        </span>
+        {t('最近随笔')}
+      </h2>
+      <div class="section-body">
+        <ul class="home-row-list">
+          {essays.slice(0, 3).map((essay) => (
+            <HomeRow label={t('随笔')} title={essay.data.title} href={path(essayUrl(essay.id))} />
+          ))}
+        </ul>
+        <a class="more-link" href={path('/blog')}>
+          <span class="lift-text">{t('全部随笔')}</span>
+        </a>
+      </div>
+    </section>
+    <section class="home-section" data-intro-reveal>
+      <h2>
+        <span class="section-index" aria-hidden="true">
+          04
+        </span>
+        {t('项目')}
+      </h2>
+      <div class="section-body">
+        <ul class="home-row-list">
+          {projects
+            .filter((project) => !project.fork)
+            .slice(0, 3)
+            .map((project) => (
+              <HomeRow label="GitHub" title={project.name} href={project.url} external />
+            ))}
+        </ul>
+        <a class="more-link" href={path('/projects')}>
+          <span class="lift-text">{t('全部项目与 GitHub 动态')}</span>
+        </a>
+      </div>
+    </section>
+    <section class="home-section" data-intro-reveal>
+      <h2>
+        <span class="section-index" aria-hidden="true">
+          05
+        </span>
+        {t('笔记一览')}
+      </h2>
+      <div class="section-body">
+        <ul class="home-row-list">
+          <HomeRow
+            label={t('总计')}
+            title={noteCount(notes.length, locale)}
+            href={path('/notes/all')}
+          />
+          <HomeRow
+            label={t('专题')}
+            title={locale === 'en' ? `${topics.length} topics` : `${topics.length} 个笔记专题`}
+            href={path('/notes/topics')}
+          />
+          <HomeRow
+            label="PDF"
+            title={
+              locale === 'en'
+                ? `${pdfNotes.length} handwritten notes and annotations`
+                : `${pdfNotes.length} 份手写与批注`
+            }
+            href={path('/notes/pdf')}
+          />
+        </ul>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

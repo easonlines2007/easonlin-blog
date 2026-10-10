@@ -5,12 +5,13 @@ export interface StoredMotto {
   text: string
   updatedAt: string
   revision: string
+  textEn?: string
 }
 
 export interface MottoStore {
   readonly configured: boolean
   read(): Promise<StoredMotto | null>
-  write(text: string, revision: string | null): Promise<StoredMotto>
+  write(text: string, revision: string | null, textEn?: string): Promise<StoredMotto>
 }
 
 interface BlobClient {
@@ -81,22 +82,32 @@ export function createBlobMottoStore({
         !Number.isFinite(Date.parse(record.updatedAt))
       )
         throw new Error('Invalid motto record')
-      return { text, updatedAt: record.updatedAt, revision: result.blob.etag }
+      const textEn = normalizeMotto(record.textEn)
+      return {
+        text,
+        updatedAt: record.updatedAt,
+        revision: result.blob.etag,
+        ...(textEn ? { textEn } : {})
+      }
     },
-    async write(text, revision) {
+    async write(text, revision, textEn) {
       const updatedAt = now().toISOString()
       try {
-        const result = await client.put(pathname, JSON.stringify({ text, updatedAt }), {
-          access: 'private',
-          addRandomSuffix: false,
-          // Atomic create for the first value; compare-and-swap for every subsequent save.
-          allowOverwrite: revision !== null,
-          ...(revision === null ? {} : { ifMatch: revision }),
-          contentType: 'application/json',
-          abortSignal: AbortSignal.timeout(8000)
-        })
+        const result = await client.put(
+          pathname,
+          JSON.stringify({ text, updatedAt, ...(textEn ? { textEn } : {}) }),
+          {
+            access: 'private',
+            addRandomSuffix: false,
+            // Atomic create for the first value; compare-and-swap for every subsequent save.
+            allowOverwrite: revision !== null,
+            ...(revision === null ? {} : { ifMatch: revision }),
+            contentType: 'application/json',
+            abortSignal: AbortSignal.timeout(8000)
+          }
+        )
         if (!result.etag) throw new Error('Missing motto revision')
-        return { text, updatedAt, revision: result.etag }
+        return { text, updatedAt, revision: result.etag, ...(textEn ? { textEn } : {}) }
       } catch (error) {
         if (error instanceof BlobPreconditionFailedError) throw new MottoConflictError()
         // The SDK has no dedicated "already exists" error. Confirm the initial-create

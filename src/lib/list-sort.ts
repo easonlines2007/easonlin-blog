@@ -6,9 +6,12 @@ export interface SortableListItem {
   index: number
 }
 
-const titleCollator = new Intl.Collator('zh-CN', { numeric: true, sensitivity: 'base' })
-
-export function sortListItems<T extends SortableListItem>(items: T[], order: ListSortOrder): T[] {
+export function sortListItems<T extends SortableListItem>(
+  items: T[],
+  order: ListSortOrder,
+  locale = 'zh-CN'
+): T[] {
+  const titleCollator = new Intl.Collator(locale, { numeric: true, sensitivity: 'base' })
   return [...items].sort((a, b) => {
     let difference = 0
 

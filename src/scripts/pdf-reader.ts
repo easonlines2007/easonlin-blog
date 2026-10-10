@@ -1,3 +1,5 @@
+import { localeFromPath, useTranslations, formatMessage } from '../lib/i18n'
+const t = useTranslations(localeFromPath(typeof location === 'undefined' ? '/' : location.pathname))
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
@@ -29,8 +31,8 @@ export function setupPdfReader(reader: HTMLElement) {
     message.hidden = false
     message.textContent =
       error instanceof Error && error.name === 'PasswordException'
-        ? '这份 PDF 有密码保护，请打开原文件阅读。'
-        : '暂时无法预览这份 PDF，请通过上方入口打开原文件。'
+        ? t('这份 PDF 有密码保护，请打开原文件阅读。')
+        : t('暂时无法预览这份 PDF，请通过上方入口打开原文件。')
     updateControls()
   }
 
@@ -67,7 +69,11 @@ export function setupPdfReader(reader: HTMLElement) {
       count.textContent = `${pageNumber} / ${pdf.numPages}`
       canvas.setAttribute(
         'aria-label',
-        `${reader.dataset.title} — 第 ${pageNumber} 页，共 ${pdf.numPages} 页`
+        formatMessage(t('{0} — 第 {1} 页，共 {2} 页'), [
+          reader.dataset.title,
+          pageNumber,
+          pdf.numPages
+        ])
       )
       message.hidden = true
       viewport.hidden = false

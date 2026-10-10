@@ -1,13 +1,26 @@
 ---
+import { localeFromPath, useTranslations } from '@/lib/i18n'
 import { Image } from 'astro:assets'
 import avatar from '../assets/avatar.png'
 import { github } from '../lib/projects'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
 const firstDay = new Date(`${github.days[0].date}T00:00:00Z`)
 const offset = firstDay.getUTCDay()
 const weeks = Math.ceil((offset + github.days.length) / 7)
 const months = github.days.flatMap((day, i) =>
   i === 0 || day.date.endsWith('-01')
-    ? [{ label: `${Number(day.date.slice(5, 7))}月`, column: Math.floor((i + offset) / 7) + 1 }]
+    ? [
+        {
+          label:
+            locale === 'en'
+              ? new Intl.DateTimeFormat('en', { month: 'short', timeZone: 'UTC' }).format(
+                  new Date(`${day.date}T00:00:00Z`)
+                )
+              : `${Number(day.date.slice(5, 7))}月`,
+          column: Math.floor((i + offset) / 7) + 1
+        }
+      ]
     : []
 )
 // Keep month labels from sharing a column when the range starts near a month boundary.
@@ -21,7 +34,7 @@ const labels = months.filter(
     class="activity-scroll"
     tabindex="0"
     role="region"
-    aria-label="GitHub 过去一年的贡献日历，可横向滚动"
+    aria-label={t('GitHub 过去一年的贡献日历，可横向滚动')}
   >
     <div class="activity-calendar" style={`--weeks:${weeks}`}>
       <div class="activity-months" aria-hidden="true">
@@ -41,8 +54,16 @@ const labels = months.filter(
           <span
             class="activity-day"
             data-level={day.level}
-            title={`${day.date} · ${day.count} 次贡献`}
-            aria-label={`${day.date}，${day.count} 次贡献`}
+            title={
+              locale === 'en'
+                ? `${day.date} · ${day.count} contributions`
+                : `${day.date} · ${day.count} 次贡献`
+            }
+            aria-label={
+              locale === 'en'
+                ? `${day.date}, ${day.count} contributions`
+                : `${day.date}，${day.count} 次贡献`
+            }
           />
         ))}
       </div>
@@ -58,19 +79,23 @@ const labels = months.filter(
       <Image src={avatar} width={64} height={64} alt="" format="webp" />
       <span class="lift-text">
         <strong>Eason Lin</strong>
-        <span>过去一年 {github.total} 次贡献</span>
+        <span>
+          {locale === 'en'
+            ? `${github.total} contributions in the past year`
+            : `过去一年 ${github.total} 次贡献`}
+        </span>
       </span>
     </a>
-    <span class="activity-legend" aria-label="颜色越深，贡献越多">
-      少{' '}
+    <span class="activity-legend" aria-label={t('颜色越深，贡献越多')}>
+      {t('少')}{' '}
       {[0, 1, 2, 3, 4].map((level) => (
         <span class="activity-day" data-level={level} />
       ))}{' '}
-      多
+      {t('多')}
     </span>
   </div>
   <p class="activity-updated">
-    每周自动同步 · 数据更新于{' '}
+    {locale === 'en' ? 'Synced weekly · Updated' : '每周自动同步 · 数据更新于'}{' '}
     <time datetime={github.updatedAt}>{github.updatedAt.slice(0, 10)}</time> ·{' '}
     <a href={`https://github.com/${github.username}`}>
       <span class="lift-text">@{github.username} ↗</span>

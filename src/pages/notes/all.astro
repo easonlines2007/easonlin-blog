@@ -1,7 +1,5 @@
 ---
-import NotesLayout from '../../layouts/NotesLayout.astro'
-import { getNotes } from '../../lib/notes'
-const notes = await getNotes()
+import View from '@/views/notes/all.astro'
 ---
 
-<NotesLayout title="全部笔记" {notes} back="/notes" backLabel="笔记" />
+<View {...Astro.props} />

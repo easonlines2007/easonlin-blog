@@ -1,4 +1,7 @@
 ---
+import { localeFromPath, useTranslations } from '@/lib/i18n'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
 import { Image } from 'astro:assets'
 import avatar from '../assets/avatar.png'
 import woodstock from '../assets/woodstock.png'
@@ -12,7 +15,7 @@ import woodstock from '../assets/woodstock.png'
         width={256}
         height={256}
         format="webp"
-        alt="Eason Lin 的头像：戴墨镜、穿红毛衣的史努比"
+        alt={t('Eason Lin 的头像：戴墨镜、穿红毛衣的史努比')}
         loading="eager"
         fetchpriority="high"
       />

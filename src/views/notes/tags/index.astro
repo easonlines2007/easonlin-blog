@@ -1,0 +1,32 @@
+---
+import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PageHeader from '@/components/PageHeader.astro'
+import { getNotes } from '@/lib/notes'
+import { countValues, tagUrl } from '@/lib/note-utils'
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const path = (href: string) => localizePath(href, locale)
+const tags = countValues(await getNotes(locale), 'tags')
+---
+
+<BaseLayout title={t('标签')}>
+  <PageHeader
+    title={t('标签')}
+    description={
+      locale === 'en'
+        ? `Explore related notes through ${tags.length} keywords.`
+        : `从 ${tags.length} 个关键词出发，找到相关笔记。`
+    }
+    back={path('/notes')}
+    backLabel={t('笔记')}
+  />
+  <div class="tag-list enter delay-1">
+    {tags.map(([tag, count]) => (
+      <a class="tag" href={path(tagUrl(tag))} style="font-size:14px;padding:6px 12px;gap:12px">
+        <span class="lift-text">{tag}</span>
+        <span>{count}</span>
+      </a>
+    ))}
+  </div>
+</BaseLayout>
