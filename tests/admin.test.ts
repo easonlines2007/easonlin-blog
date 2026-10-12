@@ -356,6 +356,13 @@ test('GitHub commits retain the original tree and parent, reject concurrent upda
   )
   assert.deepEqual(calls.at(-1)!.body, { sha: sha('4'), force: false })
   assert.deepEqual(calls.find((call) => call.path === '/git/commits')!.body.parents, [sha('1')])
+  const commit = calls.find((call) => call.path === '/git/commits')!.body
+  const noreplyIdentity = {
+    name: 'Eason Lin',
+    email: '278925066+easonlines2007@users.noreply.github.com'
+  }
+  assert.deepEqual(commit.author, noreplyIdentity)
+  assert.deepEqual(commit.committer, noreplyIdentity)
   assert.equal(calls.find((call) => call.path === '/git/trees')!.body.base_tree, sha('2'))
   const count = calls.length
   await assert.rejects(() =>

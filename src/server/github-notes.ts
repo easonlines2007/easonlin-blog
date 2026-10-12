@@ -30,6 +30,11 @@ export interface NotesRepository {
 
 const oid = (value: unknown): value is string =>
   typeof value === 'string' && /^[a-f0-9]{40}$/.test(value)
+// Explicitly set both identities so GitHub never falls back to the account's private email.
+const commitIdentity = {
+  name: 'Eason Lin',
+  email: '278925066+easonlines2007@users.noreply.github.com'
+}
 const readable = (path: string) =>
   path === manifestPath ||
   path === overridesPath ||
@@ -180,7 +185,9 @@ export function createGitHubNotesRepository({
       const nextCommit = await api.request('/git/commits', 'POST', {
         message,
         tree: nextTree.sha,
-        parents: [snapshot.revision]
+        parents: [snapshot.revision],
+        author: commitIdentity,
+        committer: commitIdentity
       })
       if (!oid(nextCommit.sha)) throw new Error('Invalid new commit')
       // A concurrent commit makes this non-fast-forward. Never force or retry with a new parent.

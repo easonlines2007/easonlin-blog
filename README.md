@@ -171,6 +171,8 @@ Token 仅由服务端 `process.env` 读取，不能使用 `PUBLIC_` 前缀，不
 
 每次保存创建 Git 提交，继续由现有 Vercel Git 集成自动部署。界面显示“已提交”只表示 GitHub 保存成功，部署状态在 Vercel 查看；构建失败时旧网站继续服务。GitHub 使用读取时的完整仓库版本作为父提交，更新分支时始终 `force: false`；如果网页、Obsidian 或定时任务已提交新版本，保存返回冲突，保留输入，需核对并重新加载，不自动覆盖。受保护分支必须允许该作者按现有规则提交，后台不会绕过分支规则。
 
+后台提交明确使用作者的 GitHub `noreply` 邮箱作为 author 和 committer，避免 GitHub 默认身份将私人邮箱写入公开历史。
+
 本机后续同步前，先确认工作区并拉取网页端的新提交，再运行现有 `obsidian:sync` / `obsidian:watch`。覆盖文件需要随代码保留，同步脚本不会改写它。下架不是附件访问控制，也不会清除 Git 历史或旧部署。
 
 `pnpm dev` 仍只提供 Astro 页面，不执行根目录 `api/`；完整联调使用已配置环境的 `vercel dev` 或 Vercel Production 部署。自动化测试直接调用同一组管理处理函数和模拟 GitHub API，使用临时 Vault 验证再次同步不会覆盖网站设置，不写真实仓库或 Vault。
