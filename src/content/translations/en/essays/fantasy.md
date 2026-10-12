@@ -2,7 +2,7 @@
 kind: essays
 source: fantasy
 title: “Could It Use a Little Touch of Fantasy?”
-sourceHash: d7e28a61c7defa99fd411e42b2b1aeb44ed07d4fe04748e83ceb0dd39263d1d9
+sourceHash: c89c949170c48d44f10d669b3ba22fe5942b38357ece8f9b8ce8a69964c55e35
 publish: true
 translationMethod: ai-assisted
 ---
@@ -22,3 +22,5 @@ After all, life has never burned as brightly as fictional worlds do.
 So, **“could it use a little touch of fantasy?”**
 
 ![A beautiful moment](/essays/fantasy/image-01.webp)
+
+![A green payphone with a white flower](/essays/fantasy/image-02.webp)

@@ -18,3 +18,5 @@ written: '2025-10'
 那么，**“它是不是缺少了一小撮幻想元素呢？”**
 
 ![很美好的事肾，](/essays/fantasy/image-01.webp)
+
+![图像](/essays/fantasy/image-02.webp)

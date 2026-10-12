@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { fromMarkdown } from 'mdast-util-from-markdown'
 import sharp from 'sharp'
+import { parse as parseYaml } from 'yaml'
 
 const runFile = promisify(execFile)
 const projectDirectory = fileURLToPath(new URL('../', import.meta.url))
@@ -18,7 +19,8 @@ const sources = [
   ['fantasy', 'fantasy'],
   ['nineteen', 'nineteen'],
   ['information-overload', 'information-overload'],
-  ['ordinary-person.md', 'ordinary-person']
+  ['ordinary-person.md', 'ordinary-person'],
+  ['future-loss', 'future-loss']
 ]
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex')
 
@@ -68,6 +70,22 @@ function parseExport(source, slug) {
 }
 
 function cleanBody(body) {
+  // Notes sometimes exports detected text as links that only work inside Apple apps.
+  const autoLinks = []
+  const visit = (node) => {
+    if (node.type === 'link' && node.url.startsWith('x-apple-data-detectors:'))
+      autoLinks.push({
+        start: node.position.start.offset,
+        end: node.position.end.offset,
+        label: node.children
+          .map((child) => body.slice(child.position.start.offset, child.position.end.offset))
+          .join('')
+      })
+    for (const child of node.children ?? []) visit(child)
+  }
+  visit(fromMarkdown(body))
+  for (const link of autoLinks.reverse())
+    body = body.slice(0, link.start) + link.label + body.slice(link.end)
   const lines = body.replace(/[\u00A0\u2007\u202F]/g, ' ').split('\n')
   const result = []
   for (const line of lines) {
@@ -122,7 +140,11 @@ async function makeWebp(sourcePath, cacheRoot) {
 }
 
 // This importer consumes user-exported files only. It never opens Notes or the Vault.
-export async function importAppleEssays({ sourceRoot, projectRoot = projectDirectory }) {
+export async function importAppleEssays({
+  sourceRoot,
+  projectRoot = projectDirectory,
+  update = false
+}) {
   if (!sourceRoot) throw new Error('请指定已导出的 Apple Notes 目录。')
   const exportRoot = await realpath(sourceRoot)
   const cacheRoot = join(projectRoot, 'artifacts/apple-essay-image-cache')
@@ -173,37 +195,60 @@ export async function importAppleEssays({ sourceRoot, projectRoot = projectDirec
       body = body.slice(0, change.start) + change.value + body.slice(change.end)
     body = cleanBody(body)
     if (!body) throw new Error(`${slug}：正文为空。`)
-    const markdown = `---\ntitle: ${JSON.stringify(parsed.title)}\nwritten: '${parsed.written}'\n---\n\n${body}\n`
+    const articlePath = join(projectRoot, 'src/content/essays', `${slug}.md`)
+    const existingArticle = await existingBytes(articlePath)
+    let title = parsed.title
+    let header = `---\ntitle: ${JSON.stringify(title)}\nwritten: '${parsed.written}'\n---\n`
+    if (update && existingArticle) {
+      const previousHeader = existingArticle.toString('utf8').match(/^---\n([\s\S]*?)\n---\n/)
+      if (!previousHeader) throw new Error(`${slug}：现有文章缺少 frontmatter。`)
+      const previousData = parseYaml(previousHeader[1])
+      // Author-approved website titles and other metadata survive source resyncs.
+      title = previousData.title
+      header = previousHeader[0]
+      if (previousData.written !== parsed.written)
+        header = header.replace(/^written:.*$/m, `written: '${parsed.written}'`)
+    }
+    const markdown = `${header}\n${body}\n`
     planned.push({
-      path: join(projectRoot, 'src/content/essays', `${slug}.md`),
+      path: articlePath,
       bytes: Buffer.from(markdown)
     })
-    essays.push({ slug, title: parsed.title, written: parsed.written, images: imageReport })
+    essays.push({ slug, title, written: parsed.written, images: imageReport })
   }
   // Complete conversion and collision checks before touching published content.
   for (const file of planned) {
     const existing = await existingBytes(file.path)
-    if (existing && digest(existing) !== digest(file.bytes))
+    const identical = existing && digest(existing) === digest(file.bytes)
+    if (existing && !identical && !update)
       throw new Error(`目标已有不同内容，已停止导入：${file.path}`)
+    file.identical = Boolean(identical)
     file.exists = existing !== null
   }
   let written = 0
   for (const file of planned) {
-    if (file.exists) continue
+    if (file.identical) continue
     await mkdir(dirname(file.path), { recursive: true })
-    await writeFile(file.path, file.bytes, { flag: 'wx' })
+    await writeFile(file.path, file.bytes, { flag: file.exists ? 'w' : 'wx' })
     written += 1
   }
   return {
     essays,
     attachments: essays.reduce((total, essay) => total + essay.images.length, 0),
-    written
+    written,
+    changed: planned
+      .filter((file) => !file.identical)
+      .map((file) => relative(projectRoot, file.path)),
+    unchanged: planned.filter((file) => file.identical).length
   }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    const result = await importAppleEssays({ sourceRoot: process.argv[2] })
+    const result = await importAppleEssays({
+      sourceRoot: process.argv[2],
+      update: process.argv.includes('--update')
+    })
     console.log(JSON.stringify(result, null, 2))
   } catch (error) {
     console.error(error instanceof Error ? error.message : 'Apple Notes 随笔导入失败。')
