@@ -1459,28 +1459,28 @@ summary::-webkit-details-marker {
   }
 }
 
-/* English navigation needs more room than the short Chinese labels. */
-@media (min-width: 601px) and (max-width: 780px) {
-  html[lang='en'] .desktop-nav {
+/* Keep the expanded navigation comfortably spaced on narrow screens. */
+@media (min-width: 601px) and (max-width: 860px) {
+  .desktop-nav {
     display: none;
   }
-  html[lang='en'] .mobile-menu {
+  .mobile-menu {
     display: block;
   }
-  html[lang='en'] .header-actions {
+  .header-actions {
     gap: 10px;
   }
-  html[lang='en'] .mobile-menu nav {
+  .mobile-menu nav {
     min-width: 180px;
   }
-  html[lang='en'] .mobile-menu a {
+  .mobile-menu a {
     display: block;
     padding: 9px 12px;
     font-size: var(--heading-size);
     font-family: var(--font-editorial);
     border-radius: 6px;
   }
-  html[lang='en'] .mobile-menu a:hover {
+  .mobile-menu a:hover {
     background: var(--soft);
   }
 }

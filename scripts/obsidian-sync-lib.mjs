@@ -596,7 +596,7 @@ export async function syncObsidian({
       !value ||
       external(value) ||
       value.startsWith('#') ||
-      /^\/(?:notes|about|projects|blog|search)(?:[/?#]|$)/.test(value) ||
+      /^\/(?:notes|about|links|projects|blog|search)(?:[/?#]|$)/.test(value) ||
       value === '/'
     ) {
       if (pdf) fail(`${note.output} 的 pdf 必须引用本地 PDF 文件`)

@@ -3,7 +3,6 @@ import { localeFromPath, useTranslations } from '@/lib/i18n'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import PageHeader from '@/components/PageHeader.astro'
 import ContactCards from '@/components/ContactCards.astro'
-import FriendLinks from '@/components/FriendLinks.astro'
 import { theme } from '@/site.config'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
@@ -23,7 +22,6 @@ const t = useTranslations(locale)
         : `这里是 ${theme.author} 的个人笔记本，收集学习中的记录、阅读时的批注，以及值得再想一想的问题。`}
     </p>
   </div>
-  <FriendLinks />
   <section class="contact-section enter delay-1" aria-labelledby="contact">
     <div class="contact-intro">
       <span class="contact-eyebrow">CONTACT</span>

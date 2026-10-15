@@ -16,6 +16,7 @@ const english: Record<string, string> = {
   笔记: 'Notes',
   项目: 'Projects',
   随笔: 'Essays',
+  友链: 'Links',
   关于: 'About',
   全部笔记: 'All notes',
   全部随笔: 'All essays',

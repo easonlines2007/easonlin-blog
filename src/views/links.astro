@@ -1,0 +1,99 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PageHeader from '@/components/PageHeader.astro'
+import FriendLinks from '@/components/FriendLinks.astro'
+import { localeFromPath, useTranslations } from '@/lib/i18n'
+import { theme } from '@/site.config'
+
+const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
+const siteUrl = 'https://easonlin-blog.vercel.app/'
+const avatarUrl = new URL('/icon-192.png', siteUrl).href
+const details = [
+  { label: locale === 'en' ? 'Name' : '名称', value: "Eason's blog" },
+  { label: locale === 'en' ? 'URL' : '网址', value: siteUrl, href: siteUrl },
+  { label: locale === 'en' ? 'Avatar' : '头像', value: avatarUrl, href: avatarUrl },
+  { label: locale === 'en' ? 'Description' : '简介', value: t(theme.description) }
+]
+---
+
+<BaseLayout title={t('友链')}>
+  <PageHeader title={t('友链')} />
+  <FriendLinks />
+  <section class="exchange-section enter delay-1" aria-labelledby="exchange-title">
+    <h2 id="exchange-title">{locale === 'en' ? 'Exchange links' : '欢迎互挂友链'}</h2>
+    <div class="site-details">
+      <img class="site-avatar" src="/icon-192.png" width="64" height="64" alt="" loading="lazy" />
+      <dl>
+        {details.map((detail) => (
+          <div class="detail-row">
+            <dt>{detail.label}</dt>
+            <dd>{detail.href ? <a href={detail.href}>{detail.value}</a> : detail.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .exchange-section {
+    margin-top: 56px;
+    padding-top: 36px;
+    border-top: 1px solid var(--line);
+  }
+  h2 {
+    font-size: var(--heading-size);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+  .site-details {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  .site-avatar {
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+  }
+  dl {
+    margin: 0;
+    min-width: 0;
+    font-size: 14px;
+  }
+  .detail-row {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .detail-row + .detail-row {
+    margin-top: 12px;
+  }
+  dt {
+    color: var(--secondary);
+  }
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  dd a {
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-underline-offset: 4px;
+  }
+  dd a:hover {
+    text-decoration-color: var(--accent);
+  }
+  @media (max-width: 600px) {
+    .site-details {
+      flex-direction: column;
+      gap: 20px;
+    }
+  }
+  :global(html[lang='en']) .detail-row {
+    grid-template-columns: 84px minmax(0, 1fr);
+  }
+</style>

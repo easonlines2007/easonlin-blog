@@ -135,6 +135,7 @@ if (invokedDirectly) {
       ...sources.map((s) => s.url),
       '/',
       '/about',
+      '/links',
       '/projects',
       '/blog',
       '/search',

@@ -13,6 +13,7 @@ export const theme = {
       { title: '笔记', link: '/notes' },
       { title: '项目', link: '/projects' },
       { title: '随笔', link: '/blog' },
+      { title: '友链', link: '/links' },
       { title: '关于', link: '/about' }
     ]
   },

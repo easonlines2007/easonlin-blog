@@ -1,11 +1,12 @@
 ---
 import { Image } from 'astro:assets'
-import { localeFromPath } from '@/lib/i18n'
+import { localeFromPath, useTranslations } from '@/lib/i18n'
 import heresagu from '@/assets/friends/heresagu.webp'
 import gyx from '@/assets/friends/gyx.png'
 import kbyylin from '@/assets/friends/kbyylin.webp'
 
 const locale = localeFromPath(Astro.url.pathname)
+const t = useTranslations(locale)
 const friends = [
   {
     name: 'heresAgu',
@@ -21,7 +22,7 @@ const friends = [
     whiteBackground: true
   },
   {
-    name: '空白阴影',
+    name: 'kbyy personal blog',
     url: 'https://kbyylin-blog.vercel.app/',
     domain: 'kbyylin-blog.vercel.app',
     avatar: kbyylin
@@ -29,66 +30,45 @@ const friends = [
 ]
 ---
 
-<section class="friends-section enter delay-1" aria-labelledby="friends-title">
-  <h2 id="friends-title">Links</h2>
-  <p class="friends-intro">
-    {locale === 'en'
-      ? 'A few friends and their corners of the internet.'
-      : '同学们的小站，常去逛逛。'}
-  </p>
-  <ul class="friends-grid">
-    {friends.map((friend) => (
-      <li>
-        <a
-          class="friend-link"
-          href={friend.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={
-            locale === 'en'
-              ? `${friend.name} (opens in a new tab)`
-              : `${friend.name}（在新标签页打开）`
-          }
-        >
-          <Image
-            class="friend-avatar"
-            style={friend.whiteBackground ? 'background: #fff' : undefined}
-            src={friend.avatar}
-            width={56}
-            height={56}
-            widths={[56, 112]}
-            sizes="56px"
-            format="webp"
-            alt=""
-            loading="lazy"
-          />
-          <span class="friend-info">
-            <span class="friend-name lift-text">{friend.name}</span>
-            <span class="friend-domain">{friend.domain}</span>
-          </span>
-          <span class="friend-arrow" aria-hidden="true">
-            ↗
-          </span>
-        </a>
-      </li>
-    ))}
-  </ul>
-</section>
+<ul class="friends-grid enter delay-1" aria-label={t('友链')}>
+  {friends.map((friend) => (
+    <li>
+      <a
+        class="friend-link"
+        href={friend.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={
+          locale === 'en'
+            ? `${friend.name} (opens in a new tab)`
+            : `${friend.name}（在新标签页打开）`
+        }
+      >
+        <Image
+          class="friend-avatar"
+          style={friend.whiteBackground ? 'background: #fff' : undefined}
+          src={friend.avatar}
+          width={56}
+          height={56}
+          widths={[56, 112]}
+          sizes="56px"
+          format="webp"
+          alt=""
+          loading="lazy"
+        />
+        <span class="friend-info">
+          <span class="friend-name lift-text">{friend.name}</span>
+          <span class="friend-domain">{friend.domain}</span>
+        </span>
+        <span class="friend-arrow" aria-hidden="true">
+          ↗
+        </span>
+      </a>
+    </li>
+  ))}
+</ul>
 
 <style>
-  .friends-section {
-    margin-top: 44px;
-  }
-  h2 {
-    font-size: var(--heading-size);
-    font-weight: 400;
-    scroll-margin-top: var(--reading-offset);
-  }
-  .friends-intro {
-    margin: 12px 0 24px;
-    color: var(--secondary);
-    font-size: 14px;
-  }
   .friends-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
