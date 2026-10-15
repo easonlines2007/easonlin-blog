@@ -106,9 +106,7 @@ const english: Record<string, string> = {
   '关闭 ×': 'Close ×',
   '正在准备搜索…': 'Preparing search…',
   '输入一个关键词，找回读过、写过的内容。':
-    'Find something you have read or written with a keyword.',
-  '记录、整理，慢慢理解。一个持续生长的个人笔记本。':
-    'Record, organize, and understand a little more. A personal notebook that keeps growing.'
+    'Find something you have read or written with a keyword.'
 }
 
 export const useTranslations = (locale: Locale) => (text: string) =>
