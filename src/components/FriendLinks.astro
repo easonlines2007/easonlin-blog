@@ -1,0 +1,158 @@
+---
+import { Image } from 'astro:assets'
+import { localeFromPath } from '@/lib/i18n'
+import heresagu from '@/assets/friends/heresagu.webp'
+import gyx from '@/assets/friends/gyx.png'
+import kbyylin from '@/assets/friends/kbyylin.webp'
+
+const locale = localeFromPath(Astro.url.pathname)
+const friends = [
+  {
+    name: 'heresAgu',
+    url: 'https://heresagu-blog.vercel.app/',
+    domain: 'heresagu-blog.vercel.app',
+    avatar: heresagu
+  },
+  {
+    name: 'GYX’s Blog',
+    url: 'https://www.gyxblog.com/',
+    domain: 'gyxblog.com',
+    avatar: gyx,
+    whiteBackground: true
+  },
+  {
+    name: '空白阴影',
+    url: 'https://kbyylin-blog.vercel.app/',
+    domain: 'kbyylin-blog.vercel.app',
+    avatar: kbyylin
+  }
+]
+---
+
+<section class="friends-section enter delay-1" aria-labelledby="friends-title">
+  <h2 id="friends-title">Links</h2>
+  <p class="friends-intro">
+    {locale === 'en'
+      ? 'A few friends and their corners of the internet.'
+      : '同学们的小站，常去逛逛。'}
+  </p>
+  <ul class="friends-grid">
+    {friends.map((friend) => (
+      <li>
+        <a
+          class="friend-link"
+          href={friend.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={
+            locale === 'en'
+              ? `${friend.name} (opens in a new tab)`
+              : `${friend.name}（在新标签页打开）`
+          }
+        >
+          <Image
+            class="friend-avatar"
+            style={friend.whiteBackground ? 'background: #fff' : undefined}
+            src={friend.avatar}
+            width={56}
+            height={56}
+            widths={[56, 112]}
+            sizes="56px"
+            format="webp"
+            alt=""
+            loading="lazy"
+          />
+          <span class="friend-info">
+            <span class="friend-name lift-text">{friend.name}</span>
+            <span class="friend-domain">{friend.domain}</span>
+          </span>
+          <span class="friend-arrow" aria-hidden="true">
+            ↗
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .friends-section {
+    margin-top: 44px;
+  }
+  h2 {
+    font-size: var(--heading-size);
+    font-weight: 400;
+    scroll-margin-top: var(--reading-offset);
+  }
+  .friends-intro {
+    margin: 12px 0 24px;
+    color: var(--secondary);
+    font-size: 14px;
+  }
+  .friends-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .friend-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 100%;
+    padding: 22px 18px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--soft);
+    transition:
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+  .friend-link:hover,
+  .friend-link:focus-visible {
+    border-color: var(--accent);
+  }
+  .friend-avatar {
+    flex: 0 0 56px;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    object-fit: contain;
+    background: var(--page-bg);
+  }
+  .friend-info {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .friend-name {
+    font-family: var(--font-editorial);
+    font-size: 20px;
+  }
+  .friend-domain {
+    color: var(--secondary);
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+  .friend-arrow {
+    flex-shrink: 0;
+    color: var(--accent);
+    font-size: 16px;
+  }
+  @media (max-width: 900px) {
+    .friends-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .friend-link {
+      padding: 18px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .friend-link {
+      transition: none;
+    }
+  }
+</style>
