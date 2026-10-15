@@ -97,6 +97,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
         document.querySelector('meta[name="theme-color"]').content = dark ? '#1e1c1a' : '#f7f6f2'
       })()
     </script>
+    <!-- Vercel Web Analytics: lightweight script, no build dependency required. -->
+    <script is:inline>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments) }
+    </script>
+    <script is:inline defer src="/_vercel/insights/script.js"></script>
     <slot name="head" />
   </head>
   <body class:list={[home && 'home-page']}>
