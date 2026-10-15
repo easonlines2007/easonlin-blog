@@ -3,7 +3,7 @@ import { localeFromPath, useTranslations } from '@/lib/i18n'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import PageHeader from '@/components/PageHeader.astro'
 import ContactCards from '@/components/ContactCards.astro'
-import { theme } from '@/site.config'
+import GitHubProfile from '@/components/GitHubProfile.astro'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 ---
@@ -18,10 +18,11 @@ const t = useTranslations(locale)
     </p>
     <p>
       {locale === 'en'
-        ? `${theme.author}’s personal notebook: study notes, reading annotations, and questions worth returning to.`
-        : `这里是 ${theme.author} 的个人笔记本，收集学习中的记录、阅读时的批注，以及值得再想一想的问题。`}
+        ? 'Welcome to Eason Lin’s blog, where I share study notes, personal projects, and everyday essays.'
+        : '欢迎来到 Eason Lin 的博客，这里主要放些学习笔记，个人项目 与 日常随笔。'}
     </p>
   </div>
+  <GitHubProfile />
   <section class="contact-section enter delay-1" aria-labelledby="contact">
     <div class="contact-intro">
       <span class="contact-eyebrow">CONTACT</span>

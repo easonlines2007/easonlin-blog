@@ -33,7 +33,7 @@ jobs:
           package-manager-cache: false
       - name: Verify public-data validation
         run: node --test tests/github-data.test.mjs
-      - name: Fetch public repositories and contributions
+      - name: Fetch public profile, repositories and contributions
         run: node scripts/update-github-data.mjs
       - name: Publish changed data
         run: |

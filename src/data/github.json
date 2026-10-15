@@ -1,7 +1,7 @@
 {
   "username": "easonlines2007",
-  "updatedAt": "2026-10-12T10:52:56.703Z",
-  "total": 214,
+  "updatedAt": "2026-10-15T19:55:04.501Z",
+  "total": 230,
   "days": [
     {
       "date": "2025-10-12",
@@ -1832,6 +1832,21 @@
       "date": "2026-10-12",
       "level": 1,
       "count": 3
+    },
+    {
+      "date": "2026-10-13",
+      "level": 1,
+      "count": 7
+    },
+    {
+      "date": "2026-10-14",
+      "level": 1,
+      "count": 5
+    },
+    {
+      "date": "2026-10-15",
+      "level": 1,
+      "count": 4
     }
   ],
   "repositories": [
@@ -1850,6 +1865,25 @@
       "language": null,
       "stars": 0,
       "fork": true
+    },
+    {
+      "name": "easonlin-blog",
+      "description": "Eason Lin's personal notes and blog, built with Astro.",
+      "url": "https://github.com/easonlines2007/easonlin-blog",
+      "language": "TypeScript",
+      "stars": 0,
+      "fork": false
     }
-  ]
+  ],
+  "profile": {
+    "name": "Eason Lin",
+    "url": "https://github.com/easonlines2007",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/278925066?v=4",
+    "bio": "",
+    "company": "FIB，Universitat Politècnica de Catalunya",
+    "location": "Barcelona，Spain",
+    "publicRepos": 3,
+    "followers": 4,
+    "following": 4
+  }
 }

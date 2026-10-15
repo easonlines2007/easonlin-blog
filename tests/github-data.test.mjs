@@ -2,11 +2,56 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   normalizeRepositories,
+  normalizeProfile,
   parseContributions,
   sameGitHubData
 } from '../scripts/github-data.mjs'
 
 const username = 'easonlines2007'
+const profile = {
+  login: username,
+  name: 'Eason Lin',
+  html_url: `https://github.com/${username}`,
+  avatar_url: 'https://avatars.githubusercontent.com/u/278925066?v=4',
+  bio: null,
+  company: 'FIB，Universitat Politècnica de Catalunya',
+  location: 'Barcelona，Spain',
+  public_repos: 3,
+  followers: 4,
+  following: 4,
+  email: 'not-part-of-the-public-card@example.com'
+}
+
+test('profile snapshots include only the selected public fields and handle empty optional fields', () => {
+  const result = normalizeProfile(profile, username)
+  assert.equal(result.name, 'Eason Lin')
+  assert.equal(result.publicRepos, 3)
+  assert.equal(result.bio, '')
+  assert.equal('email' in result, false)
+  const empty = normalizeProfile(
+    { ...profile, name: null, company: null, location: null, followers: 0 },
+    username
+  )
+  assert.equal(empty.name, username)
+  assert.equal(empty.company, '')
+  assert.equal(empty.location, '')
+  assert.equal(empty.followers, 0)
+})
+
+test('wrong identities, untrusted avatar URLs and invalid profile counts cannot replace the snapshot', () => {
+  for (const extra of [
+    { login: 'another-user' },
+    { html_url: 'https://example.com/profile' },
+    { avatar_url: 'https://example.com/avatar.png' },
+    { avatar_url: 'http://avatars.githubusercontent.com/u/1' },
+    { avatar_url: 'not-a-url' },
+    { public_repos: -1 },
+    { followers: 1.5 },
+    { following: '4' },
+    { company: undefined }
+  ])
+    assert.throws(() => normalizeProfile({ ...profile, ...extra }, username))
+})
 const repository = (name, extra = {}) => ({
   name,
   private: false,
@@ -69,6 +114,7 @@ test('unchanged data skips timestamp-only commits, while metadata and contributi
     username,
     updatedAt: 'old',
     total: 2,
+    profile: normalizeProfile(profile, username),
     days: [{ date: '2026-10-04', level: 1, count: 2 }],
     repositories: [{ name: 'a', description: 'old' }]
   }
@@ -78,4 +124,8 @@ test('unchanged data skips timestamp-only commits, while metadata and contributi
     false
   )
   assert.equal(sameGitHubData(before, { ...before, total: 3 }), false)
+  assert.equal(
+    sameGitHubData(before, { ...before, profile: { ...before.profile, followers: 5 } }),
+    false
+  )
 })

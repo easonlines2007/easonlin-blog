@@ -90,6 +90,50 @@ export function sameGitHubData(previous, next) {
   return JSON.stringify(previousData) === JSON.stringify(nextData)
 }
 
+export function normalizeProfile(profile, username) {
+  const invalid = () => {
+    throw new Error('Unexpected public profile metadata; previous snapshot is preserved.')
+  }
+  if (
+    !profile ||
+    typeof profile.login !== 'string' ||
+    profile.login.toLowerCase() !== username.toLowerCase() ||
+    profile.html_url !== `https://github.com/${profile.login}` ||
+    typeof profile.avatar_url !== 'string'
+  )
+    invalid()
+  let avatar
+  try {
+    avatar = new URL(profile.avatar_url)
+  } catch {
+    invalid()
+  }
+  if (
+    avatar.protocol !== 'https:' ||
+    avatar.hostname !== 'avatars.githubusercontent.com' ||
+    avatar.username ||
+    avatar.password
+  )
+    invalid()
+  for (const key of ['name', 'bio', 'company', 'location']) {
+    if (profile[key] !== null && typeof profile[key] !== 'string') invalid()
+  }
+  for (const key of ['public_repos', 'followers', 'following']) {
+    if (!Number.isSafeInteger(profile[key]) || profile[key] < 0) invalid()
+  }
+  return {
+    name: profile.name || profile.login,
+    url: profile.html_url,
+    avatarUrl: avatar.href,
+    bio: profile.bio || '',
+    company: profile.company || '',
+    location: profile.location || '',
+    publicRepos: profile.public_repos,
+    followers: profile.followers,
+    following: profile.following
+  }
+}
+
 async function get(url) {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
@@ -125,14 +169,18 @@ export async function fetchGitHubData(username) {
     if (page === 100) throw new Error('Repository pagination exceeded its safety limit.')
   }
   const repositories = normalizeRepositories(repos, username)
-  const days = parseContributions(
-    await (await get(`https://github.com/users/${username}/contributions`)).text()
-  )
+  const [profileResponse, contributionsResponse] = await Promise.all([
+    get(`https://api.github.com/users/${username}`),
+    get(`https://github.com/users/${username}/contributions`)
+  ])
+  const profile = normalizeProfile(await profileResponse.json(), username)
+  const days = parseContributions(await contributionsResponse.text())
   return {
     username,
     updatedAt: new Date().toISOString(),
     total: days.reduce((sum, day) => sum + day.count, 0),
     days,
-    repositories
+    repositories,
+    profile
   }
 }
