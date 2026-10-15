@@ -239,7 +239,7 @@ PDF.js 仅在附件接近视口时加载。`scripts/prepare-pdf-assets.mjs` 在�
 
 同步会重试暂时的网络错误，并在验证仓库字段、日期完整性和贡献数字后原子替换快照。接口异常时工作流失败并保留上一次可用数据，网站构建不依赖 GitHub 网络请求。运行 `pnpm github:update` 仍可手动更新；不需要个人 GitHub Token 或 Vercel Token，工作流仅使用 GitHub 内置的当前仓库写入凭据。
 
-顶栏“友链 / Links”位于“关于”左侧，对应 `/links` 与 `/en/links`。友链数据和样式在 `src/components/FriendLinks.astro`，头像保存在 `src/assets/friends/`。桌面三列，窄屏单列；GYX 的恐龙头像在深浅主题下均使用白底。页面下方提供本站名称、网址和头像地址，供互挂友链使用。
+顶栏“友链 / Links”位于“关于”左侧，对应 `/links` 与 `/en/links`。友链数据和样式在 `src/components/FriendLinks.astro`，头像保存在 `src/assets/friends/`。桌面三列，窄屏单列；GYX 的恐龙头像在深浅主题下均使用白底。页面下方提供本站名称、网址、头像地址和简介，供互挂友链使用。本站简介为“史努比的红狗屋”，显示时保留引号。
 
 “关于”页的联系方式按微信、QQ、Instagram、小红书排列，使用一致的 5:7 展示框、不加内边距。素材使用准备好的 5:7 图片，以 `object-fit: contain` 完整显示，不裁切、不局部放大。桌面悬停或键盘聚焦显示图片，点击可打开完整原比例大图；触屏设备直接显示图片。素材位于 `src/assets/contact/`，请仅放准备公开的联系方式。
 

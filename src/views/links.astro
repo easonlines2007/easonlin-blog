@@ -3,6 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 import PageHeader from '@/components/PageHeader.astro'
 import FriendLinks from '@/components/FriendLinks.astro'
 import { localeFromPath, useTranslations } from '@/lib/i18n'
+import { theme } from '@/site.config'
 
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
@@ -11,7 +12,8 @@ const avatarUrl = new URL('/icon-192.png', siteUrl).href
 const details = [
   { label: locale === 'en' ? 'Name' : '名称', value: "Eason's blog" },
   { label: locale === 'en' ? 'URL' : '网址', value: siteUrl, href: siteUrl },
-  { label: locale === 'en' ? 'Avatar' : '头像', value: avatarUrl, href: avatarUrl }
+  { label: locale === 'en' ? 'Avatar' : '头像', value: avatarUrl, href: avatarUrl },
+  { label: locale === 'en' ? 'Description' : '简介', value: t(theme.description) }
 ]
 ---
 

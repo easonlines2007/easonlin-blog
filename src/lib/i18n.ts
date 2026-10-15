@@ -17,6 +17,7 @@ const english: Record<string, string> = {
   项目: 'Projects',
   随笔: 'Essays',
   友链: 'Links',
+  '“史努比的红狗屋”': '“Snoopy’s red doghouse”',
   关于: 'About',
   全部笔记: 'All notes',
   全部随笔: 'All essays',

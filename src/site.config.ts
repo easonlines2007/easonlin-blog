@@ -3,7 +3,7 @@ import type { IntegrationUserConfig, ThemeUserConfig } from 'astro-pure/types'
 export const theme = {
   title: "Eason's Notes",
   author: 'Eason Lin',
-  description: '',
+  description: '“史努比的红狗屋”',
   favicon: '/favicon-32.png',
   logo: { src: '/apple-touch-icon.png', alt: 'Eason Lin' },
   locale: { lang: 'zh-CN', attrs: 'zh_CN', dateLocale: 'zh-CN' },
