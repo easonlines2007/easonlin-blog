@@ -252,6 +252,10 @@ export function setupHomeMotto(root: HTMLElement) {
       if (token === sequence && !dirty() && !saving) applyState(next)
     } catch {
       // The pre-rendered motto stays readable even when the service is unavailable.
+    } finally {
+      root.setAttribute('data-motto-ready', '')
+      root.removeAttribute('data-motto-loading')
+      root.removeAttribute('aria-busy')
     }
   }
 

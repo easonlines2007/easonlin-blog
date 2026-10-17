@@ -4,6 +4,7 @@ import Icon from './Icon.astro'
 import ThemePicker from './ThemePicker.astro'
 import NavCharacter from './NavCharacter.astro'
 import LanguageSwitch from './LanguageSwitch.astro'
+import Wordmark from './Wordmark.astro'
 import { localeFromPath, localizePath, useTranslations } from '../lib/i18n'
 interface Props {
   alternatePath: string | null
@@ -19,7 +20,9 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
 <header class="site-header" data-pagefind-ignore>
   <a class="brand character-link" href={path('/')}>
     <span class="nav-flip">
-      <span class="nav-label">Eason's blog</span>
+      <span class="nav-label">
+        <Wordmark kind="blog" />
+      </span>
       <NavCharacter href="/" />
     </span>
   </a>

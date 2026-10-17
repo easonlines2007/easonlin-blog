@@ -1,6 +1,3 @@
-.admin {
-  --admin-radius: 5px;
-}
 .admin-form-message {
   margin-top: 14px;
 }
@@ -8,7 +5,7 @@
   width: min(460px, calc(100vw - 32px));
   padding: 26px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--page-bg);
   color: var(--text);
 }
@@ -86,7 +83,7 @@
   background: var(--page-bg);
   color: var(--text);
   border: 1px solid var(--line);
-  border-radius: var(--admin-radius);
+  border-radius: var(--radius);
   font: inherit;
   font-size: 14px;
   padding: 9px 11px;
@@ -108,7 +105,7 @@
 .admin-button {
   padding: 8px 13px;
   border: 1px solid var(--line);
-  border-radius: var(--admin-radius);
+  border-radius: var(--radius);
   background: transparent;
   color: var(--text);
   font-size: 13px;
@@ -262,7 +259,7 @@
   background: var(--soft);
   color: var(--text);
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--radius);
   padding: 4px 8px;
   margin-right: 10px;
   cursor: pointer;

@@ -6,11 +6,11 @@ import { getEssays } from '@/lib/essays'
 import { essayUrl } from '@/lib/essay-utils'
 import { countValues, topicUrl } from '@/lib/note-utils'
 import { projects } from '@/lib/projects'
-import { theme } from '@/site.config'
 import HomeAvatar from '@/components/HomeAvatar.astro'
 import HomeEntrance from '@/components/HomeEntrance.astro'
 import HomeRow from '@/components/HomeRow.astro'
 import HomeMotto from '@/components/HomeMotto.astro'
+import Wordmark from '@/components/Wordmark.astro'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 const path = (href: string) => localizePath(href, locale)
@@ -23,7 +23,9 @@ const topics = countValues(notes, 'topic')
   <HomeEntrance slot="head" />
   <section class="home-intro">
     <HomeAvatar />
-    <h1 data-intro-name>{theme.author}</h1>
+    <h1 data-intro-name>
+      <Wordmark kind="name" />
+    </h1>
     <HomeMotto />
   </section>
   <div class="home-sections">

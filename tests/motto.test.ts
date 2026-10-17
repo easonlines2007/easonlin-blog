@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { BlobPreconditionFailedError } from '@vercel/blob'
+import defaultMotto from '../src/data/motto.json' with { type: 'json' }
 import { createMottoHandlers } from '../src/server/motto-api.ts'
 import {
   authConfigured,
@@ -77,7 +78,7 @@ test('author login gives a private secure session; anonymous visitors only read'
   assert.equal(initial.status, 200)
   assert.match(initial.headers.get('cache-control')!, /no-store/)
   assert.deepEqual(await initial.json(), {
-    text: '记录、整理，慢慢理解。',
+    text: defaultMotto.text,
     updatedAt: null,
     revision: null,
     canEdit: false,
@@ -388,7 +389,7 @@ test('storage failures preserve fallback reading and never report a successful s
   const read = await api.get(request('/api/motto', { headers: { Cookie: authenticatedCookie() } }))
   assert.equal(read.status, 503)
   assert.deepEqual(await read.json(), {
-    text: '记录、整理，慢慢理解。',
+    text: defaultMotto.text,
     updatedAt: null,
     revision: null,
     canEdit: false,

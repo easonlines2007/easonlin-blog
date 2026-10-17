@@ -29,7 +29,7 @@ const labels = months.filter(
 )
 ---
 
-<div class="activity-card">
+<div class="activity-card" data-activity>
   <div
     class="activity-scroll"
     tabindex="0"
@@ -50,24 +50,34 @@ const labels = months.filter(
         {Array.from({ length: offset }).map(() => (
           <span aria-hidden="true" />
         ))}
-        {github.days.map((day) => (
-          <span
-            class="activity-day"
-            data-level={day.level}
-            title={
+        {github.days.map((day, i) => (
+          <button
+            type="button"
+            class="activity-cell"
+            tabindex={i === github.days.length - 1 ? 0 : -1}
+            data-column={Math.floor((i + offset) / 7)}
+            data-row={(i + offset) % 7}
+            data-date={day.date}
+            data-detail={
               locale === 'en'
-                ? `${day.date} · ${day.count} contributions`
-                : `${day.date} · ${day.count} 次贡献`
+                ? `${day.count} ${day.count === 1 ? 'contribution' : 'contributions'}`
+                : `${day.count} 次贡献`
             }
             aria-label={
               locale === 'en'
                 ? `${day.date}, ${day.count} contributions`
                 : `${day.date}，${day.count} 次贡献`
             }
-          />
+          >
+            <span class="activity-day" data-level={day.level} aria-hidden="true" />
+          </button>
         ))}
       </div>
     </div>
+  </div>
+  <div class="activity-tooltip" role="tooltip" aria-hidden="true">
+    <strong data-tooltip-detail></strong>
+    <time data-tooltip-date></time>
   </div>
   <div class="activity-footer">
     <a
@@ -102,15 +112,233 @@ const labels = months.filter(
     </a>
   </p>
 </div>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-activity]').forEach((card) => {
+    const scroll = card.querySelector<HTMLElement>('.activity-scroll')!
+    const grid = card.querySelector<HTMLElement>('.activity-days')!
+    const cells = Array.from(card.querySelectorAll<HTMLButtonElement>('.activity-cell'))
+    const tooltip = card.querySelector<HTMLElement>('.activity-tooltip')!
+    const detail = tooltip.querySelector<HTMLElement>('[data-tooltip-detail]')!
+    const date = tooltip.querySelector<HTMLTimeElement>('[data-tooltip-date]')!
+    const positions = new Map(
+      cells.map((cell) => [`${cell.dataset.column}:${cell.dataset.row}`, cell])
+    )
+    // Resolve the small local neighborhood once, instead of scanning the year on every move.
+    const neighborhoods = new Map(
+      cells.map((cell) => {
+        const column = Number(cell.dataset.column)
+        const row = Number(cell.dataset.row)
+        const neighbors: { cell: HTMLButtonElement; column: number; row: number }[] = []
+        for (let dx = -2; dx <= 2; dx++) {
+          for (let dy = -2; dy <= 2; dy++) {
+            const neighbor = positions.get(`${column + dx}:${row + dy}`)
+            if (neighbor) neighbors.push({ cell: neighbor, column: column + dx, row: row + dy })
+          }
+        }
+        return [cell, neighbors] as const
+      })
+    )
+    type Target = { cell: HTMLButtonElement; x?: number; y?: number }
+    let pending: Target | null = null
+    let frame = 0
+    let active: HTMLButtonElement | null = null
+    let focusedCell = cells.find((cell) => cell.tabIndex === 0)!
+    let lifted = new Set<HTMLButtonElement>()
+    let geometry: ReturnType<typeof measure> | null = null
+
+    function measure() {
+      const cardRect = card.getBoundingClientRect()
+      const gridRect = grid.getBoundingClientRect()
+      const cellRect = cells[0].getBoundingClientRect()
+      const styles = getComputedStyle(grid)
+      return {
+        left: gridRect.left,
+        top: gridRect.top,
+        stepX: cellRect.width + parseFloat(styles.columnGap),
+        stepY: cellRect.height + parseFloat(styles.rowGap),
+        cellWidth: cellRect.width,
+        cellHeight: cellRect.height,
+        cardLeft: cardRect.left + card.clientLeft,
+        cardTop: cardRect.top + card.clientTop,
+        cardWidth: card.clientWidth,
+        tooltipWidth: tooltip.offsetWidth,
+        tooltipHeight: tooltip.offsetHeight
+      }
+    }
+
+    function resetCell(cell: HTMLButtonElement) {
+      cell.style.removeProperty('--lift')
+      cell.style.removeProperty('--scale')
+      cell.style.removeProperty('--shadow-opacity')
+    }
+
+    function clear() {
+      cancelAnimationFrame(frame)
+      frame = 0
+      pending = null
+      lifted.forEach(resetCell)
+      lifted.clear()
+      if (active) delete active.dataset.active
+      active = null
+      geometry = null
+      tooltip.setAttribute('aria-hidden', 'true')
+    }
+
+    function render() {
+      frame = 0
+      if (!pending) return
+      const { cell, x, y } = pending
+      // Read layout before writing styles; reuse it until scroll/resize invalidates it.
+      const bounds = (geometry ??= measure())
+      const column = Number(cell.dataset.column)
+      const row = Number(cell.dataset.row)
+      const pointerX = x ?? bounds.left + column * bounds.stepX + bounds.cellWidth / 2
+      const pointerY = y ?? bounds.top + row * bounds.stepY + bounds.cellHeight / 2
+      const centerX = (pointerX - bounds.left - bounds.cellWidth / 2) / bounds.stepX
+      const centerY = (pointerY - bounds.top - bounds.cellHeight / 2) / bounds.stepY
+      const nextLifted = new Set<HTMLButtonElement>()
+      for (const neighbor of neighborhoods.get(cell)!) {
+        const distance = Math.hypot(neighbor.column - centerX, neighbor.row - centerY)
+        if (distance >= 2) continue
+        const t = 1 - distance / 2
+        const strength = t * t * (3 - 2 * t)
+        neighbor.cell.style.setProperty('--lift', `${(-7 * strength).toFixed(2)}px`)
+        neighbor.cell.style.setProperty('--scale', (1 + 0.22 * strength).toFixed(3))
+        neighbor.cell.style.setProperty('--shadow-opacity', strength.toFixed(3))
+        nextLifted.add(neighbor.cell)
+      }
+      lifted.forEach((previous) => {
+        if (!nextLifted.has(previous)) resetCell(previous)
+      })
+      lifted = nextLifted
+      if (active !== cell) {
+        if (active) delete active.dataset.active
+        active = cell
+        cell.dataset.active = ''
+        detail.textContent = cell.dataset.detail!
+        date.textContent = cell.dataset.date!
+        date.dateTime = cell.dataset.date!
+      }
+      const left = Math.max(
+        8,
+        Math.min(
+          pointerX - bounds.cardLeft - bounds.tooltipWidth / 2,
+          bounds.cardWidth - bounds.tooltipWidth - 8
+        )
+      )
+      const above = pointerY - bounds.cardTop - bounds.tooltipHeight - 22
+      const top = pointerY - bounds.tooltipHeight - 22 < 8 ? pointerY - bounds.cardTop + 22 : above
+      tooltip.style.transform = `translate3d(${left}px, ${top}px, 0)`
+      tooltip.setAttribute('aria-hidden', 'false')
+    }
+
+    function show(target: Target) {
+      pending = target
+      if (!frame) frame = requestAnimationFrame(render)
+    }
+
+    function getCell(target: EventTarget | null) {
+      return target instanceof Element ? target.closest<HTMLButtonElement>('.activity-cell') : null
+    }
+
+    grid.addEventListener(
+      'pointermove',
+      (event) => {
+        if (event.pointerType === 'touch') return
+        const cell = getCell(event.target) ?? pending?.cell
+        // Keep tracking across the tiny gaps between squares instead of pausing there.
+        if (cell) show({ cell, x: event.clientX, y: event.clientY })
+      },
+      { passive: true }
+    )
+    grid.addEventListener('pointerleave', clear)
+    grid.addEventListener('pointercancel', clear)
+    grid.addEventListener('click', (event) => {
+      const cell = getCell(event.target)
+      if (cell) show({ cell })
+    })
+    grid.addEventListener('focusin', (event) => {
+      const cell = getCell(event.target)
+      if (!cell) return
+      focusedCell.tabIndex = -1
+      cell.tabIndex = 0
+      focusedCell = cell
+      show({ cell })
+    })
+    grid.addEventListener('focusout', (event) => {
+      if (!(event.relatedTarget instanceof Node) || !grid.contains(event.relatedTarget)) clear()
+    })
+    grid.addEventListener('keydown', (event) => {
+      const cell = getCell(event.target)
+      if (!cell) return
+      const index = cells.indexOf(cell)
+      const row = Number(cell.dataset.row)
+      const destinations: Record<string, number> = {
+        ArrowLeft: index - 7,
+        ArrowRight: index + 7,
+        ArrowUp: row > 0 ? index - 1 : index,
+        ArrowDown: row < 6 ? index + 1 : index,
+        Home: 0,
+        End: cells.length - 1
+      }
+      if (!(event.key in destinations)) return
+      event.preventDefault()
+      const next = cells[destinations[event.key]]
+      if (next) {
+        next.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' })
+        next.focus({ preventScroll: true })
+      }
+    })
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') clear()
+    })
+    document.addEventListener('pointerdown', (event) => {
+      if (!(event.target instanceof Node) || !grid.contains(event.target)) clear()
+    })
+    function onScroll() {
+      const focused = document.activeElement
+      clear()
+      if (
+        focused instanceof HTMLButtonElement &&
+        grid.contains(focused) &&
+        focused.matches(':focus-visible')
+      ) {
+        show({ cell: focused })
+      }
+    }
+    scroll.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', clear)
+    window.addEventListener('blur', clear)
+    // Start at the latest dates; preserve the user's position if they scroll into history.
+    let atLatest = true
+    let previousWidth = 0
+    scroll.addEventListener(
+      'scroll',
+      () => {
+        atLatest = scroll.scrollWidth - scroll.clientWidth - scroll.scrollLeft < 2
+      },
+      { passive: true }
+    )
+    new ResizeObserver(() => {
+      clear()
+      if (atLatest || previousWidth === 0) scroll.scrollLeft = scroll.scrollWidth
+      previousWidth = scroll.clientWidth
+    }).observe(scroll)
+    scroll.scrollLeft = scroll.scrollWidth
+  })
+</script>
 <style>
   .activity-card {
+    position: relative;
     padding: 22px;
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: var(--radius);
   }
   .activity-scroll {
     overflow-x: auto;
-    padding-bottom: 8px;
+    padding: 10px 5px 8px;
+    margin: -10px -5px 0;
   }
   .activity-scroll:focus-visible {
     outline: 2px solid var(--accent);
@@ -142,6 +370,88 @@ const labels = months.filter(
     aspect-ratio: 1;
     border-radius: 2px;
     background: var(--soft);
+  }
+  .activity-cell {
+    position: relative;
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    aspect-ratio: 1;
+    touch-action: pan-x pan-y;
+  }
+  /* Only the visual lifts; the pointer target stays still to avoid hover flicker. */
+  .activity-cell .activity-day {
+    position: relative;
+    pointer-events: none;
+    transform: translateY(var(--lift, 0px)) scale(var(--scale, 1));
+    transition: transform 100ms ease-out;
+  }
+  .activity-cell .activity-day::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 5px 8px hsl(var(--foreground) / 0.2);
+    opacity: var(--shadow-opacity, 0);
+    transition: opacity 100ms ease-out;
+  }
+  .activity-cell[data-active] {
+    z-index: 2;
+  }
+  .activity-cell[data-active] .activity-day {
+    outline: 1px solid hsl(var(--primary) / 0.5);
+  }
+  .activity-cell:focus-visible {
+    outline-offset: 2px;
+  }
+  .activity-tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    display: grid;
+    box-sizing: border-box;
+    width: 156px;
+    height: 58px;
+    gap: 3px;
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: hsl(var(--card));
+    color: var(--text);
+    box-shadow: 0 6px 20px hsl(var(--foreground) / 0.12);
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: nowrap;
+    pointer-events: none;
+    will-change: transform;
+    transition: opacity 100ms ease;
+  }
+  .activity-tooltip[aria-hidden='true'] {
+    visibility: hidden;
+    opacity: 0;
+  }
+  .activity-tooltip strong {
+    font-weight: 600;
+  }
+  .activity-tooltip time {
+    color: var(--secondary);
+    font-size: 11px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .activity-cell .activity-day {
+      transition: none;
+      transform: none;
+    }
+    .activity-cell .activity-day::after {
+      display: none;
+    }
+    .activity-tooltip {
+      transition: none;
+    }
   }
   .activity-day[data-level='1'] {
     background: hsl(var(--primary) / 0.25);

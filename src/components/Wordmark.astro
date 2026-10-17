@@ -1,0 +1,49 @@
+---
+import blogArtwork from '../assets/wordmarks/wordmark-blog.svg?raw'
+import nameArtwork from '../assets/wordmarks/wordmark-name.svg?raw'
+
+interface Props {
+  kind: 'blog' | 'name'
+}
+const { kind } = Astro.props
+const label = kind === 'blog' ? "Eason's blog" : 'Eason Lin'
+const artwork = (kind === 'blog' ? blogArtwork : nameArtwork).replace(
+  '<svg ',
+  '<svg fill="currentColor" '
+)
+---
+
+<span class:list={['wordmark', `wordmark-${kind}`]}>
+  <span class="wordmark-text">{label}</span>
+  <span class="wordmark-artwork" aria-hidden="true" set:html={artwork} />
+</span>
+
+<style>
+  .wordmark {
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .wordmark-blog {
+    width: 4.793em;
+    height: 1.13em;
+  }
+  .wordmark-name {
+    width: 3.955em;
+    height: 0.73em;
+  }
+  .wordmark-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .wordmark-artwork,
+  .wordmark-artwork :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>

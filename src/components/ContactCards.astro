@@ -121,7 +121,7 @@ const contacts = [
     width: 100%;
     aspect-ratio: 5 / 7;
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: var(--radius);
     padding: 0;
     overflow: hidden;
     background: #fff;
@@ -185,7 +185,7 @@ const contacts = [
     max-height: calc(100dvh - 40px);
     padding: 16px;
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: var(--radius);
     color: var(--text);
     background: var(--page-bg);
     overflow-y: auto;
@@ -210,14 +210,14 @@ const contacts = [
     background: var(--soft);
     color: var(--text);
     border: 1px solid var(--line);
-    border-radius: 5px;
+    border-radius: var(--radius);
     font-size: 13px;
   }
   .contact-dialog img {
     display: block;
     width: 100%;
     height: auto;
-    border-radius: 5px;
+    border-radius: var(--radius);
   }
   .contact-dialog p {
     margin-top: 12px;
