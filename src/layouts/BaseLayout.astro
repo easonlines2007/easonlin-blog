@@ -5,6 +5,9 @@ import { theme } from '../site.config'
 import '../styles/fonts.css'
 import '../styles/global.css'
 import { localeFromPath, localizePath, useTranslations } from '../lib/i18n'
+import { Image } from 'astro:assets'
+import marginSnoopy from '../assets/characters/snoopy-reading.png'
+import marginWoodstock from '../assets/characters/woodstock-writing.png'
 interface Props {
   title: string
   description?: string
@@ -15,6 +18,13 @@ interface Props {
 const { title, description = theme.description, home = false, noindex = false } = Astro.props
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
+// Decorate the home and navigation landing pages, never individual articles.
+const decorated =
+  home ||
+  theme.header.menu.some(
+    ({ link }) =>
+      Astro.url.pathname.replace(/\/$/, '') === localizePath(link, locale).replace(/\/$/, '')
+  )
 const alternatePath =
   Astro.props.alternatePath === undefined
     ? localizePath(Astro.url.pathname, locale === 'en' ? 'zh' : 'en')
@@ -99,12 +109,22 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     </script>
     <!-- Vercel Web Analytics: lightweight script, no build dependency required. -->
     <script is:inline>
-      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments) }
+      window.va =
+        window.va ||
+        function () {
+          ;(window.vaq = window.vaq || []).push(arguments)
+        }
     </script>
     <script is:inline defer src="/_vercel/insights/script.js"></script>
     <slot name="head" />
   </head>
-  <body class:list={[home && 'home-page']}>
+  <body class:list={[home && 'home-page', decorated && 'newspaper-page']}>
+    {decorated && (
+      <div class="newspaper-margins" aria-hidden="true">
+        <Image class="margin-snoopy" src={marginSnoopy} width={240} format="webp" alt="" />
+        <Image class="margin-woodstock" src={marginWoodstock} width={240} format="webp" alt="" />
+      </div>
+    )}
     <a class="skip-link" href="#main">
       {t('跳转到正文')}
     </a>

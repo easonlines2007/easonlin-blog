@@ -23,21 +23,21 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
       <NavCharacter href="/" />
     </span>
   </a>
+  <nav class="desktop-nav" aria-label={t('主导航')}>
+    {theme.header.menu.map((item) => (
+      <a
+        class="character-link"
+        href={path(item.link)}
+        aria-current={active(path(item.link)) ? 'page' : undefined}
+      >
+        <span class="nav-flip">
+          <span class="nav-label">{t(item.title)}</span>
+          <NavCharacter href={item.link} />
+        </span>
+      </a>
+    ))}
+  </nav>
   <div class="header-actions">
-    <nav class="desktop-nav" aria-label={t('主导航')}>
-      {theme.header.menu.map((item) => (
-        <a
-          class="character-link"
-          href={path(item.link)}
-          aria-current={active(path(item.link)) ? 'page' : undefined}
-        >
-          <span class="nav-flip">
-            <span class="nav-label">{t(item.title)}</span>
-            <NavCharacter href={item.link} />
-          </span>
-        </a>
-      ))}
-    </nav>
     <a
       class="search-link icon-button"
       href={path('/search')}
@@ -46,8 +46,8 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
     >
       <Icon name="search" />
     </a>
-    <ThemePicker />
     <LanguageSwitch href={alternatePath} />
+    <ThemePicker />
     <details class="mobile-menu header-disclosure">
       <summary class="icon-button" aria-label={t('打开导航菜单')}>
         <Icon name="menu" />
