@@ -600,6 +600,7 @@ summary::-webkit-details-marker {
   font-family: var(--font-editorial);
   font-size: clamp(48px, 5vw, 64px);
   font-weight: 400;
+  font-style: italic;
   line-height: 1.12;
   letter-spacing: -0.025em;
 }
