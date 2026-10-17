@@ -326,6 +326,9 @@ img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  /* Keep the warm print palette, with more color than the faded margin scenes. */
+  filter: saturate(0.7) sepia(0.08);
+  opacity: 0.96;
 }
 .dark .nav-character {
   filter: drop-shadow(0 0 1px hsl(38 30% 90% / 0.65));
@@ -383,6 +386,13 @@ img {
 }
 .icon-button:hover {
   background: var(--soft);
+}
+.site-header .icon-button {
+  color: var(--secondary);
+}
+.site-header .icon-button:hover,
+.site-header .header-disclosure[open] > .icon-button {
+  color: var(--accent);
 }
 .search-link,
 .site-footer .icon-button {
