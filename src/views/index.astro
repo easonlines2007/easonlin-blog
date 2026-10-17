@@ -4,7 +4,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getNotes } from '@/lib/notes'
 import { getEssays } from '@/lib/essays'
 import { essayUrl } from '@/lib/essay-utils'
-import { countValues, noteUrl } from '@/lib/note-utils'
+import { countValues, topicUrl } from '@/lib/note-utils'
 import { projects } from '@/lib/projects'
 import { theme } from '@/site.config'
 import HomeAvatar from '@/components/HomeAvatar.astro'
@@ -17,7 +17,6 @@ const path = (href: string) => localizePath(href, locale)
 const notes = await getNotes(locale)
 const essays = await getEssays(locale)
 const topics = countValues(notes, 'topic')
-const pdfNotes = notes.filter((note) => note.data.pdf)
 ---
 
 <BaseLayout title={t('首页')} home>
@@ -37,11 +36,7 @@ const pdfNotes = notes.filter((note) => note.data.pdf)
       </h2>
       <div class="section-body">
         <ul class="home-row-list">
-          <HomeRow
-            label={t('日常')}
-            title={t('学习笔记、阅读批注与零散思考')}
-            href={path('/about')}
-          />
+          <HomeRow title={t('“史努比的红狗屋”')} href={path('/about')} />
         </ul>
         <a class="more-link" href={path('/about')}>
           <span class="lift-text">{t('更多关于这里')}</span>
@@ -53,19 +48,15 @@ const pdfNotes = notes.filter((note) => note.data.pdf)
         <span class="section-index" aria-hidden="true">
           02
         </span>
-        {t('最近笔记')}
+        {t('笔记')}
       </h2>
       <div class="section-body">
         <ul class="home-row-list">
-          {notes.slice(0, 5).map((note) => (
-            <HomeRow
-              label={note.data.pdf ? 'PDF' : t('笔记')}
-              title={note.data.title}
-              href={path(noteUrl(note.id))}
-            />
+          {topics.slice(0, 4).map(([topic, count]) => (
+            <HomeRow title={topic} meta={noteCount(count, locale)} href={path(topicUrl(topic))} />
           ))}
         </ul>
-        <a class="more-link" href={path('/notes/all')}>
+        <a class="more-link" href={path('/notes')}>
           <span class="lift-text">{t('全部笔记')}</span>
         </a>
       </div>
@@ -75,7 +66,7 @@ const pdfNotes = notes.filter((note) => note.data.pdf)
         <span class="section-index" aria-hidden="true">
           03
         </span>
-        {t('最近随笔')}
+        {t('随笔')}
       </h2>
       <div class="section-body">
         <ul class="home-row-list">
@@ -107,37 +98,6 @@ const pdfNotes = notes.filter((note) => note.data.pdf)
         <a class="more-link" href={path('/projects')}>
           <span class="lift-text">{t('全部项目与 GitHub 动态')}</span>
         </a>
-      </div>
-    </section>
-    <section class="home-section" data-intro-reveal>
-      <h2>
-        <span class="section-index" aria-hidden="true">
-          05
-        </span>
-        {t('笔记一览')}
-      </h2>
-      <div class="section-body">
-        <ul class="home-row-list">
-          <HomeRow
-            label={t('总计')}
-            title={noteCount(notes.length, locale)}
-            href={path('/notes/all')}
-          />
-          <HomeRow
-            label={t('专题')}
-            title={locale === 'en' ? `${topics.length} topics` : `${topics.length} 个笔记专题`}
-            href={path('/notes/topics')}
-          />
-          <HomeRow
-            label="PDF"
-            title={
-              locale === 'en'
-                ? `${pdfNotes.length} handwritten notes and annotations`
-                : `${pdfNotes.length} 份手写与批注`
-            }
-            href={path('/notes/pdf')}
-          />
-        </ul>
       </div>
     </section>
   </div>

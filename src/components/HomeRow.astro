@@ -2,23 +2,25 @@
 import Icon from './Icon.astro'
 
 interface Props {
-  label: string
+  label?: string
   title: string
+  meta?: string
   href: string
   external?: boolean
 }
-const { label, title, href, external = false } = Astro.props
+const { label, title, meta, href, external = false } = Astro.props
 ---
 
 <li>
   <a
-    class="home-row"
+    class:list={['home-row', !label && 'home-row-plain', meta && 'home-row-meta']}
     {href}
     target={external ? '_blank' : undefined}
     rel={external ? 'noopener noreferrer' : undefined}
   >
-    <span class="home-row-label">{label}</span>
+    {label && <span class="home-row-label">{label}</span>}
     <span class="home-row-title lift-text">{title}</span>
+    {meta && <span class="home-row-meta-text">{meta}</span>}
     <Icon name="next" />
   </a>
 </li>
