@@ -55,10 +55,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 .newspaper-page {
+  --paper-gutter: max(16px, calc((100vw - 1120px) / 2));
   position: relative;
   isolation: isolate;
 }
-/* Keep the printed texture on landing-page edges, off all reading pages. */
+/* Edge dots appear on every page, fading out before the reading column. */
 .newspaper-page::before {
   content: '';
   position: fixed;
@@ -67,7 +68,13 @@ body {
   pointer-events: none;
   background-image: radial-gradient(hsl(var(--foreground) / 0.13) 0.8px, transparent 1px);
   background-size: 7px 7px;
-  mask-image: linear-gradient(90deg, #000, transparent 16%, transparent 84%, #000);
+  mask-image: linear-gradient(
+    90deg,
+    #000,
+    transparent var(--paper-gutter),
+    transparent calc(100% - var(--paper-gutter)),
+    #000
+  );
 }
 .dark .newspaper-page::before {
   background-image: radial-gradient(hsl(var(--foreground) / 0.08) 0.8px, transparent 1px);
@@ -80,27 +87,44 @@ body {
   pointer-events: none;
   user-select: none;
 }
-.newspaper-margins img {
+.margin-illustration {
   position: absolute;
-  width: clamp(110px, calc((100vw - 1120px) / 2 - 36px), 200px);
-  filter: grayscale(1);
+  width: clamp(132px, calc((100vw - 1120px) / 2 - 24px), 236px);
+  aspect-ratio: var(--margin-aspect);
+  overflow: hidden;
   mix-blend-mode: multiply;
-  opacity: 0.12;
+  opacity: 0.65;
 }
-.margin-snoopy {
-  top: 190px;
-  left: 18px;
-  transform: rotate(-8deg);
+.margin-illustration img {
+  display: block;
+  position: absolute;
+  top: 0;
+  width: 200%;
+  max-width: none;
+  height: 100%;
 }
-.margin-woodstock {
-  top: 65vh;
-  right: 18px;
-  transform: rotate(6deg);
+.margin-left {
+  top: clamp(160px, 22vh, 240px);
+  left: 12px;
+  mask-image: linear-gradient(90deg, #000 96%, transparent);
 }
-.dark .newspaper-margins img {
-  filter: grayscale(1) invert(1);
-  mix-blend-mode: screen;
-  opacity: 0.09;
+.margin-right {
+  top: min(62vh, calc(100vh - 260px));
+  right: 12px;
+  mask-image: linear-gradient(90deg, transparent, #000 4%);
+}
+.margin-left img {
+  left: 0;
+}
+.margin-right img {
+  right: 0;
+}
+.dark .margin-illustration {
+  mix-blend-mode: normal;
+  opacity: 0.52;
+}
+.dark .margin-illustration img {
+  filter: drop-shadow(0 0 0.6px hsl(var(--foreground) / 0.18));
 }
 @media (min-width: 1440px) {
   .newspaper-margins {

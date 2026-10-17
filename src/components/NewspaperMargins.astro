@@ -1,0 +1,48 @@
+---
+import { Image } from 'astro:assets'
+import { localeFromPath, localizePath } from '../lib/i18n'
+import home from '../assets/newspaper/home.png'
+import notes from '../assets/newspaper/notes.png'
+import projects from '../assets/newspaper/projects.png'
+import essays from '../assets/newspaper/essays.png'
+import friends from '../assets/newspaper/friends.png'
+import about from '../assets/newspaper/about.png'
+
+const illustrations = {
+  '/': home,
+  '/notes': notes,
+  '/projects': projects,
+  '/blog': essays,
+  '/links': friends,
+  '/about': about
+}
+const locale = localeFromPath(Astro.url.pathname)
+const normalize = (path: string) => path.replace(/\/$/, '')
+// Only navigation landing pages get illustrations; articles keep the edge dots.
+const illustration = Object.entries(illustrations).find(
+  ([path]) => normalize(Astro.url.pathname) === normalize(localizePath(path, locale))
+)?.[1]
+---
+
+{illustration && (
+  <div
+    class="newspaper-margins"
+    style={`--margin-aspect: ${illustration.width / 2} / ${illustration.height}`}
+    aria-hidden="true"
+  >
+    {['left', 'right'].map((side) => (
+      <span class:list={['margin-illustration', `margin-${side}`]}>
+        <Image
+          src={illustration}
+          width={960}
+          format="webp"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          fetchpriority="low"
+          draggable="false"
+        />
+      </span>
+    ))}
+  </div>
+)}
