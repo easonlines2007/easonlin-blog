@@ -11,7 +11,9 @@
   --font-sans:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', sans-serif;
-  --font-editorial: 'Schoolbell', 'LXGW Marker Gothic', var(--font-sans);
+  --font-editorial:
+    'Michelangelus', 'Baskerville', 'Georgia', 'Songti SC', 'Noto Serif CJK SC',
+    'Source Han Serif SC', 'SimSun', serif;
   --heading-size: 22px;
   --radius: 0.5rem;
   --header-top: 24px;
@@ -28,15 +30,16 @@
   scrollbar-gutter: stable;
 }
 .dark {
-  --primary: 6 48% 73%;
-  --foreground: 38 22% 88%;
-  --muted-foreground: 38 10% 64%;
-  --background: 40 8% 11%;
-  --muted: 38 8% 16%;
-  --card: 38 8% 18%;
-  --border: 35 8% 26%;
-  --input: 35 8% 26%;
-  --ring: 6 48% 73%;
+  --primary: 6 48% 77%;
+  --foreground: 42 27% 90%;
+  --muted-foreground: 40 14% 74%;
+  --background: 43 6% 22%; /* Warm charcoal paper, #3B3935. */
+  --muted: 40 7% 26%;
+  --card: 40 7% 28%;
+  --border: 38 10% 42%;
+  --input: 38 10% 45%;
+  --ring: 6 48% 77%;
+  --code-background: 40 7% 17%;
   color-scheme: dark;
 }
 * {
@@ -65,6 +68,9 @@ body {
   background-image: radial-gradient(hsl(var(--foreground) / 0.13) 0.8px, transparent 1px);
   background-size: 7px 7px;
   mask-image: linear-gradient(90deg, #000, transparent 16%, transparent 84%, #000);
+}
+.dark .newspaper-page::before {
+  background-image: radial-gradient(hsl(var(--foreground) / 0.08) 0.8px, transparent 1px);
 }
 .newspaper-margins {
   display: none;
@@ -237,7 +243,8 @@ img {
   font-family: var(--font-editorial);
   font-size: 23px;
   font-weight: 400;
-  letter-spacing: -0.65px;
+  font-style: italic;
+  letter-spacing: -0.02em;
   white-space: nowrap;
 }
 .header-actions,
@@ -591,10 +598,10 @@ summary::-webkit-details-marker {
 .home-intro h1 {
   margin: 0;
   font-family: var(--font-editorial);
-  font-size: clamp(48px, 5vw, 56px);
+  font-size: clamp(48px, 5vw, 64px);
   font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: -1.1px;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
 }
 .home-sections {
   max-width: 870px;
@@ -664,6 +671,8 @@ summary::-webkit-details-marker {
 .home-row-label {
   font-size: 13px;
   color: var(--secondary);
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 .home-row-title {
   min-width: 0;
@@ -1154,8 +1163,9 @@ summary::-webkit-details-marker {
 }
 .dark .astro-code,
 .dark .astro-code span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
+  /* Lift the syntax inks, including comments, above 4.5:1 on dark paper. */
+  color: color-mix(in srgb, var(--shiki-dark) 70%, hsl(var(--foreground))) !important;
+  background-color: hsl(var(--code-background)) !important;
 }
 .code-wrapper {
   position: relative;

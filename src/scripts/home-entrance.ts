@@ -36,10 +36,7 @@ export async function startHomeEntrance() {
     const picture = avatar.querySelector('img')
     // Measure the name in its display font before moving it into place.
     await Promise.race([
-      Promise.all([
-        document.fonts.load('400 48px "Schoolbell"', name.textContent ?? 'Eason Lin'),
-        picture?.decode().catch(() => {})
-      ]),
+      Promise.all([document.fonts.ready, picture?.decode().catch(() => {})]),
       new Promise((resolve) => setTimeout(resolve, 600))
     ])
     if (finished || root.dataset.homeEntrance !== 'pending') return

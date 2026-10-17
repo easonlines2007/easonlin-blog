@@ -59,7 +59,7 @@ const options = [
     document.documentElement.style.colorScheme = resolved
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', resolved === 'dark' ? '#1e1c1a' : '#f7f6f2')
+      ?.setAttribute('content', resolved === 'dark' ? '#3b3935' : '#f2f0e8')
     choices.forEach((button) =>
       button.setAttribute('aria-pressed', String(button.dataset.themeChoice === preference))
     )

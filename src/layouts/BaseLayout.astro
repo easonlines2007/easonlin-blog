@@ -39,7 +39,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{t(title)} · {theme.title}</title>
     {description && <meta name="description" content={t(description)} />}
-    <meta name="theme-color" content="#f7f6f2" />
+    <meta name="theme-color" content="#f2f0e8" />
     <meta name="color-scheme" content="light dark" />
     <meta name="generator" content={Astro.generator} />
     {noindex && <meta name="robots" content="noindex" />}
@@ -67,20 +67,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
       </>
     )}
     <link
-      rel="preload"
-      href="/fonts/schoolbell-regular.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/lxgw-marker-gothic-regular.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
       rel="alternate"
       type="application/rss+xml"
       title={theme.title}
@@ -104,7 +90,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
         document.documentElement.classList.toggle('dark', dark)
         document.documentElement.dataset.themePreference = choice
         document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
-        document.querySelector('meta[name="theme-color"]').content = dark ? '#1e1c1a' : '#f7f6f2'
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#3b3935' : '#f2f0e8'
       })()
     </script>
     <!-- Vercel Web Analytics: lightweight script, no build dependency required. -->
