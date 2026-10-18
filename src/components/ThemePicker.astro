@@ -27,6 +27,11 @@ const options = [
       <button
         type="button"
         data-theme-choice={option.value}
+        data-current-label={
+          locale === 'en'
+            ? `Theme settings, current: ${t(option.label)}`
+            : `主题设置，当前${option.label}`
+        }
         aria-pressed={option.value === 'system'}
       >
         <Icon name={option.icon} />
@@ -40,9 +45,6 @@ const options = [
 </details>
 <script>
   import { normalizeTheme, resolveTheme, type ThemePreference } from '../lib/theme'
-  import { localeFromPath, useTranslations } from '../lib/i18n'
-  const locale = localeFromPath(location.pathname)
-  const t = useTranslations(locale)
   const media = window.matchMedia('(prefers-color-scheme: dark)')
   let preference: ThemePreference = 'system'
   try {
@@ -63,13 +65,8 @@ const options = [
     choices.forEach((button) =>
       button.setAttribute('aria-pressed', String(button.dataset.themeChoice === preference))
     )
-    const label = { system: '跟随系统', light: '浅色', dark: '深色' }[preference]
-    picker
-      .querySelector('summary')
-      ?.setAttribute(
-        'aria-label',
-        locale === 'en' ? `Theme settings, current: ${t(label)}` : `主题设置，当前${label}`
-      )
+    const choice = picker.querySelector<HTMLButtonElement>(`[data-theme-choice="${preference}"]`)!
+    picker.querySelector('summary')?.setAttribute('aria-label', choice.dataset.currentLabel!)
   }
   choices.forEach((button) =>
     button.addEventListener('click', () => {

@@ -181,5 +181,17 @@
   "格言已在另一处更新，请读取最新内容后再保存。": "The motto was updated elsewhere. Load the latest version before saving.",
   "请输入有效的作者口令。": "Enter a valid author password.",
   "少": "Less",
-  "多": "More"
+  "多": "More",
+  "专题置顶": "Pinned topics",
+  "取消置顶": "Unpin",
+  "置顶专题 {0}": "Pin topic {0}",
+  "取消置顶专题 {0}": "Unpin topic {0}",
+  "{0} 篇笔记": "{0} notes",
+  "置顶的专题会优先显示在首页、笔记页和侧栏。最新置顶的排在最前，取消后恢复原有排序。": "Pinned topics appear first on the home page, notes pages and sidebar. The most recently pinned comes first; unpinning restores the original order.",
+  "保存后随下一次部署生效。": "Changes take effect after the next deployment.",
+  "专题设置已保存，但列表暂未刷新。请点击重新加载，勿重复提交。": "Topic settings were saved, but the list could not refresh. Reload to check; do not submit again.",
+  "专题置顶设置无效，请先检查仓库中的设置。": "The topic pin settings are invalid. Check the repository settings first.",
+  "缺少有效的专题、置顶状态或仓库版本。": "A valid topic, pin status and repository revision are required.",
+  "仓库已有新提交。请重新加载列表后再修改专题置顶。": "The repository has changed. Reload the list before changing pinned topics.",
+  "专题不存在，请重新加载列表。": "This topic no longer exists. Reload the list."
 }

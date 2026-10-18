@@ -1,5 +1,6 @@
-import { localeFromPath, useTranslations, formatMessage } from '../lib/i18n'
-const t = useTranslations(localeFromPath(typeof location === 'undefined' ? '/' : location.pathname))
+import { localeFromPath, useTranslations, formatMessage, noteCount } from '../lib/i18n'
+const locale = localeFromPath(typeof location === 'undefined' ? '/' : location.pathname)
+const t = useTranslations(locale)
 import type { AdminListing, AdminNote } from '../lib/admin-types'
 
 const element = <T extends HTMLElement>(id: string) => document.getElementById(`admin-${id}`) as T
@@ -20,7 +21,7 @@ const upload = element<HTMLInputElement>('upload')
 const list = element<HTMLUListElement>('list')
 const search = element<HTMLInputElement>('search')
 const filter = element<HTMLSelectElement>('filter')
-let listing: AdminListing = { revision: '', notes: [] }
+let listing: AdminListing = { revision: '', notes: [], topics: [] }
 let selected: AdminNote | null = null
 let editorRevision = ''
 let dirty = false
@@ -159,6 +160,60 @@ function renderList() {
     listing.notes.filter((note) => note.data.publish).length
   ])
 }
+function renderTopics() {
+  const container = element<HTMLUListElement>('topic-list')
+  container.replaceChildren()
+  for (const topic of listing.topics) {
+    const item = document.createElement('li')
+    const label = document.createElement('span')
+    label.textContent = topic.name
+    const count = document.createElement('small')
+    count.textContent = noteCount(topic.count, locale)
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.className = 'admin-button'
+    button.textContent = t(topic.pinned ? '取消置顶' : '置顶')
+    button.setAttribute('aria-pressed', String(topic.pinned))
+    button.setAttribute(
+      'aria-label',
+      formatMessage(t(topic.pinned ? '取消置顶专题 {0}' : '置顶专题 {0}'), [topic.name])
+    )
+    button.disabled = busy
+    button.addEventListener(
+      'click',
+      () =>
+        void perform(async () => {
+          const editorWasCurrent = editorRevision === listing.revision
+          const result = await api<{ revision: string; unchanged: boolean; url?: string }>(
+            '/api/admin-topics',
+            'PUT',
+            {
+              topic: topic.name,
+              pinned: !topic.pinned,
+              revision: listing.revision
+            }
+          )
+          // A topic-only commit must not invalidate or discard an open article draft.
+          if (editorWasCurrent) editorRevision = result.revision
+          const link = element<HTMLAnchorElement>('commit')
+          link.hidden = !result.url
+          if (result.url) link.href = result.url
+          notice(
+            result.unchanged
+              ? t('内容没有变化，无需重新部署。')
+              : t('已提交到 GitHub，等待 Vercel 部署后生效。')
+          )
+          try {
+            await loadList()
+          } catch {
+            notice(t('专题设置已保存，但列表暂未刷新。请点击重新加载，勿重复提交。'))
+          }
+        })
+    )
+    item.append(label, count, button)
+    container.append(item)
+  }
+}
 async function discard() {
   return !dirty || (await confirmAction(t('还有未保存的修改，确定放弃这些修改吗？')))
 }
@@ -206,6 +261,7 @@ async function loadList() {
     })
   )
   renderList()
+  renderTopics()
 }
 async function save(method: 'POST' | 'PUT' | 'DELETE', extra: Record<string, unknown> = {}) {
   const path = selected?.path ?? `web/${filename.value.trim().replace(/\.md$/i, '')}.md`
@@ -306,10 +362,11 @@ element('logout').addEventListener('click', async () => {
     lock()
     form.reset()
     form.hidden = true
-    listing = { revision: '', notes: [] }
+    listing = { revision: '', notes: [], topics: [] }
     selected = null
     dirty = false
     list.replaceChildren()
+    element('topic-list').replaceChildren()
     element('commit').hidden = true
     notice(t('已退出文章管理。'))
   })

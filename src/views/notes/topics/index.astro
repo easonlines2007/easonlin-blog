@@ -4,11 +4,13 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 import PageHeader from '@/components/PageHeader.astro'
 import Icon from '@/components/Icon.astro'
 import { getNotes } from '@/lib/notes'
-import { countValues, topicUrl } from '@/lib/note-utils'
+import { topicUrl } from '@/lib/note-utils'
+import { getTopics } from '@/lib/topics'
+import TopicPin from '@/components/TopicPin.astro'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 const path = (href: string) => localizePath(href, locale)
-const topics = countValues(await getNotes(locale), 'topic')
+const topics = getTopics(await getNotes(locale))
 ---
 
 <BaseLayout title={t('专题')}>
@@ -22,7 +24,10 @@ const topics = countValues(await getNotes(locale), 'topic')
     {topics.map(([topic, count]) => (
       <a class="index-card" href={path(topicUrl(topic))}>
         <div>
-          <h2 class="lift-text">{topic}</h2>
+          <h2 class="lift-text">
+            {topic}
+            <TopicPin {topic} />
+          </h2>
           <p>{noteCount(count, locale)}</p>
         </div>
         <Icon name="next" />

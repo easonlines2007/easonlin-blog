@@ -11,7 +11,13 @@ const { count, label = '笔记', dateLabel = '添加日期' } = Astro.props
 ---
 
 <div class="listing-toolbar">
-  <p class="list-count" role="status" aria-live="polite" data-note-count>
+  <p
+    class="list-count"
+    role="status"
+    aria-live="polite"
+    data-note-count
+    data-count-label={locale === 'en' ? t(label).toLowerCase() : label}
+  >
     {locale === 'en' ? `${count} ${t(label).toLowerCase()}` : `共 ${count} 篇${label}`}
   </p>
   <label class="list-sort">

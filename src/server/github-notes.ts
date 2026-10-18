@@ -1,6 +1,7 @@
 import { AdminError, maxMarkdownBytes } from './admin-content.ts'
 import { manifestPath, notesPrefix, overridesPath, safeNotePath } from '../lib/note-schema.ts'
 import type { ServerEnvironment } from './motto-auth.ts'
+import { topicSettingsPath } from '../lib/topic-settings.ts'
 
 export interface RepositoryFile {
   sha: string
@@ -38,6 +39,7 @@ const commitIdentity = {
 const readable = (path: string) =>
   path === manifestPath ||
   path === overridesPath ||
+  path === topicSettingsPath ||
   (path.startsWith(notesPrefix) && safeNotePath(path.slice(notesPrefix.length)))
 
 export function createGitHubNotesRepository({

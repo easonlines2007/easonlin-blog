@@ -1,5 +1,6 @@
 ---
 import Icon from './Icon.astro'
+import TopicPin from './TopicPin.astro'
 
 interface Props {
   label?: string
@@ -7,8 +8,9 @@ interface Props {
   meta?: string
   href: string
   external?: boolean
+  pinTopic?: string
 }
-const { label, title, meta, href, external = false } = Astro.props
+const { label, title, meta, href, external = false, pinTopic } = Astro.props
 ---
 
 <li>
@@ -19,7 +21,10 @@ const { label, title, meta, href, external = false } = Astro.props
     rel={external ? 'noopener noreferrer' : undefined}
   >
     {label && <span class="home-row-label">{label}</span>}
-    <span class="home-row-title lift-text">{title}</span>
+    <span class="home-row-title lift-text">
+      {title}
+      {pinTopic && <TopicPin topic={pinTopic} />}
+    </span>
     {meta && <span class="home-row-meta-text">{meta}</span>}
     <Icon name="next" />
   </a>

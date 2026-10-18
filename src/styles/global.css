@@ -1191,7 +1191,8 @@ summary::-webkit-details-marker {
 }
 .prose h2,
 .prose h3,
-.prose h4 {
+.prose h4,
+[data-section-heading] {
   scroll-margin-top: var(--reading-offset);
 }
 .prose > :first-child {

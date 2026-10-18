@@ -1,0 +1,25 @@
+---
+import { localeFromPath, useTranslations } from '../lib/i18n'
+import { isTopicPinned } from '../lib/topics'
+interface Props {
+  topic: string
+}
+const { topic } = Astro.props
+const t = useTranslations(localeFromPath(Astro.url.pathname))
+---
+
+{isTopicPinned(topic) && <span class="topic-pin">{t('置顶')}</span>}
+
+<style>
+  .topic-pin {
+    display: inline-block;
+    margin-inline-start: 8px;
+    padding: 1px 5px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--accent);
+    font: 11px/1.5 var(--font-sans);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+</style>

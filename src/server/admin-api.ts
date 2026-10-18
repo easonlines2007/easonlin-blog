@@ -17,6 +17,7 @@ import {
   maxMarkdownBytes,
   parseMarkdown,
   readNotes,
+  readTopicSettings,
   writeMarkdown
 } from './admin-content.ts'
 import {
@@ -26,6 +27,8 @@ import {
   safeNotePath,
   type NoteOverride
 } from '../lib/note-schema.ts'
+import { countValues } from '../lib/note-utils.ts'
+import { sortTopics, topicSettingsPath } from '../lib/topic-settings.ts'
 
 function json(body: unknown, status = 200, headers: Record<string, string> = {}) {
   return Response.json(body, {
@@ -136,11 +139,58 @@ export function createAdminHandlers({
       return respond(async () => {
         authorize(request)
         const snapshot = await repository.snapshot()
-        const { notes } = await readNotes(snapshot)
+        const [{ notes }, settings] = await Promise.all([
+          readNotes(snapshot),
+          readTopicSettings(snapshot)
+        ])
         return json({
           revision: snapshot.revision,
-          notes: notes.map(({ source: _source, ...note }) => note)
+          notes: notes.map(({ source: _source, ...note }) => note),
+          topics: sortTopics(countValues(notes, 'topic'), settings.pinned).map(([name, count]) => ({
+            name,
+            count,
+            pinned: settings.pinned.includes(name)
+          }))
         })
+      })
+    },
+    pinTopic(request: Request) {
+      return respond(async () => {
+        sameOrigin(request)
+        authorize(request)
+        if (request.method !== 'PUT') throw new AdminError(405, '不支持的操作。')
+        const body = await readJson(request, 4096)
+        if (
+          typeof body.revision !== 'string' ||
+          !/^[a-f0-9]{40}$/.test(body.revision) ||
+          typeof body.topic !== 'string' ||
+          !body.topic.trim() ||
+          typeof body.pinned !== 'boolean'
+        )
+          throw new AdminError(400, '缺少有效的专题、置顶状态或仓库版本。')
+        const snapshot = await repository.snapshot()
+        if (snapshot.revision !== body.revision)
+          throw new AdminError(409, '仓库已有新提交。请重新加载列表后再修改专题置顶。')
+        const [{ notes }, settings] = await Promise.all([
+          readNotes(snapshot),
+          readTopicSettings(snapshot)
+        ])
+        const topic = body.topic
+        if (!notes.some((note) => note.data.topic === topic))
+          throw new AdminError(404, '专题不存在，请重新加载列表。')
+        if (settings.pinned.includes(topic) === body.pinned)
+          return json({ revision: snapshot.revision, unchanged: true })
+        const remaining = settings.pinned.filter((name) => name !== topic)
+        const pinned = body.pinned ? [topic, ...remaining] : remaining
+        const result = await repository.commit(
+          snapshot,
+          {
+            path: topicSettingsPath,
+            content: `${JSON.stringify({ pinned }, null, 2)}\n`
+          },
+          `${body.pinned ? 'Pin' : 'Unpin'} note topic: ${topic}`
+        )
+        return json({ ...result, unchanged: false })
       })
     },
     mutate(request: Request) {

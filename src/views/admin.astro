@@ -49,6 +49,14 @@ import '../styles/admin.css'
           </button>
         </div>
       </div>
+      <details class="admin-topic-manager">
+        <summary>{t('专题置顶')}</summary>
+        <p class="admin-help">
+          {t('置顶的专题会优先显示在首页、笔记页和侧栏。最新置顶的排在最前，取消后恢复原有排序。')}
+        </p>
+        <ul id="admin-topic-list" class="admin-topic-list" aria-label={t('专题置顶')}></ul>
+        <p class="admin-help">{t('保存后随下一次部署生效。')}</p>
+      </details>
       <div class="admin-grid">
         <aside class="admin-list-panel" aria-label={t('文章列表')}>
           <label class="sr-only" for="admin-search">

@@ -24,6 +24,7 @@ import {
   type EditableNote
 } from '../src/lib/note-schema.ts'
 import { publishedNotes } from '../src/lib/note-utils.ts'
+import { topicSettingsPath } from '../src/lib/topic-settings.ts'
 import { syncObsidian, obsidianNoteId } from '../scripts/obsidian-sync-lib.mjs'
 
 const origin = 'https://blog.example'
@@ -109,6 +110,7 @@ function memory(initial: Record<string, string> = {}) {
 test('all admin reads and writes require authentication; login does not require Blob', async () => {
   const f = memory()
   assert.equal((await f.api.get(req('GET', undefined, false))).status, 401)
+  assert.equal((await f.api.pinTopic(req('PUT', {}, false))).status, 401)
   for (const method of ['POST', 'PUT', 'DELETE'])
     assert.equal((await f.api.mutate(req(method, {}, false))).status, 401)
   assert.equal((await f.api.session(req('POST', { password: 'wrong' }, false))).status, 401)
@@ -303,10 +305,16 @@ test('a real Obsidian sync preserves overrides, ownership hashes and Vault bytes
   const firstCopy = await readFile(join(projectRoot, notesPrefix, 'Lab.md'), 'utf8')
   const overrides = { 'Lab.md': { tags: ['网站标签'], publish: false } }
   await writeFile(join(projectRoot, overridesPath), JSON.stringify(overrides))
+  const topicSettings = { pinned: ['FC'] }
+  await writeFile(join(projectRoot, topicSettingsPath), JSON.stringify(topicSettings))
   await syncObsidian({ vaultPath, projectRoot })
   assert.equal(await readFile(join(projectRoot, notesPrefix, 'Lab.md'), 'utf8'), firstCopy)
   assert.equal(await readFile(join(vaultPath, 'Blog/Lab.md'), 'utf8'), original)
   assert.deepEqual(JSON.parse(await readFile(join(projectRoot, overridesPath), 'utf8')), overrides)
+  assert.deepEqual(
+    JSON.parse(await readFile(join(projectRoot, topicSettingsPath), 'utf8')),
+    topicSettings
+  )
   const manifest = JSON.parse(await readFile(join(projectRoot, manifestPath), 'utf8'))
   assert.equal(manifest.notes['Lab.md'], digest(firstCopy))
   const note = {
@@ -402,4 +410,85 @@ test('GitHub tree truncation and symbolic links stop the read instead of bypassi
         repository.snapshot().then((snapshot) => snapshot.read(notesPrefix + 'link.md'))
       )
   }
+})
+
+test('topic pinning persists globally without editing notes; unpin restores default order', async () => {
+  const f = memory({ [notesPrefix + 'manual.md']: source.replace('topic: FC', 'topic: MIT 18.06') })
+  const originals = new Map(f.content)
+  const listing = await (await f.api.get(req())).json()
+  assert.equal(listing.topics.length, 2)
+  assert.ok(listing.topics.every((topic: { pinned: boolean }) => !topic.pinned))
+  const pin = async (topic: string, pinned: boolean) =>
+    f.api.pinTopic(req('PUT', { topic, pinned, revision: f.revision() }))
+  assert.equal((await pin('MIT 18.06', true)).status, 200)
+  assert.deepEqual(JSON.parse(f.content.get(topicSettingsPath)!), { pinned: ['MIT 18.06'] })
+  assert.equal((await pin('FC', true)).status, 200)
+  let topics = (await (await f.api.get(req())).json()).topics
+  assert.deepEqual(
+    topics.map((topic: { name: string }) => topic.name),
+    ['FC', 'MIT 18.06']
+  )
+  assert.ok(topics.every((topic: { pinned: boolean }) => topic.pinned))
+  const changes = f.changes.length
+  assert.equal((await (await pin('FC', true)).json()).unchanged, true)
+  assert.equal(f.changes.length, changes)
+  assert.equal((await pin('FC', false)).status, 200)
+  topics = (await (await f.api.get(req())).json()).topics
+  assert.deepEqual(
+    topics.map((topic: { name: string; pinned: boolean }) => [topic.name, topic.pinned]),
+    [
+      ['MIT 18.06', true],
+      ['FC', false]
+    ]
+  )
+  assert.equal((await pin('MIT 18.06', false)).status, 200)
+  assert.deepEqual((await (await f.api.get(req())).json()).topics, listing.topics)
+  assert.ok(f.changes.every((change) => change.path === topicSettingsPath))
+  for (const [path, source] of originals) assert.equal(f.content.get(path), source)
+})
+
+test('topic pin writes reject cross-origin calls, stale revisions, invalid status and unknown topics', async () => {
+  const f = memory()
+  const body = { topic: 'FC', pinned: true, revision: f.revision() }
+  assert.equal(
+    (await f.api.pinTopic(req('PUT', body, true, { origin: 'https://elsewhere.example' }))).status,
+    403
+  )
+  assert.equal(
+    (await f.api.pinTopic(req('PUT', { ...body, revision: 'a'.repeat(40) }))).status,
+    409
+  )
+  assert.equal((await f.api.pinTopic(req('PUT', { ...body, pinned: 'true' }))).status, 400)
+  assert.equal((await f.api.pinTopic(req('PUT', { ...body, topic: 'unknown' }))).status, 404)
+  assert.equal((await f.api.pinTopic(req('PUT', { ...body, topic: '../../secret' }))).status, 404)
+  assert.equal(
+    (await f.api.pinTopic(req('PUT', body, true, { 'content-type': 'text/plain' }))).status,
+    415
+  )
+  assert.equal((await f.api.pinTopic(req('PUT', { ...body, topic: 'a'.repeat(5000) }))).status, 413)
+  assert.equal(f.changes.length, 0)
+})
+
+test('malformed topic settings and concurrent Git writes cannot erase existing preferences', async () => {
+  for (const source of ['invalid', '{"pinned":["FC","FC"]}', '{"pinned":true}']) {
+    const f = memory({ [topicSettingsPath]: source })
+    assert.equal((await f.api.get(req())).status, 503)
+    assert.equal(
+      (await f.api.pinTopic(req('PUT', { topic: 'FC', pinned: true, revision: f.revision() })))
+        .status,
+      503
+    )
+    assert.equal(f.changes.length, 0)
+    assert.equal(f.content.get(topicSettingsPath), source)
+  }
+  const f = memory()
+  f.repository.commit = async () => {
+    throw new AdminError(409, 'Concurrent commit')
+  }
+  assert.equal(
+    (await f.api.pinTopic(req('PUT', { topic: 'FC', pinned: true, revision: f.revision() })))
+      .status,
+    409
+  )
+  assert.equal(f.changes.length, 0)
 })

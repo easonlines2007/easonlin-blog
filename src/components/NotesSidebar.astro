@@ -3,6 +3,8 @@ import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
 import type { CollectionEntry } from 'astro:content'
 import { countValues, statusLabels, tagUrl, topicUrl } from '../lib/note-utils'
 import Icon from './Icon.astro'
+import { getTopics } from '../lib/topics'
+import TopicPin from './TopicPin.astro'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 const path = (href: string) => localizePath(href, locale)
@@ -41,10 +43,13 @@ const { notes, filterNotes = notes, filters = false } = Astro.props
       </h2>
     </div>
     <ul class="sidebar-list">
-      {countValues(notes, 'topic').map(([topic, count]) => (
+      {getTopics(notes).map(([topic, count]) => (
         <li>
           <a href={path(topicUrl(topic))}>
-            <span class="lift-text">{topic}</span>
+            <span class="lift-text">
+              {topic}
+              <TopicPin {topic} />
+            </span>
             <span>{count}</span>
           </a>
         </li>

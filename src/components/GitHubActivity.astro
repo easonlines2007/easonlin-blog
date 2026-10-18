@@ -173,6 +173,8 @@ const labels = months.filter(
     }
 
     function clear() {
+      // Most page scrolls happen without an active calendar interaction.
+      if (!frame && !pending && !active && !geometry && !lifted.size) return
       cancelAnimationFrame(frame)
       frame = 0
       pending = null
@@ -427,8 +429,10 @@ const labels = months.filter(
     line-height: 1.5;
     white-space: nowrap;
     pointer-events: none;
-    will-change: transform;
     transition: opacity 100ms ease;
+  }
+  .activity-tooltip[aria-hidden='false'] {
+    will-change: transform;
   }
   .activity-tooltip[aria-hidden='true'] {
     visibility: hidden;

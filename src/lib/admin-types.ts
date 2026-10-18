@@ -10,4 +10,5 @@ export interface AdminNote {
 export interface AdminListing {
   revision: string
   notes: AdminNote[]
+  topics: { name: string; count: number; pinned: boolean }[]
 }

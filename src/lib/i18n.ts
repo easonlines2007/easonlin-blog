@@ -22,6 +22,7 @@ const english: Record<string, string> = {
   全部笔记: 'All notes',
   全部随笔: 'All essays',
   专题: 'Topics',
+  置顶: 'Pinned',
   标签: 'Tags',
   全部专题: 'All topics',
   全部标签: 'All tags',

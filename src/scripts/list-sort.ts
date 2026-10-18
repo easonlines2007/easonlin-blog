@@ -1,7 +1,5 @@
 import { sortListItems, type ListSortOrder } from '../lib/list-sort'
-import { localeFromPath, useTranslations } from '../lib/i18n'
-const locale = localeFromPath(location.pathname)
-const t = useTranslations(locale)
+const locale = document.documentElement.lang === 'en' ? 'en' : 'zh'
 
 document.querySelectorAll<HTMLElement>('[data-sortable-listing]').forEach((root) => {
   const list = root.querySelector<HTMLElement>('[data-list-items]')
@@ -36,12 +34,12 @@ document.querySelectorAll<HTMLElement>('[data-sortable-listing]').forEach((root)
         if (!element.hidden) visible++
       })
       buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)))
-      const count = root.querySelector('[data-note-count]')
+      const count = root.querySelector<HTMLElement>('[data-note-count]')
       if (count)
         count.textContent =
           locale === 'en'
-            ? `${visible} ${t(root.dataset.listLabel ?? '笔记').toLowerCase()}`
-            : `共 ${visible} 篇${root.dataset.listLabel ?? '笔记'}`
+            ? `${visible} ${count.dataset.countLabel}`
+            : `共 ${visible} 篇${count.dataset.countLabel}`
       const empty = root.querySelector<HTMLElement>('[data-filter-empty]')
       if (empty) empty.hidden = visible > 0
     })

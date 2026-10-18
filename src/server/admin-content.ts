@@ -13,6 +13,7 @@ import {
   type EditableNote
 } from '../lib/note-schema.ts'
 import type { RepositorySnapshot } from './github-notes.ts'
+import { topicSettingsPath, topicSettingsSchema } from '../lib/topic-settings.ts'
 
 export class AdminError extends Error {
   status: number
@@ -109,6 +110,15 @@ export async function readSettings(snapshot: RepositorySnapshot) {
     }
   } catch {
     throw new AdminError(503, '文章同步清单或网站设置无效，已停止写入。')
+  }
+}
+
+export async function readTopicSettings(snapshot: RepositorySnapshot) {
+  const source = await snapshot.read(topicSettingsPath)
+  try {
+    return topicSettingsSchema.parse(JSON.parse(source ?? '{"pinned":[]}'))
+  } catch {
+    throw new AdminError(503, '专题置顶设置无效，请先检查仓库中的设置。')
   }
 }
 

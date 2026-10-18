@@ -4,7 +4,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getNotes } from '@/lib/notes'
 import { getEssays } from '@/lib/essays'
 import { essayUrl } from '@/lib/essay-utils'
-import { countValues, topicUrl } from '@/lib/note-utils'
+import { topicUrl } from '@/lib/note-utils'
+import { getTopics } from '@/lib/topics'
 import { projects } from '@/lib/projects'
 import HomeAvatar from '@/components/HomeAvatar.astro'
 import HomeEntrance from '@/components/HomeEntrance.astro'
@@ -16,7 +17,7 @@ const t = useTranslations(locale)
 const path = (href: string) => localizePath(href, locale)
 const notes = await getNotes(locale)
 const essays = await getEssays(locale)
-const topics = countValues(notes, 'topic')
+const topics = getTopics(notes)
 ---
 
 <BaseLayout title={t('首页')} home>
@@ -55,7 +56,12 @@ const topics = countValues(notes, 'topic')
       <div class="section-body">
         <ul class="home-row-list">
           {topics.slice(0, 4).map(([topic, count]) => (
-            <HomeRow title={topic} meta={noteCount(count, locale)} href={path(topicUrl(topic))} />
+            <HomeRow
+              title={topic}
+              meta={noteCount(count, locale)}
+              href={path(topicUrl(topic))}
+              pinTopic={topic}
+            />
           ))}
         </ul>
         <a class="more-link" href={path('/notes')}>

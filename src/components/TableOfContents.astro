@@ -23,45 +23,86 @@ const items = headings.filter((heading) => heading.depth >= 2 && heading.depth <
   </ul>
 </nav>
 <script>
+  import { setupTocNavigation } from '../scripts/toc-navigation'
   const headings = [
     ...document.querySelectorAll<HTMLElement>(
       '.prose h2[id], .prose h3[id], [data-section-heading]'
     )
   ]
   const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')]
+  const realign = setupTocNavigation(links)
+  const linksById = new Map<string, HTMLAnchorElement[]>()
+  for (const link of links) {
+    const id = decodeURIComponent(link.hash.slice(1))
+    const group = linksById.get(id) ?? []
+    group.push(link)
+    linksById.set(id, group)
+  }
   let scheduled = false
+  let geometryDirty = true
+  let positions: number[] = []
+  let offset = 0
+  let documentHeight = 0
+  let active: string | undefined
+
   function update() {
-    const offset =
-      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--reading-offset')) +
-      20
+    scheduled = false
+    const y = window.scrollY
+    // Layout changes invalidate this cache; scrolling itself only reads numbers.
+    if (geometryDirty) {
+      offset =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue('--reading-offset')
+        ) + 20
+      positions = headings.map((heading) => heading.getBoundingClientRect().top + y)
+      documentHeight = document.documentElement.scrollHeight
+      geometryDirty = false
+    }
     let current: string | undefined = headings[0]?.id
-    for (const heading of headings) {
-      if (heading.getBoundingClientRect().top <= offset) current = heading.id
+    for (let index = 0; index < headings.length; index++) {
+      if (positions[index] <= y + offset) current = headings[index].id
       else break
     }
-    if (
-      window.scrollY > 0 &&
-      window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2
-    ) {
+    if (y > 0 && y + window.innerHeight >= documentHeight - 2) {
       current = headings.at(-1)?.id
     }
-    links.forEach((link) => {
-      if (decodeURIComponent(link.hash.slice(1)) === current)
-        link.setAttribute('aria-current', 'location')
-      else link.removeAttribute('aria-current')
-    })
-    scheduled = false
+    if (current === active) return
+    if (active) linksById.get(active)?.forEach((link) => link.removeAttribute('aria-current'))
+    if (current)
+      linksById.get(current)?.forEach((link) => link.setAttribute('aria-current', 'location'))
+    active = current
   }
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (!scheduled) {
-        requestAnimationFrame(update)
-        scheduled = true
-      }
-    },
-    { passive: true }
-  )
-  window.addEventListener('resize', update)
-  update()
+  function schedule() {
+    if (scheduled) return
+    scheduled = true
+    requestAnimationFrame(update)
+  }
+  function invalidate() {
+    geometryDirty = true
+    schedule()
+    realign()
+  }
+  if (headings.length && links.length) {
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', invalidate)
+    // Images, diagrams, PDF previews, fonts and disclosures can move headings.
+    // Sticky elements can change document overflow without moving any headings.
+    new ResizeObserver(() => {
+      documentHeight = document.documentElement.scrollHeight
+      schedule()
+    }).observe(document.documentElement)
+    const observer = new ResizeObserver(invalidate)
+    const header = document.querySelector('.site-header')
+    if (header) observer.observe(header, { box: 'border-box' })
+    const article = document.querySelector('.article-body')
+    if (article) {
+      observer.observe(article)
+      article.addEventListener('toggle', invalidate, true)
+      // The entrance transform moves visual bounds without resizing the article.
+      article.addEventListener('animationend', invalidate)
+      article.addEventListener('animationcancel', invalidate)
+    }
+    void document.fonts.ready.then(invalidate)
+    schedule()
+  }
 </script>

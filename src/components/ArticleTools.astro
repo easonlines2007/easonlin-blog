@@ -5,14 +5,26 @@ const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 ---
 
-<button class="back-to-top icon-button" type="button" aria-label={t('回到顶部')}>
+<button
+  class="back-to-top icon-button"
+  type="button"
+  aria-label={t('回到顶部')}
+  data-copy-label={t('复制')}
+  data-copy-code-label={t('复制代码')}
+  data-copied-label={t('已复制')}
+  data-copy-failed-label={t('请选中后复制')}
+>
   <Icon name="top" />
 </button>
 <script>
-  import { localeFromPath, useTranslations } from '../lib/i18n'
-  const t = useTranslations(localeFromPath(location.pathname))
   const topButton = document.querySelector<HTMLButtonElement>('.back-to-top')!
-  const update = () => topButton.classList.toggle('visible', window.scrollY > 500)
+  let visible = false
+  const update = () => {
+    const next = window.scrollY > 500
+    if (next === visible) return
+    visible = next
+    topButton.classList.toggle('visible', visible)
+  }
   window.addEventListener('scroll', update, { passive: true })
   topButton.addEventListener('click', () => {
     window.scrollTo({
@@ -32,9 +44,9 @@ const t = useTranslations(locale)
     button.className = 'copy-code'
     const label = document.createElement('span')
     label.className = 'lift-text'
-    label.textContent = t('复制')
+    label.textContent = topButton.dataset.copyLabel!
     button.append(label)
-    button.setAttribute('aria-label', t('复制代码'))
+    button.setAttribute('aria-label', topButton.dataset.copyCodeLabel!)
     button.setAttribute('aria-live', 'polite')
     wrapper.append(button)
     let timer: ReturnType<typeof setTimeout>
@@ -42,12 +54,12 @@ const t = useTranslations(locale)
       clearTimeout(timer)
       try {
         await navigator.clipboard.writeText(pre.querySelector('code')?.textContent ?? '')
-        label.textContent = t('已复制')
+        label.textContent = topButton.dataset.copiedLabel!
       } catch {
-        label.textContent = t('请选中后复制')
+        label.textContent = topButton.dataset.copyFailedLabel!
       }
       timer = setTimeout(() => {
-        label.textContent = t('复制')
+        label.textContent = topButton.dataset.copyLabel!
       }, 2000)
     })
   })
