@@ -1,43 +1,8 @@
 {
   "username": "easonlines2007",
-  "updatedAt": "2026-10-15T19:57:21.207Z",
-  "total": 231,
+  "updatedAt": "2026-10-19T04:46:58.937Z",
+  "total": 244,
   "days": [
-    {
-      "date": "2025-10-12",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-13",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-14",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-15",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-16",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-17",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-18",
-      "level": 0,
-      "count": 0
-    },
     {
       "date": "2025-10-19",
       "level": 0,
@@ -1847,6 +1812,26 @@
       "date": "2026-10-15",
       "level": 1,
       "count": 5
+    },
+    {
+      "date": "2026-10-16",
+      "level": 1,
+      "count": 4
+    },
+    {
+      "date": "2026-10-17",
+      "level": 1,
+      "count": 7
+    },
+    {
+      "date": "2026-10-18",
+      "level": 1,
+      "count": 2
+    },
+    {
+      "date": "2026-10-19",
+      "level": 0,
+      "count": 0
     }
   ],
   "repositories": [
@@ -1884,6 +1869,6 @@
     "location": "Barcelona，Spain",
     "publicRepos": 3,
     "followers": 4,
-    "following": 4
+    "following": 5
   }
 }
