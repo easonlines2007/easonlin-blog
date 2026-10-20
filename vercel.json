@@ -3,5 +3,17 @@
   "framework": "astro",
   "installCommand": "npx --yes pnpm@11.25.0 install --frozen-lockfile",
   "buildCommand": "npx --yes pnpm@11.25.0 build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/notes/fc/laboratory/lab03---claude",
+      "destination": "/notes/fc/laboratory/lab-03",
+      "permanent": true
+    },
+    {
+      "source": "/en/notes/fc/laboratory/lab03---claude",
+      "destination": "/en/notes/fc/laboratory/lab-03",
+      "permanent": true
+    }
+  ]
 }

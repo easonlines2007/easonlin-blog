@@ -1,8 +1,8 @@
 ---
 kind: notes
-source: fc/laboratory/lab03---claude
-title: Lab03 - Claude
-sourceHash: a4edd428ccaf6d4cbc958af3c25d2620ce52501979abda7b85765927d46086b5
+source: fc/laboratory/lab-03
+title: Lab 03
+sourceHash: ded9212483ce87978c2cd9f700c650f65ba08e423fd1f3b14c1042db21fd2a65
 publish: true
 translationMethod: machine-assisted
 ---

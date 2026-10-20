@@ -1,12 +1,11 @@
 ---
 tags: [ FC ]
 publish: true
-title: Lab03 - Claude
+title: Lab 03
 description: ""
 topic: FC
-date: 2026-10-07
+date: 2026-10-19
 ---
-
 ## main ： int main (int argc, char * argv[ 4]);
 - int : 返回值类型 
 - argc ：命令行参数数量

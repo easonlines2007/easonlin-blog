@@ -1,5 +1,5 @@
 :root {
-  --primary: 3 43% 39%;
+  --primary: 354 48% 35%;
   --foreground: 35 9% 20%;
   --muted-foreground: 35 6% 43%;
   --background: 48 28% 93%; /* #F2F0E8 */
@@ -7,7 +7,7 @@
   --card: 38 18% 93%;
   --border: 35 15% 83%;
   --input: 35 15% 85%;
-  --ring: 3 43% 39%;
+  --ring: 354 48% 35%;
   --font-sans:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', sans-serif;
@@ -30,7 +30,7 @@
   scrollbar-gutter: stable;
 }
 .dark {
-  --primary: 6 48% 77%;
+  --primary: 354 46% 72%;
   --foreground: 42 27% 90%;
   --muted-foreground: 40 14% 74%;
   --background: 43 6% 22%; /* Warm charcoal paper, #3B3935. */
@@ -38,7 +38,7 @@
   --card: 40 7% 28%;
   --border: 38 10% 42%;
   --input: 38 10% 45%;
-  --ring: 6 48% 77%;
+  --ring: 354 46% 72%;
   --code-background: 40 7% 17%;
   color-scheme: dark;
 }
