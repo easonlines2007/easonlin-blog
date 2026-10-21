@@ -86,6 +86,17 @@ node scripts/import-cs61a.mjs /绝对路径/CS61A_Structure_and_Interpretation_o
 
 导入先在临时目录完成分讲、链接转换与附件校验，再复制到博客。相同原稿和添加日期重复执行会跳过相同文件；目标文件有不同内容时停止，避免覆盖。原稿及真实 Obsidian Vault 不写回；CS61A 不加入 `obsidian-sync.json`，后续同步其他笔记时保留本课程。
 
+### CSAPP 与 CS61B 课程
+
+CSAPP 按 Lecture 01–26 收录为 26 篇，CS61B 按 Lecture 01–40 收录为 40 篇，各有独立专题与同名小写标签。添加日期为 `2026-10-21`，状态为 `completed`，专题按讲次排序，每篇提供上一篇／下一篇导航。原稿中的课程目录与分讲链接转换为站内地址，视频时间跳转、代码、公式与 Mermaid 图保留。
+
+```sh
+node scripts/import-course-lectures.mjs csapp /绝对路径/csapp_markdown 2026-10-21
+node scripts/import-course-lectures.mjs cs61b /绝对路径/cs61b_markdown 2026-10-21
+```
+
+导入复用隔离的同步转换流程，只复制正文引用的配图到 `public/attachments/csapp-*`，不写回原稿、附件或真实 Obsidian 清单；重复导入跳过相同文件，已有不同内容时停止。CSAPP 第 3 讲的四处失效图片引用在博客副本中按讲义主题修正，映射记录在导入脚本中；CS61B 原稿中被字符串转义为控制字符的 TeX 命令恢复为反斜杠形式，五处带特殊字符的 Mermaid 子图标题补上引号，保证公式与流程图正常渲染。
+
 ## 从 iCloud Obsidian 同步
 
 现有 iCloud Vault 继续作为笔记唯一来源，不移动 Vault，也不修改其中任何文件。在 Vault 中自行创建 `Blog/` 文件夹，准备公开的 Markdown 放在这里，子目录结构会保留。
