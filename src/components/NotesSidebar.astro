@@ -45,7 +45,7 @@ const { notes, filterNotes = notes, filters = false } = Astro.props
     <ul class="sidebar-list">
       {getTopics(notes).map(([topic, count]) => (
         <li>
-          <a href={path(topicUrl(topic))}>
+          <a class="entry-surface" href={path(topicUrl(topic))}>
             <span class="lift-text">
               {topic}
               <TopicPin {topic} />

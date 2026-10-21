@@ -102,13 +102,13 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
       {(previous || next) && (
         <nav class="module-navigation" aria-label={t('专题阅读顺序')} data-pagefind-ignore>
           {previous && (
-            <a href={path(noteUrl(previous.id))}>
+            <a class="entry-surface" href={path(noteUrl(previous.id))}>
               <span>{t('上一篇')}</span>
               <strong class="lift-text">{previous.data.title}</strong>
             </a>
           )}
           {next && (
-            <a class="module-next" href={path(noteUrl(next.id))}>
+            <a class="module-next entry-surface" href={path(noteUrl(next.id))}>
               <span>{t('下一篇')}</span>
               <strong class="lift-text">{next.data.title}</strong>
             </a>

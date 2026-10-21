@@ -57,13 +57,13 @@ const { title, written, description } = essay.data
     {(newer || older) && (
       <nav class="module-navigation" aria-label={t('随笔阅读导航')} data-pagefind-ignore>
         {newer && (
-          <a href={path(essayUrl(newer.id))}>
+          <a class="entry-surface" href={path(essayUrl(newer.id))}>
             <span>{t('较新一篇')}</span>
             <strong class="lift-text">{newer.data.title}</strong>
           </a>
         )}
         {older && (
-          <a class="module-next" href={path(essayUrl(older.id))}>
+          <a class="module-next entry-surface" href={path(essayUrl(older.id))}>
             <span>{t('较早一篇')}</span>
             <strong class="lift-text">{older.data.title}</strong>
           </a>

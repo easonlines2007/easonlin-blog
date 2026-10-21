@@ -49,6 +49,24 @@ const path = (href: string) => localizePath(href, locale)
       // The upstream package ships no TypeScript declaration.
       // @ts-expect-error -- @pagefind/default-ui has no bundled types.
       const { PagefindUI } = await import('@pagefind/default-ui')
+      // Pagefind renders asynchronously. Extend each result's native link without
+      // intercepting clicks, including its separately navigable section results.
+      const extendResults = () => {
+        container
+          .querySelectorAll<HTMLElement>('.pagefind-ui__result-link:not(.entry-link)')
+          .forEach((link) => {
+            const surface = link.closest('.pagefind-ui__result-nested, .pagefind-ui__result')
+            if (!surface) return
+            surface.classList.add('entry-surface')
+            link.classList.add('entry-link')
+            const title = document.createElement('span')
+            title.className = 'lift-text'
+            // Keep Svelte's original text nodes so later queries can update them.
+            title.append(...Array.from(link.childNodes))
+            link.append(title)
+          })
+      }
+      new MutationObserver(extendResults).observe(container, { childList: true, subtree: true })
       new PagefindUI({
         element: '#search',
         bundlePath: '/pagefind/',

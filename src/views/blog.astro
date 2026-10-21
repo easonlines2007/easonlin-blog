@@ -18,7 +18,7 @@ const essays = await getEssays(locale)
     <ol class="essay-list" data-list-items>
       {essays.map((essay) => (
         <li
-          class="essay-list-item"
+          class="essay-list-item entry-surface"
           data-list-item
           data-sort-title={essay.data.title}
           data-sort-date={writingTimestamp(essay.data.written)}
@@ -28,7 +28,7 @@ const essays = await getEssays(locale)
           </time>
           <div>
             <h2>
-              <a href={path(essayUrl(essay.id))}>
+              <a class="entry-link" href={path(essayUrl(essay.id))}>
                 <span class="lift-text">{essay.data.title}</span>
               </a>
             </h2>

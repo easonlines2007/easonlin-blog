@@ -156,6 +156,34 @@ a {
 a:hover {
   color: var(--accent);
 }
+/* The hover and focus surface matches the full native link or button hit area. */
+.entry-surface {
+  position: relative;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+:is(a, button).entry-surface:is(:hover, :focus-visible),
+.entry-surface:has(.entry-link:is(:hover, :focus-visible)):not(
+    :has(.entry-surface .entry-link:is(:hover, :focus-visible))
+  ) {
+  background-color: var(--soft);
+  border-color: hsl(var(--primary) / 0.4);
+}
+.entry-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--entry-radius, var(--radius));
+}
+.entry-link:focus-visible {
+  outline: none;
+}
+.entry-surface:has(.entry-link:focus-visible):not(:has(.entry-surface .entry-link:focus-visible)) {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
 .lift-text {
   transition:
     transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -657,6 +685,7 @@ summary::-webkit-details-marker {
   border-bottom: 1px solid hsl(var(--foreground) / 0.4);
 }
 .home-section {
+  --entry-radius: 0;
   display: grid;
   grid-template-columns: 176px minmax(0, 1fr);
   gap: 24px;
@@ -672,6 +701,16 @@ summary::-webkit-details-marker {
   align-items: baseline;
   gap: 14px;
   line-height: 1.4;
+}
+.home-section-link {
+  display: flex;
+  align-items: baseline;
+  gap: inherit;
+}
+/* Inner entries keep their own destinations above the section's main link. */
+.home-section .section-body a {
+  position: relative;
+  z-index: 1;
 }
 .section-index {
   display: inline-block;
@@ -702,9 +741,6 @@ summary::-webkit-details-marker {
   min-height: 54px;
   padding: 12px 8px;
   border-bottom: 1px dashed hsl(var(--foreground) / 0.22);
-  transition:
-    background-color 220ms ease,
-    color 160ms ease;
 }
 .home-row-list li:last-child .home-row {
   border-bottom: 0;
@@ -719,9 +755,6 @@ summary::-webkit-details-marker {
   font-size: 13px;
   color: var(--secondary);
   white-space: nowrap;
-}
-.home-row:is(:hover, :focus-visible) {
-  background: var(--soft);
 }
 .home-row-label {
   font-size: 13px;
@@ -769,6 +802,7 @@ summary::-webkit-details-marker {
   padding: 0;
 }
 .essay-list-item {
+  --entry-radius: 0;
   display: grid;
   grid-template-columns: 180px minmax(0, 1fr);
   gap: 24px;
@@ -800,15 +834,6 @@ summary::-webkit-details-marker {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 19px 20px;
-  transition:
-    background-color 160ms,
-    box-shadow 160ms,
-    border-color 160ms;
-}
-.note-card:hover {
-  background: hsl(var(--muted) / 0.45);
-  border-color: hsl(var(--primary) / 0.35);
-  box-shadow: 0 3px 12px #00000004;
 }
 .note-card-heading {
   display: flex;
@@ -820,19 +845,6 @@ summary::-webkit-details-marker {
   font-size: var(--heading-size);
   font-weight: 400;
   line-height: 1.5;
-}
-.note-title::after {
-  position: absolute;
-  content: '';
-  inset: 0;
-  border-radius: var(--radius);
-}
-.note-title:focus-visible {
-  outline: none;
-}
-.note-card:has(.note-title:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
 }
 .note-description {
   color: var(--secondary);
@@ -978,10 +990,6 @@ summary::-webkit-details-marker {
   padding: 22px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  transition: background-color 160ms;
-}
-.index-card:hover {
-  background: var(--soft);
 }
 .index-card :is(h2, h3) {
   font-size: var(--heading-size);
@@ -1412,6 +1420,32 @@ summary::-webkit-details-marker {
 }
 .search-container .pagefind-ui__result-excerpt {
   line-height: 1.8;
+}
+.search-container
+  .pagefind-ui__result
+  .pagefind-ui__result-title
+  a.pagefind-ui__result-link.entry-link {
+  position: static;
+}
+.search-container .pagefind-ui__result-nested {
+  z-index: 1;
+  align-self: stretch;
+}
+.search-container
+  .pagefind-ui__result-nested
+  .pagefind-ui__result-title
+  a.pagefind-ui__result-link.entry-link::before {
+  position: static;
+}
+.search-container .entry-surface {
+  --entry-radius: 0;
+  position: relative;
+}
+.search-container .lift-text {
+  display: inline-block;
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    text-shadow 260ms ease;
 }
 .search-container mark {
   background: hsl(var(--primary) / 0.14);

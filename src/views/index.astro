@@ -30,12 +30,14 @@ const topics = getTopics(notes)
     <HomeMotto />
   </section>
   <div class="home-sections">
-    <section class="home-section" data-intro-reveal>
+    <section class="home-section entry-surface" data-intro-reveal>
       <h2>
-        <span class="section-index" aria-hidden="true">
-          01
-        </span>
-        {t('关于')}
+        <a class="home-section-link entry-link" href={path('/about')}>
+          <span class="section-index" aria-hidden="true">
+            01
+          </span>
+          <span class="lift-text">{t('关于')}</span>
+        </a>
       </h2>
       <div class="section-body">
         <ul class="home-row-list">
@@ -46,12 +48,14 @@ const topics = getTopics(notes)
         </a>
       </div>
     </section>
-    <section class="home-section" data-intro-reveal>
+    <section class="home-section entry-surface" data-intro-reveal>
       <h2>
-        <span class="section-index" aria-hidden="true">
-          02
-        </span>
-        {t('笔记')}
+        <a class="home-section-link entry-link" href={path('/notes')}>
+          <span class="section-index" aria-hidden="true">
+            02
+          </span>
+          <span class="lift-text">{t('笔记')}</span>
+        </a>
       </h2>
       <div class="section-body">
         <ul class="home-row-list">
@@ -69,12 +73,14 @@ const topics = getTopics(notes)
         </a>
       </div>
     </section>
-    <section class="home-section" data-intro-reveal>
+    <section class="home-section entry-surface" data-intro-reveal>
       <h2>
-        <span class="section-index" aria-hidden="true">
-          03
-        </span>
-        {t('随笔')}
+        <a class="home-section-link entry-link" href={path('/blog')}>
+          <span class="section-index" aria-hidden="true">
+            03
+          </span>
+          <span class="lift-text">{t('随笔')}</span>
+        </a>
       </h2>
       <div class="section-body">
         <ul class="home-row-list">
@@ -87,12 +93,14 @@ const topics = getTopics(notes)
         </a>
       </div>
     </section>
-    <section class="home-section" data-intro-reveal>
+    <section class="home-section entry-surface" data-intro-reveal>
       <h2>
-        <span class="section-index" aria-hidden="true">
-          04
-        </span>
-        {t('项目')}
+        <a class="home-section-link entry-link" href={path('/projects')}>
+          <span class="section-index" aria-hidden="true">
+            04
+          </span>
+          <span class="lift-text">{t('项目')}</span>
+        </a>
       </h2>
       <div class="section-body">
         <ul class="home-row-list">

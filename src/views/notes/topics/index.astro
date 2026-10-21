@@ -22,7 +22,7 @@ const topics = getTopics(await getNotes(locale))
   />
   <div class="index-grid enter delay-1">
     {topics.map(([topic, count]) => (
-      <a class="index-card" href={path(topicUrl(topic))}>
+      <a class="index-card entry-surface" href={path(topicUrl(topic))}>
         <div>
           <h2 class="lift-text">
             {topic}

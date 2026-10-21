@@ -15,7 +15,11 @@ const items = headings.filter((heading) => heading.depth >= 2 && heading.depth <
   <ul class="toc-list">
     {items.map((heading) => (
       <li>
-        <a href={`#${heading.slug}`} class:list={[heading.depth > 2 && 'nested']} data-toc-link>
+        <a
+          href={`#${heading.slug}`}
+          class:list={['entry-surface', heading.depth > 2 && 'nested']}
+          data-toc-link
+        >
           <span class="lift-text">{t(heading.text)}</span>
         </a>
       </li>

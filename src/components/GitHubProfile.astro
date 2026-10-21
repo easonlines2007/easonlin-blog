@@ -11,7 +11,7 @@ const stats = [
 ]
 ---
 
-<section class="github-profile enter delay-1" aria-labelledby="github-profile-title">
+<section class="github-profile entry-surface enter delay-1" aria-labelledby="github-profile-title">
   <div class="profile-main">
     <img
       class="profile-avatar"
@@ -33,7 +33,7 @@ const stats = [
         {profile.location && <p>{profile.location}</p>}
       </div>
     </div>
-    <a class="profile-link" href={profile.url} target="_blank" rel="noopener noreferrer">
+    <a class="profile-link entry-link" href={profile.url} target="_blank" rel="noopener noreferrer">
       <span class="lift-text">{locale === 'en' ? 'View GitHub profile ↗' : 'GitHub 主页 ↗'}</span>
     </a>
   </div>

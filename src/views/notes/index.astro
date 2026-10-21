@@ -18,7 +18,7 @@ const tags = countValues(notes, 'tags')
 <BaseLayout title={t('笔记')}>
   <PageHeader title={t('笔记')} description={t('从一篇笔记、一个专题，或一个关键词开始读。')} />
   <div class="notes-hub enter delay-1">
-    <a class="index-card" href={path('/notes/all')}>
+    <a class="index-card entry-surface" href={path('/notes/all')}>
       <div>
         <h2 class="lift-text">{t('全部笔记')}</h2>
         <p>
@@ -36,7 +36,7 @@ const tags = countValues(notes, 'tags')
       </div>
       <div class="index-grid">
         {topics.map(([topic, count]) => (
-          <a class="index-card" href={path(topicUrl(topic))}>
+          <a class="index-card entry-surface" href={path(topicUrl(topic))}>
             <div>
               <h3 class="lift-text">
                 {topic}
@@ -51,7 +51,7 @@ const tags = countValues(notes, 'tags')
       {!topics.length && <p class="empty-state">{t('还没有公开专题。')}</p>}
     </section>
     <div class="index-grid">
-      <a class="index-card" href={path('/notes/tags')}>
+      <a class="index-card entry-surface" href={path('/notes/tags')}>
         <div>
           <h2 class="lift-text">{t('标签')}</h2>
           <p>
@@ -62,7 +62,7 @@ const tags = countValues(notes, 'tags')
         </div>
         <Icon name="next" />
       </a>
-      <a class="index-card" href={path('/notes/status')}>
+      <a class="index-card entry-surface" href={path('/notes/status')}>
         <div>
           <h2 class="lift-text">{t('整理状态')}</h2>
           <p>{t('进行中、已整理与已完成的笔记')}</p>

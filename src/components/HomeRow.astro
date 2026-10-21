@@ -15,7 +15,7 @@ const { label, title, meta, href, external = false, pinTopic } = Astro.props
 
 <li>
   <a
-    class:list={['home-row', !label && 'home-row-plain', meta && 'home-row-meta']}
+    class:list={['home-row entry-surface', !label && 'home-row-plain', meta && 'home-row-meta']}
     {href}
     target={external ? '_blank' : undefined}
     rel={external ? 'noopener noreferrer' : undefined}

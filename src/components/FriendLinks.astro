@@ -34,7 +34,7 @@ const friends = [
   {friends.map((friend) => (
     <li>
       <a
-        class="friend-link"
+        class="friend-link entry-surface"
         href={friend.url}
         target="_blank"
         rel="noopener noreferrer"
@@ -83,13 +83,6 @@ const friends = [
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--soft);
-    transition:
-      border-color 160ms ease,
-      color 160ms ease;
-  }
-  .friend-link:hover,
-  .friend-link:focus-visible {
-    border-color: var(--accent);
   }
   .friend-avatar {
     flex: 0 0 56px;

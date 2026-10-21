@@ -21,9 +21,9 @@ const contacts = [
 
 <div class="contact-grid">
   {contacts.map((contact, index) => (
-    <figure class="contact-card">
+    <div class="contact-card">
       <button
-        class="contact-image"
+        class="contact-trigger entry-surface"
         type="button"
         data-contact-open={`contact-${index}`}
         aria-haspopup="dialog"
@@ -33,28 +33,30 @@ const contacts = [
             : `查看${contact.name}联系方式大图`
         }
       >
-        <Image
-          src={contact.image}
-          width={contact.image.width}
-          height={contact.image.height}
-          format="png"
-          alt={
-            locale === 'en'
-              ? `${t(contact.name)} profile and contact QR code`
-              : `${contact.name}个人资料与联系二维码`
-          }
-          loading="lazy"
-        />
-        <span class="contact-cover" aria-hidden="true">
-          <span class="contact-number">0{index + 1}</span>
+        <span class="contact-image">
+          <Image
+            src={contact.image}
+            width={contact.image.width}
+            height={contact.image.height}
+            format="png"
+            alt={
+              locale === 'en'
+                ? `${t(contact.name)} profile and contact QR code`
+                : `${contact.name}个人资料与联系二维码`
+            }
+            loading="lazy"
+          />
+          <span class="contact-cover" aria-hidden="true">
+            <span class="contact-number">0{index + 1}</span>
+            <strong>{t(contact.name)}</strong>
+            <span>{t('查看联系方式 ↗')}</span>
+          </span>
+        </span>
+        <span class="contact-caption">
           <strong>{t(contact.name)}</strong>
-          <span>{t('查看联系方式 ↗')}</span>
+          <span>{t(contact.detail)}</span>
         </span>
       </button>
-      <figcaption>
-        <strong>{t(contact.name)}</strong>
-        <span>{t(contact.detail)}</span>
-      </figcaption>
       <dialog
         id={`contact-${index}`}
         class="contact-dialog"
@@ -82,7 +84,7 @@ const contacts = [
           {locale === 'en' ? 'Scan or save the image' : '扫码或保存图片'} · {t(contact.detail)}
         </p>
       </dialog>
-    </figure>
+    </div>
   ))}
 </div>
 <script>
@@ -114,6 +116,16 @@ const contacts = [
   .contact-card {
     margin: 0;
     min-width: 0;
+  }
+  .contact-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text);
+    text-align: left;
   }
   .contact-image {
     position: relative;
@@ -161,21 +173,24 @@ const contacts = [
     font-size: 10px;
     letter-spacing: 0.1em;
   }
-  .contact-image:hover .contact-cover,
-  .contact-image:focus-visible .contact-cover {
+  .contact-trigger:hover .contact-cover,
+  .contact-trigger:focus-visible .contact-cover {
     opacity: 0;
   }
-  figcaption {
+  .contact-trigger:is(:hover, :focus-visible) .contact-image {
+    border-color: hsl(var(--primary) / 0.4);
+  }
+  .contact-caption {
     padding: 14px 2px 0;
     display: flex;
     flex-direction: column;
     gap: 3px;
     font-size: 13px;
   }
-  figcaption strong {
+  .contact-caption strong {
     font-weight: 500;
   }
-  figcaption span {
+  .contact-caption > span {
     color: var(--secondary);
     font-size: 12px;
     overflow-wrap: anywhere;

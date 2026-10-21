@@ -13,7 +13,7 @@ const { title, description, tags, status, updated, date, pdf } = note.data
 ---
 
 <li
-  class="note-card"
+  class="note-card entry-surface"
   data-note-status={status}
   data-list-item
   data-sort-title={title}
@@ -21,7 +21,7 @@ const { title, description, tags, status, updated, date, pdf } = note.data
 >
   <div class="note-card-heading">
     <h2>
-      <a class="note-title" href={path(noteUrl(note.id))}>
+      <a class="note-title entry-link" href={path(noteUrl(note.id))}>
         <span class="lift-text">{title}</span>
       </a>
     </h2>

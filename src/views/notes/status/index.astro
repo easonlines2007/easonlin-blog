@@ -20,7 +20,10 @@ const notes = await getNotes(locale)
   />
   <div class="index-grid enter delay-1">
     {Object.entries(statusLabels).map(([status, label]) => (
-      <a class="index-card" href={path(statusUrl(status as keyof typeof statusLabels))}>
+      <a
+        class="index-card entry-surface"
+        href={path(statusUrl(status as keyof typeof statusLabels))}
+      >
         <div>
           <h2 class="lift-text">{t(label)}</h2>
           <p>{noteCount(notes.filter((note) => note.data.status === status).length, locale)}</p>
