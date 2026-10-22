@@ -127,7 +127,7 @@ The core idea behind Quicksort involves **partitioning.**
 
 Specifically, to partition an array a\[], first pick an element x = a\[i] as the pivot. 
 
-<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/15.-asymptotics-ii/15.4-mergesort">原教材配图已失效，查看归并排序章节说明。</a><figcaption><p>In this array, x = 10 and is the pivot element. This array has not be partitioned on x = 10 yet. </p></figcaption></figure>
+<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/30.-quicksort">原教材配图已失效，查看快速排序章节说明。</a><figcaption><p>In this array, x = 10 and is the pivot element. This array has not be partitioned on x = 10 yet. </p></figcaption></figure>
 
 Partitioning on that pivot element (x) involves rearrange a\[] such that: 
 
@@ -139,7 +139,7 @@ Partitioning on that pivot element (x) involves rearrange a\[] such that:
 
 In the following arrays, A, B, and C represent arrays that are valid partitions (with the pivot being x = 10), while D represents an invalid partition.
 
-<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/15.-asymptotics-ii/15.4-mergesort">原教材配图已失效，查看归并排序章节说明。</a><figcaption><p>D is an invalid partition because 4 is less than 10, but is to the right of the pivot after the partition. </p></figcaption></figure>
+<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/30.-quicksort">原教材配图已失效，查看快速排序章节说明。</a><figcaption><p>D is an invalid partition because 4 is less than 10, but is to the right of the pivot after the partition. </p></figcaption></figure>
 
 <br>
 
@@ -151,7 +151,7 @@ The figure below shows a partition performed on the pivot of 5. Notice how 5 in 
 
 This suggests that the partition procedure can be used recursively on the two halves to the left and to the right of the pivot element. 
 
-<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/15.-asymptotics-ii/15.4-mergesort">原教材配图已失效，查看归并排序章节说明。</a><figcaption><p>After partitioning on the pivot element of 5, 5 is in the “proper place” and there are two halves left to be sorted. The left half are the four elements of [3, 2, 1, 4], and the right half consists of the three elements of [7, 8, 6]. </p></figcaption></figure>
+<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/30.-quicksort">原教材配图已失效，查看快速排序章节说明。</a><figcaption><p>After partitioning on the pivot element of 5, 5 is in the “proper place” and there are two halves left to be sorted. The left half are the four elements of [3, 2, 1, 4], and the right half consists of the three elements of [7, 8, 6]. </p></figcaption></figure>
 
 The properties that partitioning provides inspires Tony Hoare’s Quicksort algorithm. 
 
@@ -165,7 +165,7 @@ To quicksort N items:
 
 3. Recursively quicksort the right half. 
 
-<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/15.-asymptotics-ii/15.4-mergesort">原教材配图已失效，查看归并排序章节说明。</a><figcaption><p><a href="https://docs.google.com/presentation/d/1QjAs-zx1i0_XWlLqsKtexb-iueao9jNLkN-gW9QxAD0/edit?usp=sharing">Demo of quicksort is linked here</a></p></figcaption></figure>
+<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/30.-quicksort">原教材配图已失效，查看快速排序章节说明。</a><figcaption><p><a href="https://docs.google.com/presentation/d/1QjAs-zx1i0_XWlLqsKtexb-iueao9jNLkN-gW9QxAD0/edit?usp=sharing">Demo of quicksort is linked here</a></p></figcaption></figure>
 
 <br>
 
@@ -185,7 +185,7 @@ However, what complicates runtime analysis for Quicksort is that the the overall
 
 For instance, the best case runtime is when the pivot chosen always lands in the middle (in other words, the partition always picks the median element of the array). 
 
-<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/15.-asymptotics-ii/15.4-mergesort">原教材配图已失效，查看归并排序章节说明。</a><figcaption><p>Best Case</p></figcaption></figure>
+<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/30.-quicksort">原教材配图已失效，查看快速排序章节说明。</a><figcaption><p>Best Case</p></figcaption></figure>
 
 In the best case, the total work done at each level is approximately O(N). To see this, the first partition pivots on one element and requires checking all N elements to determine whether they go on the right or the left of the pivot element. The second layer repeats this, but for N/2 elements on two separate pivots (since we are recursively partitioning on the two halves). Thus, each level is O(N) work. 
 
@@ -195,7 +195,7 @@ The overall runtime becomes $$\Theta(NH)$$, where H = # of layers = $$\Theta(log
 
 The worst case for runtime occurs when the pivot chosen at each partition lands at the beginning of the array. In this scenario, each layer still has to do O(N) work, but now there are H = # of layers = N layers, since every single element has to be pivoted on. Thus, the worst case runtime is $$\Theta(N^2)$$.
 
-<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/15.-asymptotics-ii/15.4-mergesort">原教材配图已失效，查看归并排序章节说明。</a><figcaption><p>Worst Case: <span class="math">\Theta(N^2)</span></p></figcaption></figure>
+<figure><a href="https://cs61b-2.gitbook.io/cs61b-textbook/30.-quicksort">原教材配图已失效，查看快速排序章节说明。</a><figcaption><p>Worst Case: <span class="math">\Theta(N^2)</span></p></figcaption></figure>
 
 ##### Quicksort vs Mergesort Performance
 

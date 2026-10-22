@@ -41,9 +41,9 @@ const missingTextbookImages = new Map([
     ]
   ]
 ])
-// Six legacy Google-hosted illustrations in the imported Mergesort section
+// Six legacy Google-hosted illustrations in the imported Quicksort section
 // returned 404 on 2026-10-22. Keep their captions and link to the chapter.
-const missingMergesortImages = new Set([
+const missingQuicksortImages = new Set([
   '3f28754c1bd36eeefc6ea5762a30dae21c6eca94157cdd52daf6ace575539050',
   '26974851c500091b81c8f9ecd7cc899e0268e1c762bc36a09db16f532240e053',
   'f0df2b7c6f95bff2f9e963bebd688a80a326d78e570b664b5b5810fda1d5d00b',
@@ -202,8 +202,8 @@ export async function importCourseLectures({
       function visit(node) {
         if (course === 'cs61b' && node.type === 'html' && node.value.includes('<img')) {
           const value = node.value.replace(/<img\b[^>]*\bsrc="([^"]+)"[^>]*>/g, (tag, url) =>
-            missingMergesortImages.has(digest(url.replaceAll('&amp;', '&')))
-              ? '<a href="https://cs61b-2.gitbook.io/cs61b-textbook/15.-asymptotics-ii/15.4-mergesort">原教材配图已失效，查看归并排序章节说明。</a>'
+              missingQuicksortImages.has(digest(url.replaceAll('&amp;', '&')))
+                ? '<a href="https://cs61b-2.gitbook.io/cs61b-textbook/30.-quicksort">原教材配图已失效，查看快速排序章节说明。</a>'
               : tag
           )
           if (value !== node.value)
