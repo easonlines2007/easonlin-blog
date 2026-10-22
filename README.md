@@ -95,7 +95,19 @@ node scripts/import-course-lectures.mjs csapp /绝对路径/csapp_markdown 2026-
 node scripts/import-course-lectures.mjs cs61b /绝对路径/cs61b_markdown 2026-10-21
 ```
 
-导入复用隔离的同步转换流程，只复制正文引用的配图到 `public/attachments/csapp-*`，不写回原稿、附件或真实 Obsidian 清单；重复导入跳过相同文件，已有不同内容时停止。CSAPP 第 3 讲的四处失效图片引用在博客副本中按讲义主题修正，映射记录在导入脚本中；CS61B 原稿中被字符串转义为控制字符的 TeX 命令恢复为反斜杠形式，五处带特殊字符的 Mermaid 子图标题补上引号，保证公式与流程图正常渲染。
+导入复用隔离的同步转换流程，只复制正文引用的配图，不写回原稿、附件或真实 Obsidian 清单；重复导入跳过相同文件，已有不同内容时停止。CSAPP 第 3 讲的失效图片引用在博客副本中按讲义主题修正，映射记录在导入脚本中；公式与 Mermaid 标签中的格式问题也在副本中修复。
+
+### 更新 VideoBook 扩充版
+
+2026-10-22 已用前一晚更新的 `csapp_markdown`、`cs61a_markdown`、`cs61b_markdown` 刷新全部 103 讲，保留现有网址、首次添加日期、标签和整理状态，新增 `updated` 日期。新导入器也支持 CS61A 的逐讲目录：
+
+```sh
+node scripts/import-course-lectures.mjs csapp /绝对路径/csapp_markdown 2026-10-21 2026-10-22
+node scripts/import-course-lectures.mjs cs61a /绝对路径/cs61a_markdown 2026-10-09 2026-10-22
+node scripts/import-course-lectures.mjs cs61b /绝对路径/cs61b_markdown 2026-10-21 2026-10-22
+```
+
+最后一项是显式更新日期；不提供它仍会拒绝覆盖不同内容。刷新前完整校验讲次、附件与目标文件，期间目标笔记变化时停止。按图片内容复用已有附件，避免因为来源目录改名重复复制 CS61A 的 577 张截图。CS61B 教材的本地链接转为官方网页，清理 GitBook 模板标记；八处已失效的教材旧图改为可阅读的章节链接。已有 CS61A 英文译文保留，页面注明属于扩充前版本，`sourceHash` 保留以继续提示翻译待更新。
 
 ## 从 iCloud Obsidian 同步
 

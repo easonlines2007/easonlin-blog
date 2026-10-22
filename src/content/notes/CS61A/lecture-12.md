@@ -1,25 +1,50 @@
 ---
-title: Lecture 12 · Containers (容器、盒式指针模型与字典抽象)
-description: CS61A 第 12 讲：Containers (容器、盒式指针模型与字典抽象)
 date: 2026-10-09
-topic: CS61A
 tags:
   - cs61a
 status: completed
 publish: true
+title: Lecture 12 · Containers (容器、盒式指针模型与字典抽象)
+description: CS61A 第 12 讲：Containers (容器、盒式指针模型与字典抽象)
+topic: CS61A
 order: 12
+updated: 2026-10-22
 ---
-> **英文原课**：CS 61A: Structure and Interpretation of Computer Programs (Fall 2024)  
+
+> **课程体系**：UC Berkeley CS61A (Fall 2024)  
+> **所属模块**：Module 2: 递归与数据抽象 (Recursion & Sequences)  
 > **主讲教师**：Prof. John DeNero (UC Berkeley)  
-> **图文整理**：VideoBook 视频转图文技术电子书流水线  
-> **全书体量**：已收录 37 / 37 讲 ｜ 18.2 小时音视频讲义 ｜ 577 张高清板书截图  
-> **在线目录**：[CS61A 专题目录](/notes/topics/CS61A)
+> **视频时长**：27:53 ｜ **课堂截图**：16 张板书/代码演示  
+> **视频直达**：[📺 在 B 站观看本讲原视频 (P12)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12)  
+> **快速导航**：[← 上一讲 (P11 Lecture 11 Sequences)](/notes/cs61a/lecture-11) ｜ [📚 返回全书目录](/notes/topics/CS61A) ｜ [下一讲 (P13 Lecture 13 Data Abstraction) →](/notes/cs61a/lecture-13)
 
 ---
 
+## 目录 (Table of Contents)
+1. [引言：闭包性质与层级数据结构](#1-引言闭包性质与层级数据结构)
+2. [环境模型中的容器可视化：盒式指针模型 (Box-and-Pointer Notation)](#2-环境模型中的容器可视化盒式指针模型-box-and-pointer-notation)
+3. [列表切片 (Slicing)：语法规范与内存行为](#3-列表切片-slicing语法规范与内存行为)
+4. [序列高阶聚合函数：`sum`, `max`, `all`](#4-序列高阶聚合函数sum-max-all)
+5. [字符串抽象：文本序列与子串检索](#5-字符串抽象文本序列与子串检索)
+6. [字典 (Dictionary)：键值对映射系统](#6-字典-dictionary键值对映射系统)
+7. [字典键的两大铁律：唯一性与可哈希性 (Hashability)](#7-字典键的两大铁律唯一性与可哈希性-hashability)
+8. [字典推导式与高阶嵌套索引实战 (`index`)](#8-字典推导式与高阶嵌套索引实战-index)
+9. [本讲核心要点与思考题](#9-本讲核心要点与思考题)
 
+---
 
-> **主讲**：John DeNero ｜ **时长**：27:53 ｜ **视频回链**：[B 站对应单集 (P12)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12)
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「目录 (Table of Contents)」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 1. 引言：闭包性质与层级数据结构
 
@@ -29,14 +54,47 @@ order: 12
 > **闭包性质 (Closure Property of Data Combination)**：  
 > 某种数据组合的方法满足闭包性质，当且仅当**通过该方法组合出的结果本身，依然能够作为该组合方法的输入进一步参与组合**。
 
-![什么是组合的闭包性质 (The Closure Property)？ · 课堂板书演示 (00:00:31)](</attachments/cs61a-edac872418f699b4eac3cd40.png>)
+[![什么是组合的闭包性质 (The Closure Property)？ · 课堂板书演示 (00:00:31)](</attachments/cs61a-edac872418f699b4eac3cd40.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=31)
 *⏱ 时间戳：00:00:31 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:00:31)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=31)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:00:31)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“Box and pointer notation is a way to represent lists within our environment diagrams. So, the reason why we need a notation is that sequential data can actually become quite complicated. And that's because of the closure property. A method for combining data values satisfies this closure property. I...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「1. 引言：闭包性质与层级数据结构」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 如果我们可以将整数放入一个列表中，且列表本身也是一个合法的数据对象，那么我们必然能够**将列表放入另一个列表中**。
 - 这一性质允许我们构建**层级结构 (Hierarchical Structures)**：大系统由各个部件组成，部件本身又由更小的子部件组成，递归嵌套。
 - 现实世界的几乎所有复杂概念（组织架构树、文件目录系统、网页 DOM 树、数学抽象语法树）皆基于此。
 
 ---
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「1. 引言：闭包性质与层级数据结构」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 2. 环境模型中的容器可视化：盒式指针模型 (Box-and-Pointer Notation)
 
@@ -47,8 +105,28 @@ order: 12
 2. **基本原始类型 (Primitive Values)**：如数字 `3`、布尔值 `False`、`None`，直接书写在对应的方框内部。
 3. **复合类型 (Compound Values)**：如果元素是列表、函数、字典等复合对象，**方框内部画出一个圆点，引出一根箭头（指针）精确指向目标对象**。
 
-![绘制规范 · 课堂板书演示 (00:01:36)](</attachments/cs61a-f334a32e581591362f1d9497.png>)
+[![绘制规范 · 课堂板书演示 (00:01:36)](</attachments/cs61a-f334a32e581591362f1d9497.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=96)
 *⏱ 时间戳：00:01:36 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:01:36)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=96)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:01:36)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“And that means that we need a way to keep track of what's inside of what. That's where we use box and pointer notation. Lists are represented in environment diagrams as a row of index labeled adjacent boxes, one per element. Each box either contains a primitive value or points to a compound value. S...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「2. 环境模型中的容器可视化：盒式指针模型 (Box-and-Pointer Notation)」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 ### 2.2 深度嵌套列表的环境模型实例
 考察如下多层嵌套列表：
@@ -60,8 +138,28 @@ nested_list = [
 ]
 ```
 
-![深度嵌套列表的环境模型实例 · 课堂板书演示 (00:02:35)](</attachments/cs61a-4993d92dc4dca704d82a8850.png>)
+[![深度嵌套列表的环境模型实例 · 课堂板书演示 (00:02:35)](</attachments/cs61a-4993d92dc4dca704d82a8850.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=155)
 *⏱ 时间戳：00:02:35 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:02:35)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=155)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:02:35)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“So let's walk through everything that's on the screen. Nested list is a three-element list, and so we see it bound to three adjacent rectangles. Now each element of nested list is actually another list, and so that's why we see pointers to compound values. Lists are compound values, functions are co...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「2. 环境模型中的容器可视化：盒式指针模型 (Box-and-Pointer Notation)」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 ```
 Global frame
@@ -84,6 +182,19 @@ Global frame
 
 ---
 
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「2. 环境模型中的容器可视化：盒式指针模型 (Box-and-Pointer Notation)」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
+
 ## 3. 列表切片 (Slicing)：语法规范与内存行为
 
 切片是 Python 从序列中提取子序列的核心语法。
@@ -96,8 +207,28 @@ sub1 = odds[1:3]  # 选取索引 1 和 2 -> [5, 7]
 ```
 等价于列表推导式：`[odds[i] for i in range(1, 3)]`。
 
-![语法规则与半开区间 · 课堂板书演示 (00:04:41)](</attachments/cs61a-67ace6dae1fbc97c46e51ce5.png>)
+[![语法规则与半开区间 · 课堂板书演示 (00:04:41)](</attachments/cs61a-67ace6dae1fbc97c46e51ce5.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=281)
 *⏱ 时间戳：00:04:41 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:04:41)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=281)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:04:41)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“And remember, range 1 to 3 gives me 1 and 2, but not 3. OK, so that's one way to select out the 5 and the 7. A sub-list of this list. Slicing is a notation for doing this more compactly. It does the same thing, but without you typing so much. You just write odds, and then in square brackets, you say...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「3. 列表切片 (Slicing)：语法规范与内存行为」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 边界省略规则：
 - `s[:stop]`：省略起点，默认从索引 `0` 开始。例如 `odds[:3] -> [3, 5, 7]`。
@@ -115,10 +246,43 @@ c = digits[2:]  # [2, 8] (新列表)
 ```
 执行完毕后，全局环境中共有 4 个彼此独立的列表对象！
 
-![内存行为核心法则：切片总是创建新对象 · 课堂板书演示 (00:05:44)](</attachments/cs61a-00401cd6b8e100be0add6c40.png>)
+[![内存行为核心法则：切片总是创建新对象 · 课堂板书演示 (00:05:44)](</attachments/cs61a-00401cd6b8e100be0add6c40.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=344)
 *⏱ 时间戳：00:05:44 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:05:44)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=344)*
 
+#### 📸 课堂板书与代码演示深入精读 (00:05:44)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“And you can even skip the beginning and the end, and you get back all of the elements in the original list. So these square brackets for the colon inside are called a slicing operator. Slicing always creates new values. So here are some examples. I have digits, which is a list, and then I slice it t...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「3. 列表切片 (Slicing)：语法规范与内存行为」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
+
 ---
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「3. 列表切片 (Slicing)：语法规范与内存行为」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 4. 序列高阶聚合函数：`sum`, `max`, `all`
 
@@ -129,8 +293,28 @@ Python 提供了若干开箱即用的高阶聚合函数，将可迭代序列缩�
 - 默认情况下 `start=0`，计算数值累加：`sum([2, 3, 4]) -> 9`。
 - 传入自定义 `start`：`sum([2, 3, 4], 5) -> 14`。
 
-![sum(iterable, start=0) 的进阶用法 · 课堂板书演示 (00:07:14)](</attachments/cs61a-e652acf569e238d6656a59ef.png>)
+[![sum(iterable, start=0) 的进阶用法 · 课堂板书演示 (00:07:14)](</attachments/cs61a-e652acf569e238d6656a59ef.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=434)
 *⏱ 时间戳：00:07:14 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:07:14)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=434)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:07:14)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“Now, this notation doesn't actually mean you write square brackets when you call it. Instead, this is something that's used in Python docs to say that the second argument is optional. So you can call sum with just one argument, a list, and it will sum the values, or you can call it with two argument...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「4. 序列高阶聚合函数：`sum`, `max`, `all`」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 **黑魔法：利用 `sum` 展平多层列表 (Flattening)**：
 因为列表加法 `+` 表示拼接，如果我们将初始基底设为空列表 `[]`：
@@ -141,8 +325,28 @@ flat = sum(nested, [])
 ```
 这是 Python 中极简的多维序列展平技巧！
 
-![计算步骤: 「」 + 「2, 3」 + 「4」 -> 「2, 3, 4」 · 课堂板书演示 (00:08:19)](</attachments/cs61a-e3df694ad79bac20f2830734.png>)
+[![计算步骤: 「」 + 「2, 3」 + 「4」 -> 「2, 3, 4」 · 课堂板书演示 (00:08:19)](</attachments/cs61a-e3df694ad79bac20f2830734.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=499)
 *⏱ 时间戳：00:08:19 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:08:19)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=499)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:08:19)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“Now, why is that useful? Well, let's say you're adding together values that aren't just numbers. You have to provide a value of that type in order to get started. So remember that I can add two and three the list to four the list, and I get a longer list. Well, in the same way, I can sum a list cont...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「4. 序列高阶聚合函数：`sum`, `max`, `all`」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 ### 4.2 `max` 与投影键函数 (`key=fn`)
 `max` 不仅能比较原生数值，还允许传入 `key` 函数，基于元素经过变换后的投影值进行寻值：
@@ -153,8 +357,28 @@ peak_x = max(range(10), key=lambda x: 7 - (x - 4) * (x - 2))
 ```
 注意：`max` 最终返回的是**序列中原本的元素 `3`**，而不是其计算出的函数值 `8`！
 
-![输出 3 (因为当 x=3 时，表达式取得局部峰值 8) · 课堂板书演示 (00:09:52)](</attachments/cs61a-b341278bf0132515b717dfd0.png>)
+[![输出 3 (因为当 x=3 时，表达式取得局部峰值 8) · 课堂板书演示 (00:09:52)](</attachments/cs61a-b341278bf0132515b717dfd0.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=592)
 *⏱ 时间戳：00:09:52 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:09:52)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=592)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:09:52)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“Or I could have said max one, two, three, four with a zero at the beginning, and that would have done the same thing. Now, what's going on with this key function? Well, the documentation didn't tell me, but what happens is that it applies a function to every element that you're considering and actua...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「4. 序列高阶聚合函数：`sum`, `max`, `all`」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 ### 4.3 `all` 与 `any`：布尔上下文汇总
 - `all(iterable)`：当且仅当序列中每一个元素在布尔上下文中皆为真时返回 `True`；遇到任何假值立即短路返回 `False`。空序列返回 `True`。
@@ -165,10 +389,43 @@ all([x < 5 for x in range(5)])  # True
 all([0, 1, 2, 3])                # False (0 是假值)
 ```
 
-![all 与 any：布尔上下文汇总 · 课堂板书演示 (00:11:32)](</attachments/cs61a-e788ccc055eca5356385ba2d.png>)
+[![all 与 any：布尔上下文汇总 · 课堂板书演示 (00:11:32)](</attachments/cs61a-e788ccc055eca5356385ba2d.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=692)
 *⏱ 时间戳：00:11:32 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:11:32)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=692)*
 
+#### 📸 课堂板书与代码演示深入精读 (00:11:32)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“Well, bool tells me whether a value is true or false. So 5 is a true value. True, of course, is a true value as well. Even negative 1 is a true value. But 0 is not a true value. It's a false value. Likewise, hello is a true value. And an empty string is a false value. We learned about these when we ...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「4. 序列高阶聚合函数：`sum`, `max`, `all`」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
+
 ---
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「4. 序列高阶聚合函数：`sum`, `max`, `all`」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 5. 字符串抽象：文本序列与子串检索
 
@@ -178,8 +435,28 @@ all([0, 1, 2, 3])                # False (0 是假值)
 - 三引号 `"""..."""` 能够跨越多行，常用于文档字符串 (docstring)。
 - 转义符 `\`：与紧随其后的字符融合成单一符号，如 `\n` 表示换行（ASCII Linefeed）。
 
-![字符串字面量与转义字符 · 课堂板书演示 (00:14:44)](</attachments/cs61a-ec299cafc7ac0d72da7762ac.png>)
+[![字符串字面量与转义字符 · 课堂板书演示 (00:14:44)](</attachments/cs61a-ec299cafc7ac0d72da7762ac.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=884)
 *⏱ 时间戳：00:14:44 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:14:44)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=884)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:14:44)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“I can use double quotes, and they're the same, except for that if you put an apostrophe in the middle of a double-quoted string, it works out fine. But if you do that in the middle of a single-quoted string, well, then it would end the string. You don't have to just put English characters in the str...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「5. 字符串抽象：文本序列与子串检索」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 ### 5.2 字符串与列表的微妙差异
 虽然字符串也是序列（支持 `len()` 与索引 `s[i]`），但在两处机制上与列表不同：
@@ -188,10 +465,43 @@ all([0, 1, 2, 3])                # False (0 是假值)
    - 在列表中：`[1, 2] in [1, 2, 3]` 返回 `False`（列表仅搜索顶层单个元素）。
    - 在字符串中：`'here' in 'where'` 返回 `True`（字符串支持**连续子串模式匹配**）。
 
-![字符串与列表的微妙差异 · 课堂板书演示 (00:16:42)](</attachments/cs61a-8d9e44cb62d589c9ae3dedab.png>)
+[![字符串与列表的微妙差异 · 课堂板书演示 (00:16:42)](</attachments/cs61a-8d9e44cb62d589c9ae3dedab.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1002)
 *⏱ 时间戳：00:16:42 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:16:42)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1002)*
 
+#### 📸 课堂板书与代码演示深入精读 (00:16:42)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“You get a string, but with only one element, only one character in it. In and not in are a little bit different for strings than they are with other sequence types. So, instead of looking for only individual letters inside this sequence of letters, you can look for whole words. So if I say is here a...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「5. 字符串抽象：文本序列与子串检索」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
+
 ---
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「5. 字符串抽象：文本序列与子串检索」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 6. 字典 (Dictionary)：键值对映射系统
 
@@ -204,8 +514,28 @@ numerals = {'I': 1, 'V': 5, 'X': 10}
 val = numerals['V']  # 5
 ```
 
-![字典字面量与键查找 · 课堂板书演示 (00:18:38)](</attachments/cs61a-b29df0499096004ae28f2141.png>)
+[![字典字面量与键查找 · 课堂板书演示 (00:18:38)](</attachments/cs61a-b29df0499096004ae28f2141.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1118)
 *⏱ 时间戳：00:18:38 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:18:38)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1118)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:18:38)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“But it didn't have to be that way. You could use numbers or strings as keys or values. Once I've created numerals, the most common operation I'll perform is to lookup a particular value based on its key. Now with dictionaries, we're using the same item lookup syntax as we would for a list, but we ca...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「6. 字典 (Dictionary)：键值对映射系统」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 - **单向查找**：字典只能由键检索值；无法直接通过值反向查找键。
 - **不存在的键抛出异常**：若查询不存在的键（如 `numerals['C']`），解释器将抛出 `KeyError`。
@@ -216,17 +546,70 @@ val = numerals['V']  # 5
 - `numerals.values()`：返回 `dict_values` 视图对象，提供所有值的序列视图。
 - `numerals.items()`：返回由 `(key, value)` 二元组构成的键值对序列。
 
-![字典的序列视角 · 课堂板书演示 (00:20:28)](</attachments/cs61a-78f6b987212fca3ccaeea628.png>)
+[![字典的序列视角 · 课堂板书演示 (00:20:28)](</attachments/cs61a-78f6b987212fca3ccaeea628.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1228)
 *⏱ 时间戳：00:20:28 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:20:28)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1228)*
 
+#### 📸 课堂板书与代码演示深入精读 (00:20:28)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“You could call list on numerals.values, and that would give you a regular old list instead of a dict values, which is a special kind of sequence only related to dictionaries, much like a range is a special kind of sequence only related to integers. Dictionaries can be constructed with no elements, o...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「6. 字典 (Dictionary)：键值对映射系统」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
+
 ---
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「6. 字典 (Dictionary)：键值对映射系统」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 7. 字典键的两大铁律：唯一性与可哈希性 (Hashability)
 
 字典的值可以是任意复杂类型（列表、函数、甚至嵌套字典），但**字典的键 (Keys) 受到严格的技术与逻辑限制**：
 
-![字典键的两大铁律：唯一性与可哈希性 (Hashability) · 课堂板书演示 (00:22:23)](</attachments/cs61a-6dc071307fe6fdd7a71be35b.png>)
+[![字典键的两大铁律：唯一性与可哈希性 (Hashability) · 课堂板书演示 (00:22:23)](</attachments/cs61a-6dc071307fe6fdd7a71be35b.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1343)
 *⏱ 时间戳：00:22:23 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:22:23)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1343)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:22:23)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“Cannot be a list or a dictionary. This gives me an error, unhashable type list. Unhashable is a technical term in computer science that I wish I could teach you about, but I have to leave something for 61B so you'll learn about it there, or you can read about it on the internet. The reason I reached...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「7. 字典键的两大铁律：唯一性与可哈希性 (Hashability)」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 ### 铁律 1：键不可重复 (Unique Keys)
 在字典中，每个键在任意时刻至多只能对应一个值。如果重复赋值：
@@ -246,6 +629,19 @@ bad_dict = { [1, 2]: 'val' }
 
 ---
 
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「7. 字典键的两大铁律：唯一性与可哈希性 (Hashability)」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
+
 ## 8. 字典推导式与高阶嵌套索引实战 (`index`)
 
 ### 8.1 字典推导式语法规范
@@ -254,8 +650,28 @@ bad_dict = { [1, 2]: 'val' }
 {<key_expr>: <val_expr> for <name> in <iter_expr> if <filter_expr>}
 ```
 
-![字典推导式语法规范 · 课堂板书演示 (00:24:43)](</attachments/cs61a-c5f1ad4e8212a53b635a99f4.png>)
+[![字典推导式语法规范 · 课堂板书演示 (00:24:43)](</attachments/cs61a-c5f1ad4e8212a53b635a99f4.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1483)
 *⏱ 时间戳：00:24:43 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:24:43)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1483)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:24:43)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“In the iterable value that you get by evaluating this iteration expression, you bind the name to the element in the new frame from step one. So name now has a value, one of the values in this sequence. And then if filter expression evaluates to a true value, add to the result dictionary an entry tha...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「8. 字典推导式与高阶嵌套索引实战 (`index`)」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 例如，筛选大于 2 的数字并以其平方为键：
 ```python
@@ -270,8 +686,28 @@ squares = {x * x: x for x in [1, 2, 3, 4, 5] if x > 2}
 
 **示例需求**：将正整数键 `[7, 9, 11]` 映射到区间 `range(30, 50)` 中所有能被该键整除的倍数列表。
 
-![综合大题：构建分组匹配倒排索引 (index) · 课堂板书演示 (00:27:05)](</attachments/cs61a-67484da08eab494f0d94a62f.png>)
+[![综合大题：构建分组匹配倒排索引 (index) · 课堂板书演示 (00:27:05)](</attachments/cs61a-67484da08eab494f0d94a62f.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1625)
 *⏱ 时间戳：00:27:05 · 📷 课堂截图 · [在 B 站观看对应片段 (P12 00:27:05)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12&t=1625)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:27:05)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“So this is meant to return a dictionary in which 7 the key corresponds to a list of all the multiples of 7 within this range. And so on for 9 and 11. This is a natural application of a dictionary comprehension, where in fact the keys we want are just provided to us in the keys list. So there isn't a...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「8. 字典推导式与高阶嵌套索引实战 (`index`)」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「字典键值查找、盒式指针 (Box-and-Pointer) 图解」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 #### 优雅的一行解法（字典推导式嵌套列表推导式）：
 ```python
@@ -287,6 +723,19 @@ def index(keys, values, match):
 - 内层列表推导式遍历所有的 `v in values`，利用闭包同时捕获当前键 `k` 与候选值 `v`，由 `match(k, v)` 执行过滤！代码纯粹精炼，无任何冗余状态变量。
 
 ---
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「8. 字典推导式与高阶嵌套索引实战 (`index`)」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 9. 本讲核心要点与思考题
 
@@ -324,5 +773,80 @@ def group_by_len(words):
 ```
 推导式的嵌套组合让复杂的数据重组与分类信手拈来！
 
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「9. 本讲核心要点与思考题」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
+
+
 ---
 
+## 伯克利 Midterm / Final 经典高频考题深度演练
+
+### 实战考题：环境拓扑与微观状态追踪（WWPD & Environment Diagrams）
+考虑以下 Python 代码在交互式环境中的微观执行过程：
+
+```python
+# 经典作用域与高阶函数综合考题
+x = 10
+
+def outer(x):
+    y = x + 2
+    def inner(y):
+        return x + y
+    return inner
+
+f = outer(5)
+result = f(3)
+```
+
+#### 完整解题思维模型与多帧环境图推导：
+1. **全局帧（Global Frame）初始化**：
+   - 全局变量 `x` 绑定到整数对象 `10`；
+   - 全局函数 `outer` 绑定到新创建的函数对象，其内嵌 `parent = Global`；
+2. **执行 `f = outer(5)`**：
+   - 开辟局部帧 $f_1$，标注 `f1: outer [parent=Global]`；
+   - 形参 `x` 绑定到实参 `5`；
+   - 局部变量 `y` 绑定到 `5 + 2 = 7`；
+   - 在 $f_1$ 内部执行 `def inner(y):`，创建函数对象 `inner`，其内嵌 **`parent = f1`**；
+   - 返回函数对象 `inner`，全局变量 `f` 绑定到该对象；
+3. **执行 `result = f(3)`**：
+   - 调用函数 `f`（即 `inner`），开辟局部帧 $f_2$；
+   - **核心判分点**：帧 $f_2$ 的 parent 指向谁？
+   - **铁律**：函数 `inner` 是在帧 $f_1$ 内部被定义的，因此 $f_2$ 的 **`parent = f1`**！
+   - 形参 `y` 绑定到实参 `3`；
+   - 执行体 `return x + y`：
+     - 在当前帧 $f_2$ 查找 `y`：命中局部变量 `y = 3`；
+     - 在当前帧 $f_2$ 查找 `x`：未命中，沿 parent 回溯到 **$f_1$ 帧** 查找！
+     - 在 $f_1$ 帧中命中 `x = 5`（全局的 `x = 10` 被局部遮蔽！）；
+     - 计算 `5 + 3 = 8`，作为返回值；
+4. **最终输出结论**：
+   - 全局变量 `result = 8`。
+
+---
+
+## 本讲核心概念知识矩阵 (Knowledge Matrix)
+
+| 核心知识维度 | 形式化定义与机制 | 典型代码示例 | 核心工程与算法价值 | 常见易错陷阱 |
+| :--- | :--- | :--- | :--- | :--- |
+| **基础求值语义** | 表达式求值得到值，语句执行改变内部状态 | `x = 2 + 3` | 建立离散时间状态快照心智模型 | 误将赋值等号当作代数方程动态约束 |
+| **环境帧拓扑** | 环境是一系列帧构成的有序链条 | `Global -> f1 -> f2` | 实现词法作用域与变量安全隔离 | 混淆调用者栈帧与定义处父环境指针 |
+| **抽象屏障** | 通过函数接口隔离实现细节与调用逻辑 | `def square(x): ...` | 降低大规模系统认知负荷 | 破坏接口直接依赖底层私有数据结构 |
+| **控制流决策** | 条件分支短路求值与循环迭代递进 | `if cond: ... while: ...` | 赋予程序非线性决策与大规模数据处理能力 | 遗漏循环递进变量引发死循环 |
+| **高阶能力** | 函数作为一等公民（传参、返回、赋值） | `make_adder(3)` | 实现工厂模式、闭包持久状态与柯里化 | 闭包后期绑定引发循环变量捕获错误 |
+
+---
+
+## 课程导航与跳转
+
+| 上一讲 | 目录 | 下一讲 | 原视频 |
+| :--- | :---: | :--- | :--- |
+| [← 上一讲：Lecture 11 Sequences](/notes/cs61a/lecture-11) | [📚 返回 CS61A 全书目录](/notes/topics/CS61A) | [下一讲：Lecture 13 Data Abstraction →](/notes/cs61a/lecture-13) | [🎬 在 B 站观看本讲 (P12)](https://www.bilibili.com/video/BV1sy411z7nA/?p=12) |

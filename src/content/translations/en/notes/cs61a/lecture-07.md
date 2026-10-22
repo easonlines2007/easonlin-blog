@@ -8,6 +8,9 @@ sourceHash: 1c1cfdea1299fd7bc50cc02125b0b493a7eb39a2d6caba622217bf189db948be
 publish: true
 translationMethod: machine-assisted
 ---
+
+> **Earlier edition:** The Chinese edition was expanded on 22 October 2026. This English translation covers the previous edition. [Read the updated Chinese lecture](/notes/cs61a/lecture-07).
+
 > **English original course**: CS 61A: Structure and Interpretation of Computer Programs (Fall 2024)  
 > **Lecturer**: Prof. John DeNero (UC Berkeley)  
 > **Text and illustrations**: VideoBook video to image to text technology e-book assembly line  

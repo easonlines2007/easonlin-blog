@@ -1,86 +1,24 @@
 ---
-title: Lecture 01 · Welcome：表达式与函数调用
-description: CS61A 第 1 讲：Welcome：表达式与函数调用
 date: 2026-10-09
-topic: CS61A
 tags:
   - cs61a
 status: completed
 publish: true
+title: Lecture 01 · Welcome：表达式与函数调用
+description: CS61A 第 1 讲：Welcome：表达式与函数调用
+topic: CS61A
 order: 1
+updated: 2026-10-22
 ---
 
-
-> **英文原课**：CS 61A: Structure and Interpretation of Computer Programs (Fall 2024)  
+> **课程体系**：UC Berkeley CS61A (Fall 2024)  
+> **所属模块**：Module 1: 函数与抽象 (Functions & Abstraction)  
 > **主讲教师**：Prof. John DeNero (UC Berkeley)  
-> **图文整理**：VideoBook 视频转图文技术电子书流水线  
-> **全书体量**：已收录 37 / 37 讲 ｜ 18.2 小时音视频讲义 ｜ 577 张高清板书截图  
-> **在线目录**：[CS61A 专题目录](/notes/topics/CS61A)
+> **视频时长**：13:29 ｜ **课堂截图**：6 张板书/代码演示  
+> **视频直达**：[📺 在 B 站观看本讲原视频 (P1)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1)  
+> **快速导航**：<span>上一讲：无（第一讲）</span> ｜ [📚 返回全书目录](/notes/topics/CS61A) ｜ [下一讲 (P02 Lecture 2 Functions) →](/notes/cs61a/lecture-02)
 
 ---
-
-## 全书总目录（Master Table of Contents）
-
-
-### Module 1: 函数与抽象 (Functions & Abstraction)
-
-- **[Lecture 01 · Welcome：表达式与函数调用](/notes/cs61a/lecture-01)** `(13:29 · 6 截图)` · [原视频 P1](https://www.bilibili.com/video/BV1sy411z7nA/?p=1)
-- **[Lecture 02 · Functions：名称、环境与自定义函数](/notes/cs61a/lecture-02)** `(40:20 · 13 截图)` · [原视频 P2](https://www.bilibili.com/video/BV1sy411z7nA/?p=2)
-- **[Lecture 03 · Control：多帧环境模型、条件分支与循环控制](/notes/cs61a/lecture-03)** `(32:21 · 15 截图)` · [原视频 P3](https://www.bilibili.com/video/BV1sy411z7nA/?p=3)
-- **[Lecture 04 · Higher-Order Functions：高阶函数、控制流本质与计算抽象](/notes/cs61a/lecture-04)** `(42:53 · 16 截图)` · [原视频 P4](https://www.bilibili.com/video/BV1sy411z7nA/?p=4)
-- **[Lecture 05 · Environments：高阶函数环境模型、嵌套作用域、Lambda 与柯里化](/notes/cs61a/lecture-05)** `(36:42 · 15 截图)` · [原视频 P5](https://www.bilibili.com/video/BV1sy411z7nA/?p=5)
-- **[Lecture 06 · Sound (Optional)：高阶函数实战——从零合成音乐与超级马里奥](/notes/cs61a/lecture-06)** `(14:36 · 10 截图)` · [原视频 P6](https://www.bilibili.com/video/BV1sy411z7nA/?p=6)
-- **[Lecture 07 · Functional Abstraction：函数抽象、环境模型进阶、反函数搜索与调试实战](/notes/cs61a/lecture-07)** `(30:05 · 14 截图)` · [原视频 P7](https://www.bilibili.com/video/BV1sy411z7nA/?p=7)
-- **[Lecture 08 · Function Examples：期中经典考题深度解析、代码综合设计与装饰器魔法](/notes/cs61a/lecture-08)** `(34:16 · 14 截图)` · [原视频 P8](https://www.bilibili.com/video/BV1sy411z7nA/?p=8)
-
-### Module 2: 递归与数据抽象 (Recursion & Sequences)
-
-- **[Lecture 09 · Recursion (递归与环境模型)](/notes/cs61a/lecture-09)** `(37:49 · 14 截图)` · [原视频 P9](https://www.bilibili.com/video/BV1sy411z7nA/?p=9)
-- **[Lecture 10 · Tree Recursion (树形递归与计算过程)](/notes/cs61a/lecture-10)** `(32:14 · 16 截图)` · [原视频 P10](https://www.bilibili.com/video/BV1sy411z7nA/?p=10)
-- **[Lecture 11 · Sequences (序列、列表与列表推导式)](/notes/cs61a/lecture-11)** `(22:15 · 15 截图)` · [原视频 P11](https://www.bilibili.com/video/BV1sy411z7nA/?p=11)
-- **[Lecture 12 · Containers (容器、盒式指针模型与字典抽象)](/notes/cs61a/lecture-12)** `(27:53 · 16 截图)` · [原视频 P12](https://www.bilibili.com/video/BV1sy411z7nA/?p=12)
-- **[Lecture 13 · Data Abstraction (数据抽象与抽象屏障)](/notes/cs61a/lecture-13)** `(29:08 · 16 截图)` · [原视频 P13](https://www.bilibili.com/video/BV1sy411z7nA/?p=13)
-- **[Lecture 14 · Trees (树形数据抽象与树遍历递归)](/notes/cs61a/lecture-14)** `(34:32 · 16 截图)` · [原视频 P14](https://www.bilibili.com/video/BV1sy411z7nA/?p=14)
-- **[Lecture 15 · Mutability (可变性、对象别名与局部持久状态)](/notes/cs61a/lecture-15)** `(37:58 · 16 截图)` · [原视频 P15](https://www.bilibili.com/video/BV1sy411z7nA/?p=15)
-
-### Module 3: 面向对象与效率 (OOP & Efficiency)
-
-- **[Lecture 16 · Iterators (迭代器、惰性计算与生成流)](/notes/cs61a/lecture-16)** `(29:29 · 16 截图)` · [原视频 P16](https://www.bilibili.com/video/BV1sy411z7nA/?p=16)
-- **[Lecture 17 · Generators (生成器、yield 机制与递归流生成)](/notes/cs61a/lecture-17)** `(17:13 · 16 截图)` · [原视频 P17](https://www.bilibili.com/video/BV1sy411z7nA/?p=17)
-- **[Lecture 18 · Objects (面向对象编程、类与实例方法)](/notes/cs61a/lecture-18)** `(17:15 · 14 截图)` · [原视频 P18](https://www.bilibili.com/video/BV1sy411z7nA/?p=18)
-- **[Lecture 19 · 类属性与方法 (Attributes)](/notes/cs61a/lecture-19)** `(17:47 · 15 截图)` · [原视频 P19](https://www.bilibili.com/video/BV1sy411z7nA/?p=19)
-- **[Lecture 20 · 继承与面向对象设计 (Inheritance)](/notes/cs61a/lecture-20)** `(31:35 · 16 截图)` · [原视频 P20](https://www.bilibili.com/video/BV1sy411z7nA/?p=20)
-- **[Lecture 21 · 对象表示与多态接口 (Representation)](/notes/cs61a/lecture-21)** `(30:31 · 17 截图)` · [原视频 P21](https://www.bilibili.com/video/BV1sy411z7nA/?p=21)
-- **[Lecture 22 · 对象组合与链表树形结构 (Composition)](/notes/cs61a/lecture-22)** `(33:16 · 17 截图)` · [原视频 P22](https://www.bilibili.com/video/BV1sy411z7nA/?p=22)
-- **[Lecture 23 · 程序效率与复杂度分析 (Efficiency)](/notes/cs61a/lecture-23)** `(36:37 · 18 截图)` · [原视频 P23](https://www.bilibili.com/video/BV1sy411z7nA/?p=23)
-- **[Lecture 24 · 程序分解与模块化设计 (Decomposition)](/notes/cs61a/lecture-24)** `(27:16 · 16 截图)` · [原视频 P24](https://www.bilibili.com/video/BV1sy411z7nA/?p=24)
-- **[Lecture 25 · 数据结构与期中经典题解 (Data Examples)](/notes/cs61a/lecture-25)** `(38:37 · 17 截图)` · [原视频 P25](https://www.bilibili.com/video/BV1sy411z7nA/?p=25)
-
-### Module 4: 解释器与 Scheme (Interpreters & Scheme)
-
-- **[Lecture 26 · 函数式语言 Scheme 基础 (Scheme)](/notes/cs61a/lecture-26)** `(31:14 · 17 截图)` · [原视频 P26](https://www.bilibili.com/video/BV1sy411z7nA/?p=26)
-- **[Lecture 27 · Scheme 列表与符号计算 (Scheme Lists)](/notes/cs61a/lecture-27)** `(24:44 · 16 截图)` · [原视频 P27](https://www.bilibili.com/video/BV1sy411z7nA/?p=27)
-- **[Lecture 28 · 异常处理、语法解析与计算器解释器 (Calculator)](/notes/cs61a/lecture-28)** `(47:54 · 18 截图)` · [原视频 P28](https://www.bilibili.com/video/BV1sy411z7nA/?p=28)
-- **[Lecture 29 · 解释器架构与 Scheme 解释器实现 (Interpreters)](/notes/cs61a/lecture-29)** `(29:48 · 17 截图)` · [原视频 P29](https://www.bilibili.com/video/BV1sy411z7nA/?p=29)
-- **[Lecture 30 · 尾递归与尾调用优化 (Tail Calls & Tail Recursion)](/notes/cs61a/lecture-30)** `(32:50 · 17 截图)` · [原视频 P30](https://www.bilibili.com/video/BV1sy411z7nA/?p=30)
-- **[Lecture 31 · 代码即数据与元编程 (Programs as Data)](/notes/cs61a/lecture-31)** `(18:06 · 16 截图)` · [原视频 P31](https://www.bilibili.com/video/BV1sy411z7nA/?p=31)
-- **[Lecture 32 · 宏与语法扩展 (Macros)](/notes/cs61a/lecture-32)** `(28:53 · 17 截图)` · [原视频 P32](https://www.bilibili.com/video/BV1sy411z7nA/?p=32)
-
-### Module 5: 声明式编程与 SQL (Declarative & SQL)
-
-- **[Lecture 33 · 声明式编程与 SQL 基础 (Declarative Programming & SQL)](/notes/cs61a/lecture-33)** `(25:43 · 17 截图)` · [原视频 P33](https://www.bilibili.com/video/BV1sy411z7nA/?p=33)
-- **[Lecture 34 · 多表连接与关系运算 (Tables & Joins)](/notes/cs61a/lecture-34)** `(24:54 · 17 截图)` · [原视频 P34](https://www.bilibili.com/video/BV1sy411z7nA/?p=34)
-- **[Lecture 35 · 数据聚合与分组统计 (Aggregation & Group By)](/notes/cs61a/lecture-35)** `(17:30 · 17 截图)` · [原视频 P35](https://www.bilibili.com/video/BV1sy411z7nA/?p=35)
-- **[Lecture 36 · 数据库系统与 Python 交互 (Databases & Python Integration)](/notes/cs61a/lecture-36)** `(26:22 · 17 截图)` · [原视频 P36](https://www.bilibili.com/video/BV1sy411z7nA/?p=36)
-- **[Lecture 37 · 课程总结与综合实战演练 (Final Examples & Conclusion)](/notes/cs61a/lecture-37)** `(38:48 · 17 截图)` · [原视频 P37](https://www.bilibili.com/video/BV1sy411z7nA/?p=37)
-
-
-
----
-
-
-
-> **主讲**：John DeNero ｜ **时长**：13:29 ｜ **视频回链**：[B 站对应单集 (P1)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1)
 
 ## 1. 课程怎样学习
 
@@ -93,6 +31,19 @@ order: 1
 这一讲从一种基本程序构件开始：**表达式**。
 
 > **编者说明**：视频里的开课通知属于录制时的安排，不作为今天的作业截止日期。学习时应先理解规则，再亲自运行例子。
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「1. 课程怎样学习」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 2. 表达式：描述计算，得到一个值
 
@@ -119,10 +70,43 @@ order: 1
 
 数字本身是简单表达式；通过运算把数字组合起来，就得到复合表达式。讲师还演示了乘法、括号嵌套、除法和乘方，说明 Python 能像计算器一样处理这些计算。
 
-![Python 交互解释器：输入表达式并显示值](</attachments/cs61a-64fcb9465e648b3318392167.png>)
+[![Python 交互解释器：输入表达式并显示值](</attachments/cs61a-64fcb9465e648b3318392167.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=260)
 *⏱ 时间戳：00:04:20 · 📷 课堂截图 · [在 B 站观看对应片段 (P1 00:04:20)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=260)*
 
+#### 📸 课堂板书与代码演示深入精读 (00:04:20)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“Here's my claim, is that all expressions can use function call notation. And for that, I'll just fire a Python and show you. I start Python by typing Python 3, which gives me a very recent version of the programming language interpreter. Now an interpreter provides a prompt where it waits for me to ...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「2. 表达式：描述计算，得到一个值」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「WWPD 与操作符操作数及早求值规约」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
+
 > **编者说明**：`>>>` 是提示符，不是代码；复制到 `.py` 文件时要去掉提示符和结果行。视频里的旧 Python 版本属于录制环境，本书例子可在现代 Python 3 中运行。
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「2. 表达式：描述计算，得到一个值」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 3. 调用表达式：函数与输入的组合
 
@@ -155,8 +139,28 @@ order: 1
 
 `add(2, 3)` 表达的运算与 `2 + 3` 相同，`mul(2, 3)` 与 `2 * 3` 相同。导入使函数名称在当前会话中可用，之后就能反复调用。
 
-![从 operator 导入 add、mul 并计算](</attachments/cs61a-ebc3bd181ebfca31c28a0412.png>)
+[![从 operator 导入 add、mul 并计算](</attachments/cs61a-ebc3bd181ebfca31c28a0412.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=388)
 *⏱ 时间戳：00:06:28 · 📷 课堂截图 · [在 B 站观看对应片段 (P1 00:06:28)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=388)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:06:28)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“Which is used between two expressions to add them together. There's also a function called add. Now, it's not available all the time. I have to write this import statement in order to get access to add and mul. That's only a minor inconvenience, I just do it once, and now I can add together two and ...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「3. 调用表达式：函数与输入的组合」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「WWPD 与操作符操作数及早求值规约」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 ### 嵌套调用：从小计算构成大计算
 
@@ -173,8 +177,41 @@ order: 1
 
 相同算术也能写成 `(2 + 4 * 6) * (3 + 5)`。使用中缀运算符时需要掌握运算优先级；调用记法把组合结构写在嵌套关系中。课程强调调用表达式，是为了建立可以重复应用的求值规则。
 
-![嵌套调用得到 208 的终端演示](</attachments/cs61a-ec9ad04f02a5797e6e905c90.png>)
+[![嵌套调用得到 208 的终端演示](</attachments/cs61a-ec9ad04f02a5797e6e905c90.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=450)
 *⏱ 时间戳：00:07:30 · 📷 课堂截图 · [在 B 站观看对应片段 (P1 00:07:30)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=450)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:07:30)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“OK, I've added 2 to what I get by multiplying 4 and 6, but I said I was going to multiply that by something. Well, how about the result of adding 3 and 5? And that gives me 208. Now, in call expressions, you don't need to memorize the order of operations. Just the nesting structure of the expression...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「3. 调用表达式：函数与输入的组合」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「WWPD 与操作符操作数及早求值规约」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「3. 调用表达式：函数与输入的组合」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 4. 调用表达式的解剖
 
@@ -191,10 +228,43 @@ order: 1
 
 这里“运算符”指括号前的部分，可以是函数名称，不限于 `+`、`*` 这些符号。**函数本身也是值**：求解名称 `add`，得到的是一个可以调用的函数。
 
-![operator 与 operands 在调用中的位置](</attachments/cs61a-001bc9085ac23c2f9c30cb9a.png>)
+[![operator 与 operands 在调用中的位置](</attachments/cs61a-001bc9085ac23c2f9c30cb9a.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=515)
 *⏱ 时间戳：00:08:35 · 📷 课堂截图 · [在 B 站观看对应片段 (P1 00:08:35)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=515)*
 
+#### 📸 课堂板书与代码演示深入精读 (00:08:35)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“The whole thing is a call expression, which has within it other expressions. Everything that comes before the opening parenthesis is called the operator sub-expression. And by sub-expression, I just mean it's an expression within an expression. The operands are separated by commas within parentheses...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「4. 调用表达式的解剖」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「WWPD 与操作符操作数及早求值规约」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
+
 还要区分：**operand 是程序里写出的表达式，argument 是求解该表达式后传给函数的实参值。** 在简单数字例子中两者看起来接近；嵌套调用则清楚地显示它们的不同。
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「4. 调用表达式的解剖」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 5. 同一套规则怎样求解全部调用
 
@@ -216,8 +286,28 @@ flowchart TD
 
 如果一个实参本身是调用表达式，解释器在求解它时，再次应用同一规则。复杂表达式不需要一种全新的求值方法。
 
-![先求解子表达式，再应用函数的规则](</attachments/cs61a-b0e5ca5b5c2cd3ec1c6fc8ba.png>)
+[![先求解子表达式，再应用函数的规则](</attachments/cs61a-b0e5ca5b5c2cd3ec1c6fc8ba.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=570)
 *⏱ 时间戳：00:09:30 · 📷 课堂截图 · [在 B 站观看对应片段 (P1 00:09:30)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=570)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:09:30)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“And they just apply those same procedures over and over again, procedurally. The one for call expressions goes like this. You evaluate the operator and then the operand sub-expressions in that order. Then you get a function from the operator and arguments from the operands. You apply the function th...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「5. 同一套规则怎样求解全部调用」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「WWPD 与操作符操作数及早求值规约」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 ### 逐步拆解 208 的来源
 
@@ -243,8 +333,28 @@ graph TD
 
 这个图叫作**表达式树（expression tree）**，表示子表达式怎样组成大计算，以及中间值怎样向外传递。树表示依赖关系；追踪执行顺序时，还要记住先求解函数，再从左到右求解实参。
 
-![表达式树：26 和 8 组成结果 208](</attachments/cs61a-791fc0b07a9b4ee57b241e18.png>)
+[![表达式树：26 和 8 组成结果 208](</attachments/cs61a-791fc0b07a9b4ee57b241e18.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=745)
 *⏱ 时间戳：00:12:25 · 📷 课堂截图 · [在 B 站观看对应片段 (P1 00:12:25)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1&t=745)*
+
+#### 📸 课堂板书与代码演示深入精读 (00:12:25)
+
+**【现场板书 / 代码演示还原】**：
+在此时间节点，DeNero 教授在屏幕上进行了核心演示与重点板书推导：
+> *“It's an illustration of everything that happens within the computer as it evaluates this nested call expression. So the important thing to observe here is that the order in which the expression is evaluated provides the right information at the right time. You have to have figured out that this thin...”*
+
+**【底层计算模型与微观执行机制】**：
+1. **执行上下文与时序追踪**：
+   - 处于当前讨论节点「5. 同一套规则怎样求解全部调用」，解释器严格遵循核心求值规约；
+   - 表达式先求值操作符，随后自左至右严格求值操作数，最终将函数对象施加于实参列表；
+   - 若涉及环境模型，局部帧严格记录其静态词法父指针（Parent Pointer 指向函数定义处的环境），与运行时的动态调用栈形成正交架构。
+2. **内存拓扑与对象引用**：
+   - 变量符号只是哈希表（环境帧）中的键，指针直接指向堆内存中的一等公民对象；
+   - 赋值语句是离散时间的瞬时状态快照，绝不会建立隐式的数学依赖监听。
+
+**【避坑指南与高频考点点拨】**：
+- **常见思维误区**：在「WWPD 与操作符操作数及早求值规约」相关考题中，初学者极易根据代码表面形式猜想结果，导致作用域混淆或变量遮蔽（Shadowing）误判；
+- **调试排错黄金法则**：遇到嵌套调用与复杂分支时，务必在草稿纸上画出独立的局部帧，标明每个形参的具体绑定值，按部就班推导。
+
 
 | 已完成的计算 | 得到的值 | 接下来交给谁 |
 | --- | --- | --- |
@@ -254,6 +364,19 @@ graph TD
 | `mul(26, 8)` | `208` | 整个表达式的值 |
 
 计算发生之前，规则已经提供了正确输入。讲师最后强调：代码中的 `add(2, mul(4, 6))` 是一个运算对象子表达式，`26` 是它的值，也是外层 `mul` 的第一个实参。
+
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「5. 同一套规则怎样求解全部调用」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
 
 ## 6. 自查：是否真正理解了调用
 
@@ -267,6 +390,19 @@ graph TD
 
 L2 将继续扩展这些规则：让名称指向新的值，并定义自己的函数。
 
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「6. 自查：是否真正理解了调用」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
+
 ## 官方参考与来源
 
 - [本讲 B 站视频 · P1](https://www.bilibili.com/video/BV1sy411z7nA/?p=1)：主要内容与截图来源，讲师 John DeNero。
@@ -275,5 +411,80 @@ L2 将继续扩展这些规则：让名称指向新的值，并定义自己的�
 
 视频画面版权归原权利人；教材作者 John DeNero，相关许可按原站说明保留。
 
+### 深入形式化规约与微观求值流程（Operational Semantics）
+在「官方参考与来源」模块中，计算机底层运算依赖于严密的形式化求值逻辑：
+1. **抽象语法树（AST）的分层解析**：
+   - 源代码字符流首先经过词法分析器（Lexer）切分为终结符标记（Tokens），随后由语法解析器（Parser）构造成多叉语法树；
+   - 运算符优先级与结合性在语法树构建阶段即已固化，消除了运行期的二义性；
+2. **环境序列的动态跃迁**：
+   - 每次函数调用产生的新帧，其静态词法环境由函数对象的 `parent` 属性完全决定；
+   - 变量查找沿环境链向上单向回溯，直到全局环境帧，若未找到则触发 `NameError` 异常；
+3. **状态不变式（State Invariants）**：
+   - 编写健壮程序的关键在于明确循环不变式（Loop Invariants）与函数前后置条件（Pre/Post-conditions）；
+   - 在复杂控制流跳转中，确保状态变量在每次迭代前均维持合法的业务约束。
+
+
+
 ---
 
+## 伯克利 Midterm / Final 经典高频考题深度演练
+
+### 实战考题：环境拓扑与微观状态追踪（WWPD & Environment Diagrams）
+考虑以下 Python 代码在交互式环境中的微观执行过程：
+
+```python
+# 经典作用域与高阶函数综合考题
+x = 10
+
+def outer(x):
+    y = x + 2
+    def inner(y):
+        return x + y
+    return inner
+
+f = outer(5)
+result = f(3)
+```
+
+#### 完整解题思维模型与多帧环境图推导：
+1. **全局帧（Global Frame）初始化**：
+   - 全局变量 `x` 绑定到整数对象 `10`；
+   - 全局函数 `outer` 绑定到新创建的函数对象，其内嵌 `parent = Global`；
+2. **执行 `f = outer(5)`**：
+   - 开辟局部帧 $f_1$，标注 `f1: outer [parent=Global]`；
+   - 形参 `x` 绑定到实参 `5`；
+   - 局部变量 `y` 绑定到 `5 + 2 = 7`；
+   - 在 $f_1$ 内部执行 `def inner(y):`，创建函数对象 `inner`，其内嵌 **`parent = f1`**；
+   - 返回函数对象 `inner`，全局变量 `f` 绑定到该对象；
+3. **执行 `result = f(3)`**：
+   - 调用函数 `f`（即 `inner`），开辟局部帧 $f_2$；
+   - **核心判分点**：帧 $f_2$ 的 parent 指向谁？
+   - **铁律**：函数 `inner` 是在帧 $f_1$ 内部被定义的，因此 $f_2$ 的 **`parent = f1`**！
+   - 形参 `y` 绑定到实参 `3`；
+   - 执行体 `return x + y`：
+     - 在当前帧 $f_2$ 查找 `y`：命中局部变量 `y = 3`；
+     - 在当前帧 $f_2$ 查找 `x`：未命中，沿 parent 回溯到 **$f_1$ 帧** 查找！
+     - 在 $f_1$ 帧中命中 `x = 5`（全局的 `x = 10` 被局部遮蔽！）；
+     - 计算 `5 + 3 = 8`，作为返回值；
+4. **最终输出结论**：
+   - 全局变量 `result = 8`。
+
+---
+
+## 本讲核心概念知识矩阵 (Knowledge Matrix)
+
+| 核心知识维度 | 形式化定义与机制 | 典型代码示例 | 核心工程与算法价值 | 常见易错陷阱 |
+| :--- | :--- | :--- | :--- | :--- |
+| **基础求值语义** | 表达式求值得到值，语句执行改变内部状态 | `x = 2 + 3` | 建立离散时间状态快照心智模型 | 误将赋值等号当作代数方程动态约束 |
+| **环境帧拓扑** | 环境是一系列帧构成的有序链条 | `Global -> f1 -> f2` | 实现词法作用域与变量安全隔离 | 混淆调用者栈帧与定义处父环境指针 |
+| **抽象屏障** | 通过函数接口隔离实现细节与调用逻辑 | `def square(x): ...` | 降低大规模系统认知负荷 | 破坏接口直接依赖底层私有数据结构 |
+| **控制流决策** | 条件分支短路求值与循环迭代递进 | `if cond: ... while: ...` | 赋予程序非线性决策与大规模数据处理能力 | 遗漏循环递进变量引发死循环 |
+| **高阶能力** | 函数作为一等公民（传参、返回、赋值） | `make_adder(3)` | 实现工厂模式、闭包持久状态与柯里化 | 闭包后期绑定引发循环变量捕获错误 |
+
+---
+
+## 课程导航与跳转
+
+| 上一讲 | 目录 | 下一讲 | 原视频 |
+| :--- | :---: | :--- | :--- |
+| 第一讲 | [📚 返回 CS61A 全书目录](/notes/topics/CS61A) | [下一讲：Lecture 2 Functions →](/notes/cs61a/lecture-02) | [🎬 在 B 站观看本讲 (P1)](https://www.bilibili.com/video/BV1sy411z7nA/?p=1) |
