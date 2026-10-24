@@ -109,6 +109,16 @@ node scripts/import-course-lectures.mjs cs61b /绝对路径/cs61b_markdown 2026-
 
 最后一项是显式更新日期；不提供它仍会拒绝覆盖不同内容。刷新前完整校验讲次、附件与目标文件，期间目标笔记变化时停止。按图片内容复用已有附件，避免因为来源目录改名重复复制 CS61A 的 577 张截图。CS61B 教材的本地链接转为官方网页，清理 GitBook 模板标记；八处已失效的教材旧图改为可阅读的章节链接。已有 CS61A 英文译文保留，页面注明属于扩充前版本，`sourceHash` 保留以继续提示翻译待更新。
 
+### CCCS（Crash Course Computer Science）
+
+2026-10-24 收录全 40 讲，专题为 `CCCS`、标签为 `cccs`，每讲独立成篇，按讲次排序并提供上一篇／下一篇。保留课程全名、Carrie Anne Philbin 主讲信息、原视频时间跳转、159 张截图与 Mermaid 图。
+
+```sh
+node scripts/import-course-lectures.mjs cccs /绝对路径/output/crash_course_cs_markdown 2026-10-24
+```
+
+当前 VideoBook 汇总目录版将图片文件名错误导出为控制字符。导入器核对汇总版与逐集文稿的正文一致后，从同级 `BV1EW411u7th_p1` 至 `BV1EW411u7th_p40` 中的 `book.md` 读取完整图片引用，只复制使用到的截图到 `public/attachments/cccs-*`。若两个版本正文不一致则停止。原始文稿、截图与 Obsidian 清单均不改动。
+
 ## 从 iCloud Obsidian 同步
 
 现有 iCloud Vault 继续作为笔记唯一来源，不移动 Vault，也不修改其中任何文件。在 Vault 中自行创建 `Blog/` 文件夹，准备公开的 Markdown 放在这里，子目录结构会保留。

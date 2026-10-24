@@ -90,3 +90,47 @@ test('renaming a referenced image reuses its existing public asset', async (t) =
   assert.deepEqual(await readdir(directory), files)
   assert.ok((await readFile(f.note(1), 'utf8')).includes(`/attachments/${files[0]}`))
 })
+
+test('CCCS restores episode images and refuses a mismatched directory edition', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'cccs-import-test-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const sourceDirectory = join(root, 'collection')
+  const projectRoot = join(root, 'project')
+  await mkdir(sourceDirectory)
+  for (let index = 1; index <= 40; index++) {
+    const episode = join(root, `BV1EW411u7th_p${index}`)
+    await mkdir(episode)
+    const heading = `# Lecture ${String(index).padStart(2, '0')} ${index}. 主题 ${index}\n\n`
+    const navigation = index === 1 ? '[下一讲](Lecture_02_Topic.md)\n\n' : ''
+    const image = index === 1 ? '![图](images/shot.png)\n' : ''
+    const corruptImage =
+      index === 1
+        ? '[![图](images/p01/\u0001)](https://www.bilibili.com/video/BV1EW411u7th/?p=1&t=1)\n'
+        : ''
+    await writeFile(join(episode, 'book.md'), heading + navigation + image)
+    await writeFile(
+      join(sourceDirectory, `Lecture_${String(index).padStart(2, '0')}_Topic.md`),
+      heading + navigation + corruptImage
+    )
+  }
+  const images = join(root, 'BV1EW411u7th_p1/images')
+  await mkdir(images)
+  await writeFile(join(images, 'shot.png'), Buffer.from('screenshot fixture'))
+  const run = () =>
+    importCourseLectures({ course: 'cccs', sourceDirectory, projectRoot, date: '2026-10-24' })
+  assert.deepEqual(await run(), { notes: 40, attachments: 1, written: 41 })
+  const path = join(projectRoot, 'src/content/notes/CCCS/lecture-01.md')
+  const note = await readFile(path, 'utf8')
+  assert.match(note, /title: Lecture 01 · 主题 1\n/)
+  assert.match(note, /topic: CCCS\n/)
+  assert.match(note, /\/notes\/cccs\/lecture-02/)
+  assert.match(note, /\/attachments\/cccs-[a-f0-9]+\.png/)
+  assert.ok(!note.includes('\u0001'))
+  assert.equal((await run()).written, 0)
+  await writeFile(
+    join(sourceDirectory, 'Lecture_01_Topic.md'),
+    '# Lecture 01 1. 新版本\n\n已扩充。\n'
+  )
+  await assert.rejects(run(), /正文不一致/)
+  assert.equal(await readFile(path, 'utf8'), note)
+})

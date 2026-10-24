@@ -11,7 +11,8 @@ const projectDirectory = fileURLToPath(new URL('../', import.meta.url))
 const courses = {
   csapp: { topic: 'CSAPP', count: 26 },
   cs61a: { topic: 'CS61A', count: 37 },
-  cs61b: { topic: 'CS61B', count: 40 }
+  cs61b: { topic: 'CS61B', count: 40 },
+  cccs: { topic: 'CCCS', count: 40, episodePrefix: 'BV1EW411u7th' }
 }
 // Lecture 3 refers to nonexistent slide numbers. Match the section topics to the
 // supplied 02–03 Bits/Integers deck: Casting Surprises, Sign Extension, TAdd
@@ -137,8 +138,8 @@ export async function importCourseLectures({
   updated,
   projectRoot = projectDirectory
 }) {
-  if (!Object.hasOwn(courses, course)) throw new Error('课程应为 csapp、cs61a 或 cs61b。')
-  const { topic, count } = courses[course]
+  if (!Object.hasOwn(courses, course)) throw new Error('课程应为 csapp、cs61a、cs61b 或 cccs。')
+  const { topic, count, episodePrefix } = courses[course]
   if (
     !/^\d{4}-\d{2}-\d{2}$/.test(date ?? '') ||
     new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date
@@ -151,13 +152,29 @@ export async function importCourseLectures({
   )
     throw new Error('请指定真实的更新日期。')
   const sourceRoot = await realpath(sourceDirectory)
+  // The CCCS directory export corrupts image names into a control character.
+  // Its sibling episode books contain the same text and intact screenshot paths.
+  const attachmentRoot = episodePrefix ? dirname(sourceRoot) : sourceRoot
   const files = (await readdir(sourceRoot))
     .filter((name) => /^Lecture_\d+_.+\.md$/.test(name))
     .sort()
   if (files.length !== count) throw new Error(`${topic} 应包含完整的 ${count} 讲。`)
   const lectures = []
   for (const [index, name] of files.entries()) {
-    const source = await readFile(join(sourceRoot, name), 'utf8')
+    const sourcePath = episodePrefix
+      ? join(attachmentRoot, `${episodePrefix}_p${index + 1}`, 'book.md')
+      : join(sourceRoot, name)
+    const source = await readFile(sourcePath, 'utf8')
+    if (episodePrefix) {
+      const directorySource = await readFile(join(sourceRoot, name), 'utf8')
+      const normalize = (value) =>
+        value
+          .replace(/\[?!\[([^\]]*)\]\([^)]+\)(?:\]\([^)]+\))?/g, '[IMAGE:$1]')
+          .replace(/\s+/g, ' ')
+          .trim()
+      if (normalize(directorySource) !== normalize(source))
+        throw new Error(`CCCS 汇总版与逐集文稿正文不一致，请核对版本：${name}`)
+    }
     const heading = fromMarkdown(source).children[0]
     const match =
       heading?.type === 'heading' && heading.depth === 1
@@ -172,13 +189,16 @@ export async function importCourseLectures({
     const filename = `lecture-${String(index + 1).padStart(2, '0')}.md`
     const path = join(projectRoot, 'src/content/notes', topic, filename)
     const previous = await existingBytes(path)
+    const lectureTitle = episodePrefix
+      ? match[3].replace(new RegExp(`^${index + 1}\\.\\s*`), '')
+      : match[3]
     lectures.push({
       name,
       filename,
       previous,
       metadata: updated && previous ? readMetadata(previous, path) : {},
-      title: `Lecture ${String(index + 1).padStart(2, '0')} · ${match[3]}`,
-      description: `${topic} 第 ${index + 1} 讲：${match[3]}`,
+      title: `Lecture ${String(index + 1).padStart(2, '0')} · ${lectureTitle}`,
+      description: `${topic} 第 ${index + 1} 讲：${lectureTitle}`,
       body: repairMathBlocks(
         course === 'cs61b'
           ? repairCs61bBody(source.slice(heading.position.end.offset).trimStart())
@@ -202,8 +222,8 @@ export async function importCourseLectures({
       function visit(node) {
         if (course === 'cs61b' && node.type === 'html' && node.value.includes('<img')) {
           const value = node.value.replace(/<img\b[^>]*\bsrc="([^"]+)"[^>]*>/g, (tag, url) =>
-              missingQuicksortImages.has(digest(url.replaceAll('&amp;', '&')))
-                ? '<a href="https://cs61b-2.gitbook.io/cs61b-textbook/30.-quicksort">原教材配图已失效，查看快速排序章节说明。</a>'
+            missingQuicksortImages.has(digest(url.replaceAll('&amp;', '&')))
+              ? '<a href="https://cs61b-2.gitbook.io/cs61b-textbook/30.-quicksort">原教材配图已失效，查看快速排序章节说明。</a>'
               : tag
           )
           if (value !== node.value)
@@ -247,11 +267,14 @@ export async function importCourseLectures({
         if (node.type === 'link' || node.type === 'image') {
           const target =
             node.type === 'image'
-              ? course === 'csapp' &&
-                index === 2 &&
-                (node.url === './images/p03/slide_45.png' && /位模式|底层机制/.test(node.alt ?? '')
-                  ? './images/p02/slide_22.png'
-                  : csappImageFixes.get(node.url))
+              ? episodePrefix && node.url.startsWith('images/')
+                ? `${episodePrefix}_p${index + 1}/${node.url}`
+                : course === 'csapp' &&
+                  index === 2 &&
+                  (node.url === './images/p03/slide_45.png' &&
+                  /位模式|底层机制/.test(node.alt ?? '')
+                    ? './images/p02/slide_22.png'
+                    : csappImageFixes.get(node.url))
               : (destinations.get(node.url.replace(/^\.\//, '')) ??
                 (course === 'cs61b' && node.url.startsWith('/cs61b-textbook/')
                   ? `https://cs61b-2.gitbook.io${node.url.replace(/\.md(?=#|$)/, '')}`
@@ -290,7 +313,7 @@ export async function importCourseLectures({
     const result = await syncObsidian({
       vaultPath,
       projectRoot: stagingProject,
-      attachmentRoot: sourceRoot
+      attachmentRoot
     })
     const manifest = JSON.parse(
       await readFile(join(stagingProject, 'src/data/obsidian-sync.json'), 'utf8')
