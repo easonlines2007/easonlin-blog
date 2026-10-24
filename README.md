@@ -119,6 +119,16 @@ node scripts/import-course-lectures.mjs cccs /绝对路径/output/crash_course_c
 
 当前 VideoBook 汇总目录版将图片文件名错误导出为控制字符。导入器核对汇总版与逐集文稿的正文一致后，从同级 `BV1EW411u7th_p1` 至 `BV1EW411u7th_p40` 中的 `book.md` 读取完整图片引用，只复制使用到的截图到 `public/attachments/cccs-*`。若两个版本正文不一致则停止。原始文稿、截图与 Obsidian 清单均不改动。
 
+### The Missing Semester of Your CS Education
+
+2026-10-24 收录完整 11 讲，专题为 `Missing Semester`、标签为 `missing-semester`，网址为 `/notes/missing-semester/lecture-01` 至 `lecture-11`。保留主讲信息、课程许可、官方讲义和视频时间跳转；每讲独立成篇，按讲次排序并提供上一篇／下一篇导航。
+
+```sh
+node scripts/import-course-lectures.mjs missing-semester /绝对路径/output/missing_semester_markdown 2026-10-24
+```
+
+汇总版将来自不同视频的同名截图平铺到一个目录，会导致图片互相覆盖。导入器从每讲的视频链接识别对应的同级 `BV.../book.md`，确认正文一致后读取原始截图路径，独立保留全部 44 张截图与 Mermaid 图。博客副本同时修复导出时被转成控制字符的正则 `\b` 和 sed `\1`；原始文稿及截图不改动。
+
 ## 从 iCloud Obsidian 同步
 
 现有 iCloud Vault 继续作为笔记唯一来源，不移动 Vault，也不修改其中任何文件。在 Vault 中自行创建 `Blog/` 文件夹，准备公开的 Markdown 放在这里，子目录结构会保留。

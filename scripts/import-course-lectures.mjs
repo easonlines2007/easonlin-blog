@@ -12,7 +12,8 @@ const courses = {
   csapp: { topic: 'CSAPP', count: 26 },
   cs61a: { topic: 'CS61A', count: 37 },
   cs61b: { topic: 'CS61B', count: 40 },
-  cccs: { topic: 'CCCS', count: 40, episodePrefix: 'BV1EW411u7th' }
+  cccs: { topic: 'CCCS', count: 40, episodePrefix: 'BV1EW411u7th' },
+  'missing-semester': { topic: 'Missing Semester', count: 11, videoBooks: true }
 }
 // Lecture 3 refers to nonexistent slide numbers. Match the section topics to the
 // supplied 02–03 Bits/Integers deck: Casting Surprises, Sign Extension, TAdd
@@ -130,6 +131,27 @@ async function existingBytes(path) {
   }
 }
 
+function repairMissingSemesterBody(body) {
+  // The export interpreted regex \b and sed \1 as Python control characters.
+  return body
+    .replaceAll('\u0008', '\\b')
+    .replaceAll('\u0001', '\\1')
+    .replace(/^([^\n]+\n)/, '$1> **课程许可**：CC BY-NC-SA 4.0。  \n')
+}
+
+function repairMissingSemesterDiagram(source) {
+  source = source
+    .replace('w (词) / " (引号)', 'w (词) / &quot; (引号)')
+    .replace('例如: ci" 清空', '例如: ci&quot; 清空')
+  if (/^\s*(?:graph|flowchart)\b/.test(source))
+    source = source.replace(
+      /^(\s*)Note over (\w+),(\w+): "([^"]+)"$/gm,
+      (_, indent, first, second, label) =>
+        `${indent}BuildNote["${label}"]\n${indent}${first} -.-> BuildNote\n${indent}${second} -.-> BuildNote`
+    )
+  return source
+}
+
 // Use an isolated Vault and ownership manifest; never write to the source or real Vault.
 export async function importCourseLectures({
   course,
@@ -138,8 +160,9 @@ export async function importCourseLectures({
   updated,
   projectRoot = projectDirectory
 }) {
-  if (!Object.hasOwn(courses, course)) throw new Error('课程应为 csapp、cs61a、cs61b 或 cccs。')
-  const { topic, count, episodePrefix } = courses[course]
+  if (!Object.hasOwn(courses, course))
+    throw new Error(`课程应为 ${Object.keys(courses).join('、')}。`)
+  const { topic, count, episodePrefix, videoBooks } = courses[course]
   if (
     !/^\d{4}-\d{2}-\d{2}$/.test(date ?? '') ||
     new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date
@@ -154,26 +177,32 @@ export async function importCourseLectures({
   const sourceRoot = await realpath(sourceDirectory)
   // The CCCS directory export corrupts image names into a control character.
   // Its sibling episode books contain the same text and intact screenshot paths.
-  const attachmentRoot = episodePrefix ? dirname(sourceRoot) : sourceRoot
+  const attachmentRoot = episodePrefix || videoBooks ? dirname(sourceRoot) : sourceRoot
   const files = (await readdir(sourceRoot))
     .filter((name) => /^Lecture_\d+_.+\.md$/.test(name))
     .sort()
   if (files.length !== count) throw new Error(`${topic} 应包含完整的 ${count} 讲。`)
   const lectures = []
   for (const [index, name] of files.entries()) {
-    const sourcePath = episodePrefix
-      ? join(attachmentRoot, `${episodePrefix}_p${index + 1}`, 'book.md')
+    const directorySource = await readFile(join(sourceRoot, name), 'utf8')
+    const episodeDirectory = episodePrefix
+      ? `${episodePrefix}_p${index + 1}`
+      : videoBooks
+        ? directorySource.match(/https:\/\/www\.bilibili\.com\/video\/(BV[a-zA-Z0-9]+)/)?.[1]
+        : undefined
+    if (videoBooks && !episodeDirectory) throw new Error(`${name} 缺少原视频标识。`)
+    const sourcePath = episodeDirectory
+      ? join(attachmentRoot, episodeDirectory, 'book.md')
       : join(sourceRoot, name)
     const source = await readFile(sourcePath, 'utf8')
-    if (episodePrefix) {
-      const directorySource = await readFile(join(sourceRoot, name), 'utf8')
+    if (episodeDirectory) {
       const normalize = (value) =>
         value
           .replace(/\[?!\[([^\]]*)\]\([^)]+\)(?:\]\([^)]+\))?/g, '[IMAGE:$1]')
           .replace(/\s+/g, ' ')
           .trim()
       if (normalize(directorySource) !== normalize(source))
-        throw new Error(`CCCS 汇总版与逐集文稿正文不一致，请核对版本：${name}`)
+        throw new Error(`${topic} 汇总版与逐集文稿正文不一致，请核对版本：${name}`)
     }
     const heading = fromMarkdown(source).children[0]
     const match =
@@ -189,12 +218,13 @@ export async function importCourseLectures({
     const filename = `lecture-${String(index + 1).padStart(2, '0')}.md`
     const path = join(projectRoot, 'src/content/notes', topic, filename)
     const previous = await existingBytes(path)
-    const lectureTitle = episodePrefix
+    const lectureTitle = episodeDirectory
       ? match[3].replace(new RegExp(`^${index + 1}\\.\\s*`), '')
       : match[3]
     lectures.push({
       name,
       filename,
+      episodeDirectory,
       previous,
       metadata: updated && previous ? readMetadata(previous, path) : {},
       title: `Lecture ${String(index + 1).padStart(2, '0')} · ${lectureTitle}`,
@@ -202,14 +232,16 @@ export async function importCourseLectures({
       body: repairMathBlocks(
         course === 'cs61b'
           ? repairCs61bBody(source.slice(heading.position.end.offset).trimStart())
-          : source.slice(heading.position.end.offset).trimStart()
+          : course === 'missing-semester'
+            ? repairMissingSemesterBody(source.slice(heading.position.end.offset).trimStart())
+            : source.slice(heading.position.end.offset).trimStart()
       )
     })
   }
   const destinations = new Map(
     lectures.map(({ name, filename }) => [name, `/notes/${course}/${filename.slice(0, -3)}`])
   )
-  destinations.set('README.md', `/notes/topics/${topic}`)
+  destinations.set('README.md', `/notes/topics/${encodeURIComponent(topic)}`)
   const temporary = await mkdtemp(join(tmpdir(), `${course}-import-`))
   try {
     const vaultPath = join(temporary, 'vault')
@@ -235,7 +267,9 @@ export async function importCourseLectures({
         }
         if (node.type === 'code' && node.lang === 'mermaid') {
           const original = lecture.body.slice(node.position.start.offset, node.position.end.offset)
-          const value = original.replace(node.value, repairMermaid(node.value))
+          const diagram =
+            course === 'missing-semester' ? repairMissingSemesterDiagram(node.value) : node.value
+          const value = original.replace(node.value, repairMermaid(diagram))
           if (value !== original)
             replacements.push({
               start: node.position.start.offset,
@@ -267,8 +301,8 @@ export async function importCourseLectures({
         if (node.type === 'link' || node.type === 'image') {
           const target =
             node.type === 'image'
-              ? episodePrefix && node.url.startsWith('images/')
-                ? `${episodePrefix}_p${index + 1}/${node.url}`
+              ? lecture.episodeDirectory && node.url.startsWith('images/')
+                ? `${lecture.episodeDirectory}/${node.url}`
                 : course === 'csapp' &&
                   index === 2 &&
                   (node.url === './images/p03/slide_45.png' &&

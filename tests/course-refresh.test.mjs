@@ -134,3 +134,57 @@ test('CCCS restores episode images and refuses a mismatched directory edition', 
   await assert.rejects(run(), /正文不一致/)
   assert.equal(await readFile(path, 'utf8'), note)
 })
+
+test('Missing Semester keeps same-name screenshots from different videos distinct', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'missing-semester-import-test-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const sourceDirectory = join(root, 'collection')
+  const projectRoot = join(root, 'project')
+  await mkdir(sourceDirectory)
+  for (let index = 1; index <= 11; index++) {
+    const episode = join(root, `BVTest${index}`)
+    await mkdir(episode)
+    const image = index <= 2 ? '\n![截图](images/shared.png)\n' : ''
+    const code =
+      index === 4 ? "\n```bash\nsed -E 's/(.*)/\u0001/'\n```\n\n`\u0008` 表示单词边界。\n" : ''
+    const source = `# Lecture ${String(index).padStart(2, '0')} 主题 ${index}\n\n> **课程体系**：The Missing Semester\n> [原视频](https://www.bilibili.com/video/BVTest${index}/)\n\n[目录](README.md)\n${image}${code}`
+    await writeFile(join(episode, 'book.md'), source)
+    await writeFile(
+      join(sourceDirectory, `Lecture_${String(index).padStart(2, '0')}_Topic.md`),
+      source
+    )
+    if (index <= 2) {
+      await mkdir(join(episode, 'images'))
+      await writeFile(join(episode, 'images/shared.png'), Buffer.from(`video ${index} screenshot`))
+    }
+  }
+  const run = () =>
+    importCourseLectures({
+      course: 'missing-semester',
+      sourceDirectory,
+      projectRoot,
+      date: '2026-10-24'
+    })
+  assert.deepEqual(await run(), { notes: 11, attachments: 2, written: 13 })
+  const notes = join(projectRoot, 'src/content/notes/Missing Semester')
+  const first = await readFile(join(notes, 'lecture-01.md'), 'utf8')
+  const second = await readFile(join(notes, 'lecture-02.md'), 'utf8')
+  const image = (value) => value.match(/\/attachments\/missing-semester-[a-f0-9]+\.png/)[0]
+  assert.notEqual(image(first), image(second))
+  assert.equal(
+    (await readFile(join(projectRoot, 'public', image(first)))).toString(),
+    'video 1 screenshot'
+  )
+  assert.equal(
+    (await readFile(join(projectRoot, 'public', image(second)))).toString(),
+    'video 2 screenshot'
+  )
+  assert.match(first, /CC BY-NC-SA 4\.0/)
+  assert.ok(first.includes('/notes/topics/Missing%20Semester'))
+  assert.ok(!first.includes('(/notes/topics/Missing Semester)'))
+  const fourth = await readFile(join(notes, 'lecture-04.md'), 'utf8')
+  assert.ok(fourth.includes("sed -E 's/(.*)/\\1/'"))
+  assert.ok(fourth.includes('`\\b`'))
+  assert.ok(!/[\u0001\u0008]/.test(fourth))
+  assert.equal((await run()).written, 0)
+})
