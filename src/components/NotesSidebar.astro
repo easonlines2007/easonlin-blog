@@ -5,6 +5,7 @@ import { countValues, statusLabels, tagUrl, topicUrl } from '../lib/note-utils'
 import Icon from './Icon.astro'
 import { getTopics } from '../lib/topics'
 import TopicPin from './TopicPin.astro'
+import { noteCategories, categoryNotes, categoryUrl } from '../lib/note-categories'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 const path = (href: string) => localizePath(href, locale)
@@ -34,6 +35,21 @@ const { notes, filterNotes = notes, filters = false } = Astro.props
         </a>
       ))}
     </div>
+  </section>
+  <section>
+    <div class="sidebar-title">
+      <h2>{locale === 'en' ? 'Categories' : '分类'}</h2>
+    </div>
+    <ul class="sidebar-list">
+      {noteCategories.map((category) => (
+        <li>
+          <a class="entry-surface" href={path(categoryUrl(category.id))}>
+            <span class="lift-text">{category.title}</span>
+            <span>{categoryNotes(notes, category.id).length}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
   </section>
   <section>
     <div class="sidebar-title">

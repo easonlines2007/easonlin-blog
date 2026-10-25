@@ -1,0 +1,16 @@
+---
+import View from '@/views/notes/categories/[category].astro'
+import type { GetStaticPaths } from 'astro'
+import { getNotes } from '@/lib/notes'
+import { noteCategories, categoryNotes } from '@/lib/note-categories'
+
+export const getStaticPaths = (async () => {
+  const allNotes = await getNotes('en')
+  return noteCategories.map((category) => ({
+    params: { category: category.id },
+    props: { category, allNotes, notes: categoryNotes(allNotes, category.id) }
+  }))
+}) satisfies GetStaticPaths
+---
+
+<View {...Astro.props} />

@@ -5,6 +5,7 @@ export interface NoteMeta {
     date: Date
     updated?: Date
     topic: string
+    category?: 'ai' | 'lin'
     order?: number
     tags: string[]
     status: 'growing' | 'ready' | 'completed'

@@ -49,6 +49,63 @@ async function fixture(t) {
   }
 }
 
+test('scoped Lin sync preserves other managed courses and assets, skips empty drafts, and cleans only its scope', async (t) => {
+  const f = await fixture(t)
+  await f.source('MIT/course.md', note('![board](../board.png)'))
+  await f.source('FC/old.md', note('old FC'))
+  await f.source('board.png', 'original board')
+  await f.run({ publishAll: true })
+  const course = await f.output('src/content/notes/MIT/course.md')
+  const oldFC = await f.output('src/content/notes/FC/old.md')
+  const oldManifest = JSON.parse(await f.output('src/data/obsidian-sync.json'))
+  await rm(join(f.vaultPath, 'MIT'), { recursive: true })
+  await rm(join(f.vaultPath, 'FC'), { recursive: true })
+  await f.source('CS61A - Lin/Lec 2 - Functions.md', 'personal CS61A notes')
+  await f.source('CS61A - Lin/empty.md', '')
+  await f.source('FC - Lin/lab.md', 'personal FC notes')
+  const options = { publishAll: true, sourceFolders: ['CS61A - Lin', 'FC - Lin'], skipEmpty: true }
+  const vaultBefore = await snapshot(f.vaultPath)
+  const result = await f.run(options)
+  assert.equal(result.notes, 2)
+  assert.equal(await f.output('src/content/notes/MIT/course.md'), course)
+  assert.equal(await f.output('src/content/notes/FC/old.md'), oldFC)
+  await assert.rejects(f.output('src/content/notes/CS61A - Lin/empty.md'), { code: 'ENOENT' })
+  const personal = exportedMetadata(
+    await f.output('src/content/notes/CS61A - Lin/Lec 2 - Functions.md')
+  )
+  assert.equal(personal.category, 'lin')
+  assert.equal(personal.order, 2)
+  let manifest = JSON.parse(await f.output('src/data/obsidian-sync.json'))
+  assert.equal(Object.keys(manifest.notes).length, 4)
+  assert.deepEqual(manifest.attachments, oldManifest.attachments)
+  assert.deepEqual(await snapshot(f.vaultPath), vaultBefore)
+  assert.equal((await f.run(options)).written, 0)
+  await rm(join(f.vaultPath, 'FC - Lin/lab.md'))
+  await f.run(options)
+  manifest = JSON.parse(await f.output('src/data/obsidian-sync.json'))
+  assert.equal(Object.keys(manifest.notes).length, 3)
+  assert.equal(await f.output('src/content/notes/MIT/course.md'), course)
+  assert.deepEqual(manifest.attachments, oldManifest.attachments)
+  const beforeFailure = await snapshot(f.projectRoot)
+  await assert.rejects(f.run({ ...options, sourceFolders: ['missing-folder'] }), /文件不存在/)
+  await assert.rejects(f.run({ ...options, sourceFolders: ['../outside'] }), /安全相对目录/)
+  assert.deepEqual(await snapshot(f.projectRoot), beforeFailure)
+})
+
+test('category routes are reserved and scoped sync refreshes reused attachments', async (t) => {
+  const f = await fixture(t)
+  assert.throws(() => obsidianNoteId('categories/lin.md'), /占用了现有栏目/)
+  await f.source('FC - Lin/lab.md', '![diagram](../diagram.png)')
+  await f.source('diagram.png', 'first diagram')
+  const options = { publishAll: true, sourceFolders: ['FC - Lin'] }
+  await f.run(options)
+  const manifest = JSON.parse(await f.output('src/data/obsidian-sync.json'))
+  const name = Object.keys(manifest.attachments)[0]
+  await f.source('diagram.png', 'updated diagram')
+  await f.run(options)
+  assert.equal(await f.output(`public/attachments/${name}`), 'updated diagram')
+})
+
 test('completed and ready notes keep distinct statuses and invalid status changes preserve the last export', async (t) => {
   const f = await fixture(t)
   await f.source('Blog/ready.md', note())

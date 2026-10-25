@@ -153,8 +153,12 @@ function completeMetadata(note, sourceStat, previousBytes) {
     title: basename(note.output, '.md'),
     description: '',
     topic: note.output.includes('/') ? note.output.split('/')[0] : '随笔',
+    category: / - Lin$/.test(note.output.split('/')[0]) ? 'lin' : 'ai',
     tags: []
   }
+  const lecture =
+    / - Lin$/.test(note.output.split('/')[0]) && basename(note.output).match(/^Lec\s+(\d+)\b/i)
+  if (lecture && Number(lecture[1]) > 0) defaults.order = Number(lecture[1])
   if (emptyProperty(note.data.date)) {
     const previousDate = previousBytes
       ? frontmatter(previousBytes.toString('utf8'), `已同步笔记 ${note.output}`).data.date
@@ -203,6 +207,8 @@ function validateNote(data, label) {
     fail(`${label} 的 status 必须是 growing、ready 或 completed`)
   if (data.order !== undefined && (!Number.isInteger(data.order) || data.order < 1))
     fail(`${label} 的 order 必须是正整数`)
+  if (data.category !== undefined && !['ai', 'lin'].includes(data.category))
+    fail(`${label} 的 category 必须是 ai 或 lin`)
   if (data.sample !== undefined && typeof data.sample !== 'boolean')
     fail(`${label} 的 sample 必须是布尔值`)
   if (data.pdf !== undefined && typeof data.pdf !== 'string')
@@ -220,7 +226,7 @@ export function obsidianNoteId(path, data = {}) {
       .join('/')
       .replace(/\/index$/, '')
   if (!safeRelative(id) || typeof id !== 'string') fail(`笔记无法生成有效网址：${path}`)
-  if (['index', 'all', 'pdf', 'tags', 'topics', 'status'].includes(id.split('/')[0]))
+  if (['index', 'all', 'pdf', 'tags', 'topics', 'status', 'categories'].includes(id.split('/')[0]))
     fail(`笔记网址占用了现有栏目：/notes/${id}`)
   return id
 }
@@ -394,9 +400,20 @@ export async function syncObsidian({
   projectRoot,
   publishAll = false,
   noteImports = {},
-  attachmentRoot
+  attachmentRoot,
+  sourceFolders,
+  skipEmpty = false
 }) {
   if (typeof publishAll !== 'boolean') fail('publishAll 必须是布尔值，不能隐式启用全量发布')
+  if (typeof skipEmpty !== 'boolean') fail('skipEmpty 必须是布尔值')
+  if (
+    sourceFolders !== undefined &&
+    (!publishAll ||
+      !Array.isArray(sourceFolders) ||
+      !sourceFolders.length ||
+      sourceFolders.some((folder) => !safeRelative(folder)))
+  )
+    fail('指定同步目录需要全量模式和非空的安全相对目录列表')
   if (!isAbsolute(vaultPath || '') || !isAbsolute(projectRoot || ''))
     fail('Vault 和项目路径必须是绝对路径')
   for (const root of [resolve(vaultPath), resolve(projectRoot)]) {
@@ -439,11 +456,15 @@ export async function syncObsidian({
     return bytes
   }
   const allNotes = []
-  const sourceNotePaths = await walk(
-    vault,
-    sourceRoot,
-    (path) => extname(path).toLowerCase() === '.md'
-  )
+  const folders = sourceFolders ? [...new Set(sourceFolders)] : undefined
+  const inScope = (name) => !folders || folders.some((folder) => name.startsWith(`${folder}/`))
+  const listSourceNotes = async () => {
+    const paths = []
+    for (const directory of folders?.map((folder) => join(vault, folder)) ?? [sourceRoot])
+      paths.push(...(await walk(vault, directory, (path) => extname(path).toLowerCase() === '.md')))
+    return [...new Set(paths)].sort()
+  }
+  const sourceNotePaths = await listSourceNotes()
   for (const path of sourceNotePaths) {
     // Keep existing Blog routes when opting into whole-Vault publishing.
     const outputRoot = publishAll && within(blog, path) ? blog : sourceRoot
@@ -453,6 +474,7 @@ export async function syncObsidian({
     const parsed = frontmatter(new TextDecoder('utf-8', { fatal: true }).decode(bytes), output, {
       publishAll
     })
+    if (skipEmpty && !parsed.body.trim()) continue
     if (publishAll) {
       parsed.document ??= new Document(parsed.data)
       parsed.data.publish = true
@@ -505,7 +527,7 @@ export async function syncObsidian({
   if (await exists(notesRoot)) {
     for (const path of await walk(project, notesRoot, (path) => extname(path) === '.md')) {
       const name = posix(relative(notesRoot, path))
-      if (Object.hasOwn(previous.notes, name)) continue
+      if (Object.hasOwn(previous.notes, name) && inScope(name)) continue
       const bytes = await readOutput(path)
       const { data } = frontmatter(bytes.toString('utf8'), `现有笔记 ${name}`)
       // Manual draft routes are reserved as well, so publishing them later remains safe.
@@ -666,12 +688,28 @@ export async function syncObsidian({
       fail(`规划期间源文件发生变化，请重试：${posix(relative(vault, path))}`)
   }
   // Catch note additions/removals during a run too; never clean up from a partial iCloud view.
-  const finalNotes = await walk(vault, sourceRoot, (path) => extname(path).toLowerCase() === '.md')
+  const finalNotes = await listSourceNotes()
   if (
     finalNotes.length !== sourceNotePaths.length ||
     finalNotes.some((path, index) => path !== sourceNotePaths[index])
   )
     fail('规划期间 Blog 目录发生变化，请重试')
+  // A scoped sync must not remove other notebooks whose source folders have moved out of the Vault.
+  if (folders) {
+    for (const name of Object.keys(previous.notes)) {
+      if (inScope(name)) continue
+      const bytes = backup.get(join(notesRoot, name))
+      if (!bytes) fail(`范围外的受管理笔记缺失，保留同步清单：${name}`)
+      plannedNotes.set(name, bytes)
+    }
+    // These may still be referenced by the preserved notebooks. Current-scope assets take precedence.
+    for (const name of Object.keys(previous.attachments)) {
+      if (plannedAssets.has(name)) continue
+      const bytes = backup.get(join(assetsRoot, name))
+      if (!bytes) fail(`范围外的受管理附件缺失，保留同步清单：${name}`)
+      plannedAssets.set(name, bytes)
+    }
+  }
   const next = { version: 1, notes: {}, attachments: {} }
   const changes = []
   for (const [field, root, desired] of [

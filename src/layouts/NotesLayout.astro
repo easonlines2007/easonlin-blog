@@ -31,6 +31,7 @@ const {
 
 <BaseLayout {title} {alternatePath}>
   <PageHeader {title} {description} {back} {backLabel} />
+  <slot name="before-list" />
   <div class="listing-grid enter delay-1" data-sortable-listing data-list-label="笔记">
     <div>
       <ListToolbar count={notes.length} />

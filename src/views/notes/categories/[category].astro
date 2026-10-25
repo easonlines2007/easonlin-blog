@@ -1,0 +1,46 @@
+---
+import { localeFromPath, localizePath } from '@/lib/i18n'
+import NotesLayout from '@/layouts/NotesLayout.astro'
+import Icon from '@/components/Icon.astro'
+import TopicPin from '@/components/TopicPin.astro'
+import { getTopics } from '@/lib/topics'
+import { topicUrl } from '@/lib/note-utils'
+import { noteCount } from '@/lib/i18n'
+
+const locale = localeFromPath(Astro.url.pathname)
+const path = (href: string) => localizePath(href, locale)
+const { category, notes, allNotes } = Astro.props
+const topics = getTopics(notes)
+---
+
+<NotesLayout
+  title={category.title}
+  description={category.description[locale]}
+  {notes}
+  {allNotes}
+  back={path('/notes')}
+  backLabel={locale === 'en' ? 'Notes' : '笔记'}
+>
+  <div slot="before-list" class="category-topics">
+    <div class="index-grid">
+      {topics.map(([topic, count]) => (
+        <a class="index-card entry-surface" href={path(topicUrl(topic))}>
+          <div>
+            <h2 class="lift-text">
+              {topic}
+              <TopicPin {topic} />
+            </h2>
+            <p>{noteCount(count, locale)}</p>
+          </div>
+          <Icon name="next" />
+        </a>
+      ))}
+    </div>
+  </div>
+</NotesLayout>
+
+<style>
+  .category-topics {
+    margin-bottom: 28px;
+  }
+</style>

@@ -7,6 +7,7 @@ import { getNotes } from '@/lib/notes'
 import { countValues, topicUrl } from '@/lib/note-utils'
 import { getTopics } from '@/lib/topics'
 import TopicPin from '@/components/TopicPin.astro'
+import { noteCategories, categoryNotes, categoryUrl } from '@/lib/note-categories'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 const path = (href: string) => localizePath(href, locale)
@@ -29,6 +30,23 @@ const tags = countValues(notes, 'tags')
       </div>
       <Icon name="next" />
     </a>
+    <section aria-labelledby="notes-categories-title">
+      <div class="notes-hub-heading">
+        <h2 id="notes-categories-title">{locale === 'en' ? 'Categories' : '分类'}</h2>
+      </div>
+      <div class="index-grid">
+        {noteCategories.map((category) => (
+          <a class="index-card entry-surface" href={path(categoryUrl(category.id))}>
+            <div>
+              <h3 class="lift-text">{category.title}</h3>
+              <p>{category.description[locale]}</p>
+              <p>{noteCount(categoryNotes(notes, category.id).length, locale)}</p>
+            </div>
+            <Icon name="next" />
+          </a>
+        ))}
+      </div>
+    </section>
     <section class="notes-hub-topics" aria-labelledby="notes-topics-title">
       <div class="notes-hub-heading">
         <h2 id="notes-topics-title">{t('专题')}</h2>

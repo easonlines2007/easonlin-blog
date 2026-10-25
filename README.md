@@ -131,6 +131,20 @@ node scripts/import-course-lectures.mjs missing-semester /绝对路径/output/mi
 
 ## 从 iCloud Obsidian 同步
 
+### AI 与 Lin 分类
+
+笔记页在“专题”上方提供两类入口：`AI`（ai电子书）与 `Lin`（古法笔记），中英文共用分类数据。分类页同时展示所属专题和文章，列表侧栏也可切换分类。`category` 可选 `ai` / `lin`，未设置的既有笔记默认属于 AI。
+
+当前手写笔记范围保存在 `src/data/obsidian-sources.json`：只同步 Vault 中的 `CS61A - Lin/`、`FC - Lin/`，跳过空白正文；范围之外已发布的受管理课程、附件和同步归属保留。` - Lin` 目录导出的副本自动归入 Lin，`Lec N` 文件继承讲次阅读顺序；不会写回 Obsidian 原文。
+
+同步命令仍为 `pnpm obsidian:sync`，也可用 `--folder "目录名"` 多次指定本次范围、`--skip-empty` 跳过空稿。指定范围要求 `OBSIDIAN_PUBLISH_ALL=true`；目录不存在、路径不安全或源文件读取不完整时停止。若本机旧 VideoBook 外部附件目录已移动，当前两组笔记均使用 Vault 内附件，可运行：
+
+```sh
+OBSIDIAN_ATTACHMENT_PATH='' pnpm obsidian:sync
+```
+
+旧 `FC/` 五篇使用 `note-overrides.json` 下架；Lin 使用新的 `FC - Lin/` 副本，旧文章及译文不再出现在公开列表、页面、RSS 或搜索。现有 AI 课程不会因 Vault 中旧源文件移走而被范围同步清理。
+
 现有 iCloud Vault 继续作为笔记唯一来源，不移动 Vault，也不修改其中任何文件。在 Vault 中自行创建 `Blog/` 文件夹，准备公开的 Markdown 放在这里，子目录结构会保留。
 
 复制环境配置并填入 Vault 的**绝对路径**（是 Vault 根目录，不是 Blog 目录）：

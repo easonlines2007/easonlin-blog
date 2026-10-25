@@ -12,6 +12,20 @@ async function fixture(t) {
   return root
 }
 
+test('configured notebook scopes are passed to normal sync and watcher runs', async (t) => {
+  const root = await fixture(t)
+  await mkdir(join(root, 'src/data'), { recursive: true })
+  await writeFile(
+    join(root, '.env.local'),
+    'OBSIDIAN_VAULT_PATH="/tmp/Vault"\nOBSIDIAN_PUBLISH_ALL=true\n'
+  )
+  const settings = { sourceFolders: ['CS61A - Lin', 'FC - Lin'], skipEmpty: true }
+  await writeFile(join(root, 'src/data/obsidian-sources.json'), JSON.stringify(settings))
+  const config = await loadObsidianConfig({ root, environment: {} })
+  assert.deepEqual(config.sourceFolders, settings.sourceFolders)
+  assert.equal(config.skipEmpty, true)
+})
+
 test('Obsidian configuration uses the project file and respects environment overrides', async (t) => {
   const base = await fixture(t)
   const root = join(base, 'project # with spaces')

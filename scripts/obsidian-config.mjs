@@ -27,6 +27,26 @@ export async function loadObsidianConfig({ root = projectRoot, environment = pro
     throw new Error('OBSIDIAN_PUBLISH_ALL 只能设置为 true 或 false。')
   }
   let noteImports
+  let sourceSettings = {}
+  try {
+    sourceSettings = JSON.parse(
+      await readFile(join(root, 'src/data/obsidian-sources.json'), 'utf8')
+    )
+    if (
+      !sourceSettings ||
+      typeof sourceSettings !== 'object' ||
+      Array.isArray(sourceSettings) ||
+      Object.keys(sourceSettings).some((key) => !['sourceFolders', 'skipEmpty'].includes(key)) ||
+      !Array.isArray(sourceSettings.sourceFolders) ||
+      !sourceSettings.sourceFolders.length ||
+      sourceSettings.sourceFolders.some((folder) => typeof folder !== 'string' || !folder.trim()) ||
+      typeof sourceSettings.skipEmpty !== 'boolean'
+    )
+      throw new Error('同步目录设置无效。')
+  } catch (error) {
+    if (error.code !== 'ENOENT')
+      throw new Error('无法读取 Obsidian 同步目录设置。', { cause: error })
+  }
   const attachmentRoot =
     (environment.OBSIDIAN_ATTACHMENT_PATH ?? localEnvironment.OBSIDIAN_ATTACHMENT_PATH)?.trim() ||
     undefined
@@ -45,6 +65,7 @@ export async function loadObsidianConfig({ root = projectRoot, environment = pro
   return {
     projectRoot: root,
     vaultPath,
+    ...sourceSettings,
     ...(publishMode === 'true' ? { publishAll: true } : {}),
     ...(attachmentRoot ? { attachmentRoot } : {}),
     ...(noteImports ? { noteImports } : {})
