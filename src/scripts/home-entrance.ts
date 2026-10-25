@@ -74,18 +74,18 @@ export async function startHomeEntrance() {
     moveIntoPlace(avatar, groupTop + avatarHeight / 2, avatarScale, 0)
     moveIntoPlace(name, groupTop + avatarHeight + gap + nameHeight / 2, nameScale, 0)
 
-    function drawPaths(selector: string, spacing: number, strokeDuration: number) {
+    function drawPaths(selector: string, spacing: number, strokeDuration: number, startAt = 100) {
       document.querySelectorAll<SVGPathElement>(selector).forEach((path, index) => {
         const length = path.getTotalLength()
         animations.push(
           path.animate(
             [
-              { strokeDasharray: `${length} ${length}`, strokeDashoffset: length },
-              { strokeDasharray: `${length} ${length}`, strokeDashoffset: 0 }
+              { opacity: 1, strokeDasharray: `${length} ${length}`, strokeDashoffset: length },
+              { opacity: 1, strokeDasharray: `${length} ${length}`, strokeDashoffset: 0 }
             ],
             {
               duration: strokeDuration,
-              delay: 100 + index * spacing,
+              delay: startAt + Number(path.dataset.introStroke ?? index) * spacing,
               easing: 'linear',
               fill: 'both'
             }
@@ -96,6 +96,7 @@ export async function startHomeEntrance() {
 
     drawPaths('[data-intro-name] [data-intro-ink]', 180, 280)
     drawPaths('[data-intro-avatar] [data-intro-outline]', 200, 650)
+    drawPaths('[data-intro-avatar] [data-intro-shading]', 0, 1050, 380)
 
     const drawing = avatar.querySelector<SVGElement>('.avatar-drawing')
     if (picture && drawing) {

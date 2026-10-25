@@ -1,16 +1,18 @@
 ---
 import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
 import Icon from './Icon.astro'
+import SectionTitle from './SectionTitle.astro'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 const path = (href: string) => localizePath(href, locale)
 interface Props {
   title: string
+  englishTitle?: string
   description?: string
   back?: string
   backLabel?: string
 }
-const { title, description, back = '/', backLabel = '首页' } = Astro.props
+const { title, englishTitle, description, back = '/', backLabel = '首页' } = Astro.props
 ---
 
 <a class="back-link" href={path(back)}>
@@ -18,7 +20,7 @@ const { title, description, back = '/', backLabel = '首页' } = Astro.props
   <span class="lift-text">{t(backLabel)}</span>
 </a>
 <div class="page-heading enter">
-  <h1>{t(title)}</h1>
+  {englishTitle ? <SectionTitle title={t(title)} {englishTitle} /> : <h1>{t(title)}</h1>}
   {description && <p>{t(description)}</p>}
   <slot />
 </div>

@@ -6,6 +6,8 @@ import Icon from '@/components/Icon.astro'
 import ArticleTools from '@/components/ArticleTools.astro'
 import { getEssays } from '@/lib/essays'
 import { essayUrl, formatWritingDate } from '@/lib/essay-utils'
+import { essayPresentation } from '@/lib/essay-presentation'
+import '@/styles/essays.css'
 
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
@@ -19,6 +21,7 @@ interface Props {
 const { essay, newer, older } = Astro.props
 const { Content } = await render(essay.translation ?? essay)
 const { title, written, description } = essay.data
+const { short } = essayPresentation(essay)
 ---
 
 <BaseLayout
@@ -36,8 +39,18 @@ const { title, written, description } = essay.data
     <Icon name="back" />
     <span class="lift-text">{t('随笔')}</span>
   </a>
-  <article class="article-body essay-article enter" data-pagefind-body>
+  <article
+    class:list={[
+      'article-body',
+      'essay-article',
+      'literary-article',
+      'enter',
+      short && 'literary-short'
+    ]}
+    data-pagefind-body
+  >
     <header class="article-header">
+      <p class="literary-kicker">{locale === 'en' ? 'From the journal' : '随笔 · 字里行间'}</p>
       <h1 data-pagefind-meta="title">{title}</h1>
       <div class="article-date">
         <time datetime={written}>
@@ -47,6 +60,9 @@ const { title, written, description } = essay.data
     </header>
     <div class="prose essay-prose" id="article-content">
       <Content />
+    </div>
+    <div class="literary-endmark" aria-hidden="true">
+      ❧
     </div>
     <footer class="article-bottom" data-pagefind-ignore>
       {locale === 'en' && <a href={essayUrl(essay.id)}>Read Chinese original</a>}

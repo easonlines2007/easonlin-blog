@@ -3,7 +3,9 @@ import { localeFromPath, localizePath, useTranslations, noteCount } from '@/lib/
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getNotes } from '@/lib/notes'
 import { getEssays } from '@/lib/essays'
-import { essayUrl } from '@/lib/essay-utils'
+import { essayUrl, formatWritingDate } from '@/lib/essay-utils'
+import { essayPresentation } from '@/lib/essay-presentation'
+import '@/styles/essays.css'
 import { topicUrl } from '@/lib/note-utils'
 import { getTopics } from '@/lib/topics'
 import { projects } from '@/lib/projects'
@@ -84,7 +86,22 @@ const topics = getTopics(notes)
       </h2>
       <div class="section-body">
         <ul class="home-row-list">
-          {essays.slice(0, 3).map((essay) => (
+          {essays.slice(0, 1).map((essay) => (
+            <li class="home-essay-feature">
+              <a href={path(essayUrl(essay.id))}>
+                <p class="home-essay-excerpt">{essayPresentation(essay).excerpt}</p>
+                <span class="home-essay-attribution">
+                  {essay.data.title}
+                  <span aria-hidden="true"> · </span>
+                  <time datetime={essay.data.written}>
+                    {formatWritingDate(essay.data.written, locale)}
+                  </time>
+                  <span aria-hidden="true"> ↗</span>
+                </span>
+              </a>
+            </li>
+          ))}
+          {essays.slice(1, 3).map((essay) => (
             <HomeRow label={t('随笔')} title={essay.data.title} href={path(essayUrl(essay.id))} />
           ))}
         </ul>

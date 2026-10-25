@@ -2,41 +2,165 @@
 import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import PageHeader from '@/components/PageHeader.astro'
-import ListToolbar from '@/components/ListToolbar.astro'
 import { getEssays } from '@/lib/essays'
 import { essayUrl, formatWritingDate, writingTimestamp } from '@/lib/essay-utils'
+import { essayPresentation } from '@/lib/essay-presentation'
+import '@/styles/essays.css'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 const path = (href: string) => localizePath(href, locale)
 const essays = await getEssays(locale)
+const pictureDescriptions: Record<
+  string,
+  { zh: string; en: string; width: number; height: number; displayWidth: string }
+> = {
+  'future-loss': {
+    width: 1484,
+    height: 1060,
+    displayWidth: '94%',
+    zh: '木框中的人物素描',
+    en: 'A figurative drawing in a wooden frame'
+  },
+  nineteen: {
+    width: 2000,
+    height: 1333,
+    displayWidth: '100%',
+    zh: '夜色里燃烧的蜡烛',
+    en: 'A candle burning in the dark'
+  },
+  night: {
+    width: 2000,
+    height: 1172,
+    displayWidth: '92%',
+    zh: '深蓝背景前的小舟与人像',
+    en: 'A small boat and figure against a deep blue background'
+  },
+  'ordinary-person': {
+    width: 2000,
+    height: 1500,
+    displayWidth: '88%',
+    zh: '晴空下的巴塞罗那屋顶',
+    en: 'Barcelona rooftops under a clear sky'
+  },
+  'information-overload': {
+    width: 1500,
+    height: 2000,
+    displayWidth: '68%',
+    zh: '夜色中的建筑与雕像',
+    en: 'A building and statue at night'
+  },
+  fantasy: {
+    width: 4590,
+    height: 3442,
+    displayWidth: '100%',
+    zh: '《再见绘梨》的黑白漫画画面',
+    en: 'Black-and-white panels from Goodbye, Eri'
+  },
+  'no-regrets': {
+    width: 2000,
+    height: 1500,
+    displayWidth: '100%',
+    zh: '城市上空云层间的暮光',
+    en: 'Evening light breaking through clouds over the city'
+  },
+  'time-to-leave': {
+    width: 1500,
+    height: 2000,
+    displayWidth: '68%',
+    zh: '空下来的宿舍与阳台门',
+    en: 'An empty dormitory and its balcony door'
+  },
+  unfinished: {
+    width: 1895,
+    height: 1077,
+    displayWidth: '100%',
+    zh: '《黑神话：悟空》中的画面',
+    en: 'A scene from Black Myth: Wukong'
+  },
+  'ability-and-desire': {
+    width: 2000,
+    height: 1357,
+    displayWidth: '92%',
+    zh: '暮色中的校园操场',
+    en: 'A school playground at dusk'
+  }
+}
 ---
 
 <BaseLayout title={t('随笔')}>
-  <PageHeader title={t('随笔')} description={t('一些感受，一些想法，写下来，留在这里。')} />
-  <div class="enter delay-1" data-sortable-listing data-list-label="随笔">
-    <ListToolbar count={essays.length} label={t('随笔')} dateLabel={t('写作日期')} />
-    <ol class="essay-list" data-list-items>
-      {essays.map((essay) => (
-        <li
-          class="essay-list-item entry-surface"
-          data-list-item
-          data-sort-title={essay.data.title}
-          data-sort-date={writingTimestamp(essay.data.written)}
+  <div class="essay-journal" data-sortable-listing data-list-label="随笔">
+    <PageHeader
+      title={t('随笔')}
+      englishTitle="Essays"
+      description={t('一些感受，一些想法，写下来，留在这里。')}
+    />
+    <div class="journal-edition">
+      <span>
+        {locale === 'en'
+          ? `${essays.length} pieces, gathered here`
+          : `${essays.length} 篇文字，收在这里`}
+      </span>
+      <label class="journal-order">
+        <span>{locale === 'en' ? 'Order' : '排列'}</span>
+        <select
+          data-list-sort
+          aria-label={locale === 'en' ? 'Essay order' : '随笔排列顺序'}
+          disabled
         >
-          <time datetime={essay.data.written}>
-            {locale === 'en' ? 'Written' : '写于'} {formatWritingDate(essay.data.written, locale)}
-          </time>
-          <div>
-            <h2>
-              <a class="entry-link" href={path(essayUrl(essay.id))}>
-                <span class="lift-text">{essay.data.title}</span>
-              </a>
-            </h2>
-            {essay.data.description && <p>{essay.data.description}</p>}
-          </div>
-        </li>
-      ))}
+          <option value="default">{locale === 'en' ? 'Newest first' : '由近及远'}</option>
+          <option value="date-asc">{locale === 'en' ? 'Oldest first' : '由远及近'}</option>
+          <option value="title-asc">{locale === 'en' ? 'By title' : '按篇名'}</option>
+        </select>
+      </label>
+    </div>
+    <ol class="journal-contents" data-list-items>
+      {essays.map((essay) => {
+        const { excerpt, image } = essayPresentation(essay)
+        return (
+          <li
+            class="journal-entry"
+            data-list-item
+            data-sort-title={essay.data.title}
+            data-sort-date={writingTimestamp(essay.data.written)}
+          >
+            <article class="journal-entry-inner">
+              <time datetime={essay.data.written}>
+                {formatWritingDate(essay.data.written, locale)}
+              </time>
+              <h2>
+                <a href={path(essayUrl(essay.id))}>
+                  <span class="lift-text">{essay.data.title}</span>
+                </a>
+              </h2>
+              <p class="journal-excerpt">{excerpt}</p>
+              {image && (
+                <figure
+                  class="journal-photo"
+                  style={`--journal-photo-width: ${pictureDescriptions[essay.id]?.displayWidth ?? '100%'}`}
+                >
+                  <img
+                    src={
+                      image.src.startsWith('/essays/')
+                        ? `/essay-covers/${essay.id}.webp`
+                        : image.src
+                    }
+                    width={pictureDescriptions[essay.id]?.width}
+                    height={pictureDescriptions[essay.id]?.height}
+                    alt={pictureDescriptions[essay.id]?.[locale] ?? image.alt}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+              )}
+            </article>
+          </li>
+        )
+      })}
     </ol>
     {!essays.length && <p class="empty-state">{t('暂时还没有随笔。')}</p>}
   </div>
 </BaseLayout>
+
+<script>
+  import '../scripts/list-sort'
+</script>
