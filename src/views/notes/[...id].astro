@@ -9,6 +9,7 @@ import ArticleTools from '@/components/ArticleTools.astro'
 import MermaidDiagrams from '@/components/MermaidDiagrams.astro'
 import PdfReader from '@/components/PdfReader.astro'
 import { getNotes } from '@/lib/notes'
+import { getTocHeadings } from '@/lib/table-of-contents'
 import { formatDate, noteUrl, tagUrl, topicUrl, statusUrl, statusLabels } from '@/lib/note-utils'
 
 const locale = localeFromPath(Astro.url.pathname)
@@ -22,6 +23,7 @@ interface Props {
 }
 const { note, previous, next } = Astro.props
 const { Content, headings } = await render(note.translation ?? note)
+const hasToc = getTocHeadings(headings).length > 0
 const { title, description, tags, topic, date, updated, status, sample, pdf } = note.data
 ---
 
@@ -69,12 +71,14 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
           )}
         </div>
       </header>
-      <details class="mobile-toc" data-pagefind-ignore>
-        <summary>
-          <span class="lift-text">{t('本页目录')}</span>
-        </summary>
-        <TableOfContents {headings} mobile />
-      </details>
+      {hasToc && (
+        <details class="mobile-toc" data-pagefind-ignore>
+          <summary>
+            <span class="lift-text">{t('本页目录')}</span>
+          </summary>
+          <TableOfContents {headings} mobile />
+        </details>
+      )}
       <div class="prose" id="article-content">
         <Content />
       </div>
@@ -116,10 +120,12 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
         </nav>
       )}
     </article>
-    <aside class="toc-sidebar enter delay-1">
-      <h2 class="toc-title">{t('本页目录')}</h2>
-      <TableOfContents {headings} />
-    </aside>
+    {hasToc && (
+      <aside class="toc-sidebar enter delay-1">
+        <h2 class="toc-title">{t('本页目录')}</h2>
+        <TableOfContents {headings} />
+      </aside>
+    )}
   </div>
   <ArticleTools />
   <MermaidDiagrams />

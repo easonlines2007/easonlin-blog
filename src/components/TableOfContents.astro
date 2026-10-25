@@ -1,6 +1,7 @@
 ---
 import { localeFromPath, useTranslations } from '@/lib/i18n'
 import type { MarkdownHeading } from 'astro'
+import { getTocHeadings } from '@/lib/table-of-contents'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 interface Props {
@@ -8,7 +9,7 @@ interface Props {
   mobile?: boolean
 }
 const { headings, mobile = false } = Astro.props
-const items = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3)
+const items = getTocHeadings(headings)
 ---
 
 <nav aria-label={t(mobile ? '文章目录（手机）' : '文章目录')}>
@@ -17,7 +18,8 @@ const items = headings.filter((heading) => heading.depth >= 2 && heading.depth <
       <li>
         <a
           href={`#${heading.slug}`}
-          class:list={['entry-surface', heading.depth > 2 && 'nested']}
+          class:list={['entry-surface', heading.level > 0 && 'nested']}
+          style={`--toc-level: ${heading.level}`}
           data-toc-link
         >
           <span class="lift-text">{t(heading.text)}</span>
@@ -28,11 +30,6 @@ const items = headings.filter((heading) => heading.depth >= 2 && heading.depth <
 </nav>
 <script>
   import { setupTocNavigation } from '../scripts/toc-navigation'
-  const headings = [
-    ...document.querySelectorAll<HTMLElement>(
-      '.prose h2[id], .prose h3[id], [data-section-heading]'
-    )
-  ]
   const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')]
   const realign = setupTocNavigation(links)
   const linksById = new Map<string, HTMLAnchorElement[]>()
@@ -42,6 +39,11 @@ const items = headings.filter((heading) => heading.depth >= 2 && heading.depth <
     group.push(link)
     linksById.set(id, group)
   }
+  const headings = [
+    ...document.querySelectorAll<HTMLElement>(
+      '.prose h1[id], .prose h2[id], .prose h3[id], [data-section-heading]'
+    )
+  ].filter((heading) => linksById.has(heading.id))
   let scheduled = false
   let geometryDirty = true
   let positions: number[] = []

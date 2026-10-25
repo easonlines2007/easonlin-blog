@@ -1164,7 +1164,7 @@ summary::-webkit-details-marker {
   background: var(--soft);
 }
 .toc-list a.nested {
-  padding-left: 26px;
+  padding-left: calc(12px + var(--toc-level, 1) * 14px);
   font-size: 13px;
 }
 .mobile-toc {
@@ -1188,6 +1188,7 @@ summary::-webkit-details-marker {
   line-height: 1.95;
   overflow-wrap: break-word;
 }
+.prose h1,
 .prose h2 {
   font-size: var(--heading-size);
   font-weight: 400;
@@ -1197,6 +1198,7 @@ summary::-webkit-details-marker {
   font-size: var(--heading-size);
   font-weight: 400;
 }
+.prose h1,
 .prose h2,
 .prose h3,
 .prose h4,
