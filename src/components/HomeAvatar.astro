@@ -18,7 +18,33 @@ import woodstock from '../assets/woodstock.png'
         alt={t('Eason Lin 的头像：戴墨镜、穿红毛衣的史努比')}
         loading="eager"
         fetchpriority="high"
+        data-intro-avatar-image
       />
+      <svg class="avatar-drawing" viewBox="0 0 1254 1254" fill="none" aria-hidden="true">
+        <g stroke="#262824" stroke-width="17" stroke-linecap="round" stroke-linejoin="round">
+          <path
+            data-intro-outline
+            d="M345 501C363 394 421 246 513 202Q594 155 679 196 M755 226C829 213 903 188 961 232C1010 268 1037 337 1017 410C999 500 902 539 803 574Q715 596 670 662L621 680Q593 674 585 641Q564 608 521 590"
+          />
+          <path
+            data-intro-outline
+            d="M480 408C510 439 537 521 512 587C489 669 404 677 364 618C333 575 334 519 353 471 M418 401C370 454 362 560 395 601C437 650 499 592 488 533Q485 453 418 401Z"
+          />
+          <path
+            data-intro-outline
+            d="M490 409L683 304 M687 202C699 169 744 179 747 216L750 350C749 399 706 391 692 358C679 323 674 231 687 202Z M747 191Q785 165 784 207L761 226 M1025 299C1092 298 1095 376 1031 387 M613 172Q602 115 639 96 M648 178Q657 139 684 132"
+          />
+          <path
+            data-intro-outline
+            stroke="#bd302f"
+            d="M601 674Q550 624 508 666Q477 689 488 735C415 760 392 798 408 866Q405 916 460 924L706 918Q748 914 746 862C765 812 724 758 700 739L687 680L657 669 M504 747L460 842L470 869H684L689 895 M457 877L453 906 M500 878L495 910 M541 880L537 911 M581 880L580 911 M624 880L622 911 M661 879L661 910 M581 720L595 810 M644 721L662 811"
+          />
+          <path
+            data-intro-outline
+            d="M449 926L493 954L480 1020C405 1025 333 1041 332 1085Q330 1110 386 1104L744 1061Q832 1045 811 1013C778 973 718 994 677 989Q627 975 668 929 M577 981L572 1048 M81 1106Q212 1079 331 1093 M735 1070Q911 1027 1017 1010"
+          />
+        </g>
+      </svg>
     </div>
     <div class="avatar-face avatar-back" aria-hidden="true">
       <Image src={woodstock} width={256} height={256} format="webp" alt="" loading="eager" />
@@ -28,6 +54,20 @@ import woodstock from '../assets/woodstock.png'
 <style>
   .avatar {
     perspective: 650px;
+  }
+  .avatar-drawing {
+    display: none;
+    position: absolute;
+    inset: 7px;
+    width: calc(100% - 14px);
+    height: calc(100% - 14px);
+    pointer-events: none;
+  }
+  :global([data-home-entrance='pending']) .avatar-drawing {
+    display: block;
+  }
+  :global([data-home-entrance='pending']) [data-intro-avatar-image] {
+    opacity: 0;
   }
   .avatar-card {
     position: relative;

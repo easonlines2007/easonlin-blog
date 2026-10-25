@@ -7,10 +7,38 @@ interface Props {
 }
 const { kind } = Astro.props
 const label = kind === 'blog' ? "Eason's blog" : 'Eason Lin'
-const artwork = (kind === 'blog' ? blogArtwork : nameArtwork).replace(
+let artwork = (kind === 'blog' ? blogArtwork : nameArtwork).replace(
   '<svg ',
   '<svg fill="currentColor" '
 )
+if (kind === 'name') {
+  // Follow each letter's pen movement while retaining the original letterforms.
+  const contours = nameArtwork.match(/d="([^"]+)"/)![1].match(/M[^M]+/g)!
+  const letters = [[0], [1, 2], [3], [4, 5], [6], [7], [8, 9], [10]]
+  const strokes = [
+    'M19 -69H68L63 -55 M32 -67L9 -2 M23 -35H48 M-5 -1H46L51 -16',
+    'M99 -43C66 -52 43 11 70 -2Q87 -8 99 -44L87 -6Q85 6 107 -12',
+    'M139 -38C121 -56 100 -33 122 -23C150 -7 122 13 108 -7',
+    'M174 -43C150 -46 132 8 159 -1C180 -5 194 -47 174 -43',
+    'M193 -39L205 -43L190 0 M203 -29Q241 -63 227 -27L219 -5Q218 6 240 -12',
+    'M275 -69H302 M287 -67L265 -5 M250 -1H302L307 -16',
+    'M316 -39L329 -43L316 -6Q313 6 337 -12 M335 -61L336 -60',
+    'M341 -39L354 -43L339 0 M352 -29Q390 -63 376 -27L368 -5Q367 6 388 -12'
+  ]
+  const masks = strokes
+    .map(
+      (d, i) =>
+        `<mask id="home-name-ink-${i}" maskUnits="userSpaceOnUse" x="-10" y="-80" width="410" height="90"><path data-intro-ink d="${d}" fill="none" stroke="white" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" /></mask>`
+    )
+    .join('')
+  const glyphs = letters
+    .map(
+      (parts, i) =>
+        `<g class="name-letter" style="--ink-mask: url(#home-name-ink-${i})"><path d="${parts.map((part) => contours[part]).join('')}" /></g>`
+    )
+    .join('')
+  artwork = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6.2 -71 395.5 73" fill="currentColor"><defs>${masks}</defs>${glyphs}</svg>`
+}
 ---
 
 <span class:list={['wordmark', `wordmark-${kind}`]}>
@@ -45,5 +73,8 @@ const artwork = (kind === 'blog' ? blogArtwork : nameArtwork).replace(
     display: block;
     width: 100%;
     height: 100%;
+  }
+  :global([data-home-entrance='pending']) .wordmark-name :global(.name-letter) {
+    mask: var(--ink-mask);
   }
 </style>

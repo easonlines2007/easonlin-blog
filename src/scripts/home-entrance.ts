@@ -1,5 +1,5 @@
-const duration = 1800
-const settleAt = 0.4
+const duration = 3000
+const settleAt = 0.68
 const ease = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
 /** Animate the actual hero elements so the final layout never swaps or jumps. */
@@ -18,6 +18,7 @@ export async function startHomeEntrance() {
     if (finished) return
     finished = true
     delete root.dataset.homeEntrance
+    delete root.dataset.homeRevealing
     animations.forEach((animation) => animation.cancel())
     events.abort()
   }
@@ -61,7 +62,7 @@ export async function startHomeEntrance() {
         element.animate(
           [
             { opacity: 0, transform: start, offset: 0, easing: 'ease-out' },
-            { opacity: 1, transform: start, offset: 0.24 },
+            { opacity: 1, transform: start, offset: 0.08 },
             { opacity: 1, transform: start, offset: settleAt, easing: ease },
             { opacity: 1, transform: `rotate(${rotation}deg)`, offset: 1 }
           ],
@@ -73,10 +74,52 @@ export async function startHomeEntrance() {
     moveIntoPlace(avatar, groupTop + avatarHeight / 2, avatarScale, 0)
     moveIntoPlace(name, groupTop + avatarHeight + gap + nameHeight / 2, nameScale, 0)
 
+    function drawPaths(selector: string, spacing: number, strokeDuration: number) {
+      document.querySelectorAll<SVGPathElement>(selector).forEach((path, index) => {
+        const length = path.getTotalLength()
+        animations.push(
+          path.animate(
+            [
+              { strokeDasharray: `${length} ${length}`, strokeDashoffset: length },
+              { strokeDasharray: `${length} ${length}`, strokeDashoffset: 0 }
+            ],
+            {
+              duration: strokeDuration,
+              delay: 100 + index * spacing,
+              easing: 'linear',
+              fill: 'both'
+            }
+          )
+        )
+      })
+    }
+
+    drawPaths('[data-intro-name] [data-intro-ink]', 180, 280)
+    drawPaths('[data-intro-avatar] [data-intro-outline]', 200, 650)
+
+    const drawing = avatar.querySelector<SVGElement>('.avatar-drawing')
+    if (picture && drawing) {
+      animations.push(
+        picture.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: 450,
+          delay: 1550,
+          easing: 'ease-in-out',
+          fill: 'both'
+        }),
+        drawing.animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: 350,
+          delay: 1650,
+          easing: 'ease-in-out',
+          fill: 'both'
+        })
+      )
+    }
+
     // Keep every other element hidden until both moving elements have landed.
     // Sequencing on completion also holds if rendering is delayed or interrupted.
     await Promise.all(animations.map((animation) => animation.finished))
     if (finished) return
+    root.dataset.homeRevealing = 'true'
 
     const remaining = document.querySelectorAll<HTMLElement>(
       '.site-header, [data-intro-reveal], .site-footer'
