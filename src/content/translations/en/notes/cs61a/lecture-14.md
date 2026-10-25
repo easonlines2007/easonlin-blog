@@ -1,67 +1,161 @@
 ---
 kind: notes
 source: cs61a/lecture-14
-title: "Lecture 14 · Trees: Data Abstraction and Recursive Traversal"
-description: "CS61A Lecture 14: Tree data abstraction and recursive traversal."
-sourceHash: 381fda80cc18e99e5ff1030c3bca07848cd1abd5e2fc3ba4e19738637e774ed1
+title: "Lecture 14 · Trees: Data Abstraction and Tree Recursion"
+description: "CS61A Lecture 14: Trees (Tree data abstraction and tree traversal recursion)"
+sourceHash: 49b7d11cdff34acde687f9e5d22c081905b89444716c49198c2525bcc9975742
 publish: true
 translationMethod: machine-assisted
 ---
 
-> **Earlier edition:** The Chinese edition was expanded on 22 October 2026. This English translation covers the previous edition. [Read the updated Chinese lecture](/notes/cs61a/lecture-14).
-
-> **English original course**: CS 61A: Structure and Interpretation of Computer Programs (Fall 2024)  
+> **Course**: UC Berkeley CS61A (Fall 2024)  
+> **Module**: Module 2: Recursion & Data Abstraction (Recursion & Sequences)  
 > **Lecturer**: Prof. John DeNero (UC Berkeley)  
-> **Text and illustrations**: VideoBook video to image to text technology e-book assembly line  
-> **course coverage**: 37 / 37 on 18.2 hour audio/video instruction ⁇ 577 high-level lecture screenshots  
-> **Online catalog**: [CS61A Special Catalog](/en/notes/topics/CS61A)
+> **Video duration**: 34:32 ｜ **Classroom screenshots**: 16 pieces of blackboard writing/code demonstration  
+> **Direct video**: [📺Watch the original video of this lecture on Bilibili (P14)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14)  
+> **Quick navigation**: [← Previous Lecture (P13 Lecture 13 Data Abstraction)](/en/notes/cs61a/lecture-13) ｜ [📚 Return to the full book catalog](/en/notes/topics/CS61A) ｜ [Next Lecture (P15 Lecture 15 Mutability) →](/en/notes/cs61a/lecture-15)
 
 ---
 
+## Table of Contents
+1. [Introduction: Hierarchical world modeling and two metaphors of trees](/en/notes/cs61a/lecture-14#1-introduction-hierarchical-world-modeling-and-two-metaphors-of-trees)
+2. [The Tree Data Abstraction](/en/notes/cs61a/lecture-14#2-the-tree-data-abstraction)
+3. [Programmed tree construction: Fibonacci trees (`fib_tree`)](/en/notes/cs61a/lecture-14#3-programmed-tree-construction-fibonacci-tree-fib_tree)
+4. [Standard recursive paradigm for tree processing functions: statistics and expansion](/en/notes/cs61a/lecture-14#4-standard-recursive-paradigm-for-tree-processing-functions-statistics-and-expansion)
+5. [Structural transformation and compact expression of trees: `increment_tree`](/en/notes/cs61a/lecture-14#5-structural-transformation-and-compact-expression-of-trees-increment_tree)
+6. [Tree structure visualization: indent printing (`print_tree`)](/en/notes/cs61a/lecture-14#6-tree-structure-visualization-indent-printing-print_tree)
+7. [Two schools of recursive thinking: return value aggregation vs. state parameter downloading](/en/notes/cs61a/lecture-14#7-two-schools-of-recursive-thinking-return-value-aggregation-vs-state-parameter-downloading)
+8. [Final puzzle: Arbitrary node path and statistics (`count_paths`)](/en/notes/cs61a/lecture-14#8-final-puzzle-arbitrary-node-path-and-statistics-count_paths)
+9. [Key points and thinking questions of this lecture](/en/notes/cs61a/lecture-14#9-core-points-and-thinking-questions-of-this-lecture)
+
+---
+
+### In-depth formal specification and micro-evaluation process (Operational Semantics)
+In the "Table of Contents" module, the underlying computer operations rely on strict formal evaluation logic:
+1. **Hierarchical parsing of abstract syntax trees (AST)**: 
+   - The source code character stream is first divided into terminal symbol tokens (Tokens) by the lexical analyzer (Lexer), and then constructed into a multi-fork syntax tree by the syntax parser (Parser);
+   - Operator priority and associativity are solidified during the syntax tree construction phase, eliminating ambiguity at runtime;
+2. **Dynamic transitions of environment chains**: 
+   - Each function call generates a new frame whose static lexical environment is determined by the function object's  `parent`  Attributes are completely determined;
+   - The variable search traces back up the environment chain in one direction until the global environment frame. If it is not found, it will be triggered.  `NameError`  Abnormal;
+3. **State Invariants**: 
+   - The key to writing robust programs is to clarify loop invariants (Loop Invariants) and function pre/post-conditions (Pre/Post-conditions);
+   - In complex control flow jumps, ensure that state variables maintain legal business constraints before each iteration.
 
 
-> **Lecture**: John DeNero ｜ **duration**: 34:32 ｜ **Video link back**: [B station response unit set (P14)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14)
+## 1. Introduction: Hierarchical world modeling and two metaphors of trees
 
-## 1. Introduction: Two metaphors of tree and world-level model
+In computer science, tree structures are everywhere (file directory trees, parsing ASTs, organizational charts, decision trees). Professor DeNero points out that trees in computer science are **Grows upside down (roots at the top, leaves at the bottom)**.
 
-In computer science, tree structures are everywhere: file directory trees, syntax analysis AST, organizational structure diagrams, decision trees. **The roots are at the top, the leaves are below.**.
+There are two descriptive metaphors for understanding trees:
 
-Understanding trees is a metaphor for two descriptions of tables:
+### 1.1 The Recursive Metaphor of Botany
+> A tree consists of a **Root Label**  and a group **List of Branches**  composition.  
+> Key corollary: **Each branch of the tree is a complete tree in itself!**
 
-### 1.1 Botanical recursion metaphors (The Rescursive Metaphor)
-> A tree is made of a single **Root Label**  And a group **List of Branches**  The composition.  
-> The key conclusions: **And every branch of a tree is a whole tree.**
+[![The Recursive Metaphor of Botany · Classroom Blackboard Demonstration (00:03:13)](</attachments/cs61a-0cf2cbddc72016fb7e0a6680.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=193)
+*⏱ Timestamp: 00:03:13 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:03:13)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=193)*
 
-![Botany recursion (The Rescursive Metaphor) lecture board illustration (00:03:13)](</attachments/cs61a-0cf2cbddc72016fb7e0a6680.png>)
-*⏱ Timestamp: 00:03:13 · 📷 Lecture screenshot · [Watch clip (P14 00:03:13)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=193)*
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:03:13)
 
-- **The Leaf Nodule** Tree without branch (the list of branches is empty) is called leaf node.
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“Hierarchical relationships. We've drawn pictures of trees before and discussed how in computer science they grow upside down. Now we'll talk about the common vocabulary used to describe trees. There are in fact two different metaphors used regularly. The first is the recursive description of trees, ...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "1. Introduction: Hierarchical world modeling and two metaphors of trees", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+- **Leaf node (Leaf)**: A tree with no branches (the branch list is empty) is called a leaf node.
 
 ### 1.2 The Relative / Family Tree Metaphor
-Each location in the tree where data is stored is called **The Node**.
-- The node stores specific data (called nodes)  **Label**).
-- The link between the nodes is at a kinship level: **The Parent**, **Children's Nodes**, **The Siblings**, **The Ancestors**, **The following is a list of the most common causes of death in children:**.
-- The level at which a node is located is called the **The first is the "Deepth".**.
+Each data storage location in the tree is called **Node**.
+- Nodes store specific data (called the node’s  **Label**).
+- There is an affinity hierarchical relationship between nodes: **Parent**, **Children**, **Siblings**, **Ancestors**, **Descendants**.
+- The level at which a node is located is called its **Depth**.
 
-![The Relative / Family Tree Metaphor (00:04:16) · lecture board illustration](</attachments/cs61a-c1dfc301fb50eec7d42234a7.png>)
-*⏱ Timestamp: 00:04:16 · 📷 Lecture screenshot · [Watch clip (P14 00:04:16)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=256)*
+[![The Relative / Family Tree Metaphor · Classroom Blackboard Demonstration (00:04:16)](</attachments/cs61a-c1dfc301fb50eec7d42234a7.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=256)
+*⏱ Timestamp: 00:04:16 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:04:16)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=256)*
+
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:04:16)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“Once you've constructed a tree recursively, you might want to describe certain locations within the tree. And so we say in the relative description about family trees that each location in a tree is called a node. So here are all the nodes. I have circled them. And this is the root or the root node ...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "1. Introduction: Hierarchical world modeling and two metaphors of trees", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
 
 ---
 
-## The Tree Data Abstraction is a collection of data abstractions.
+### In-depth formal specification and micro-evaluation process (Operational Semantics)
+In the "1. Introduction: Hierarchical World Modeling and Two Metaphors of Trees" module, the underlying computer operations rely on strict formal evaluation logic:
+1. **Hierarchical parsing of abstract syntax trees (AST)**: 
+   - The source code character stream is first divided into terminal symbol tokens (Tokens) by the lexical analyzer (Lexer), and then constructed into a multi-fork syntax tree by the syntax parser (Parser);
+   - Operator priority and associativity are solidified during the syntax tree construction phase, eliminating ambiguity at runtime;
+2. **Dynamic transitions of environment chains**: 
+   - Each function call generates a new frame whose static lexical environment is determined by the function object's  `parent`  Attributes are completely determined;
+   - The variable search traces back up the environment chain in one direction until the global environment frame. If it is not found, it will be triggered.  `NameError`  Abnormal;
+3. **State Invariants**: 
+   - The key to writing robust programs is to clarify loop invariants (Loop Invariants) and function pre/post-conditions (Pre/Post-conditions);
+   - In complex control flow jumps, ensure that state variables maintain legal business constraints before each iteration.
 
-In keeping with CS61A's consistent data abstraction philosophy, we first define the public interface of trees:
 
-![data abstraction (The Tree Data Action) lecture board illustration (00:05:21)](</attachments/cs61a-f87f424ed7261631f1d9e931.png>)
-*⏱ Timestamp: 00:05:21 · 📷 Lecture screenshot · [Watch clip (P14 00:05:21)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=321)*
+## 2. The Tree Data Abstraction
+
+Adhering to CS61A's consistent data abstraction philosophy, we first define the public interface of the tree:
+
+[![The Tree Data Abstraction · Classroom Blackboard Demonstration (00:05:21)](</attachments/cs61a-f87f424ed7261631f1d9e931.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=321)
+*⏱ Timestamp: 00:05:21 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:05:21)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=321)*
+
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:05:21)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“So something like each parent is the sum of its children, which is true of a Fibonacci tree. Now that we can talk about trees, we can talk about implementing the tree abstraction. A tree has a root label and a list of branches, and the constructor is going to take those two values. Each branch must ...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "2. The Tree Data Abstraction", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
 
 ### 2.1 Constructor and selector specifications
-- `tree(label, branches=[])` The root node is the root node.  `label` List of sub-trees  `branches`  The tree.  `branches`  The space is formed by a leaf node.
-- `label(t)` Selector, back to the tree  `t`  The root label.
-- `branches(t)` Selector, back to the tree  `t`  The list of branches (each element is a tree)
-- `is_leaf(t)` Judging by the word, when and only when  `branches(t)`  Back in the day  `True`.
+- `tree(label, branches=[])`: Construct a root node as  `label`, the subtree list is  `branches`  tree. Default  `branches`  is empty, a leaf node is constructed at this time.
+- `label(t)`:Selector, return tree  `t`  the root tag.
+- `branches(t)`:Selector, return tree  `t`  A branch list (each element of which is a tree).
+- `is_leaf(t)`: Judgment predicate, if and only if  `branches(t)`  Return if empty  `True`.
 
-### 2.2 Concrete implementation with rigorous error-control testing
+### 2.2 Specific implementation and strict error-proofing verification
 ```python
 def tree(label, branches=[]):
     """树构造器：确保所有分支皆为合法树。"""
@@ -91,26 +185,120 @@ def is_tree(tree):
     return True
 ```
 
-![Actualization and strict error-proofing lecture board illustration (00:06:51)](</attachments/cs61a-aebf5ef87cd157f2d635e700.png>)
-*⏱ Timestamp: 00:06:51 · 📷 Lecture screenshot · [Watch clip (P14 00:06:51)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=411)*
+[![Specific implementation and strict error proofing · Classroom blackboard demonstration (00:06:51)](</attachments/cs61a-aebf5ef87cd157f2d635e700.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=411)
+*⏱ Timestamp: 00:06:51 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:06:51)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=411)*
 
-![Actualization and strict error-proofing of lecture board illustration (00:08:18)](</attachments/cs61a-de7be30617444c5578fa2f83.png>)
-*⏱ Timestamp: 00:08:18 · 📷 Lecture screenshot · [Watch clip (P14 00:08:18)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=498)*
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:06:51)
 
-> **abstraction block answers** The use of silicon  `for b in branches(t):`  The question is, has the branch broken the barrier of abstraction?  
-> **The answer is no!**  The tree abstraction is clearly guaranteed in the open contract: `branches(t)`  The return is a tree made of young trees. **List of Branches** The use of lists across the branches is in full compliance with the contract for this abstraction!
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“By default, the list of branches is empty. So by default, I'll get a leaf, which is why I'm able to call just tree on one in order to construct this leaf node here. I put the label into a list. Branches is already a list, and so I sum them together. The label of a tree is a selector that returns the...”*
 
-![Actualization and strict error-proofing of lecture board illustration (00:10:14)](</attachments/cs61a-c2092934f0b8b21c53c019f3.png>)
-*⏱ Timestamp: 00:10:14 · 📷 Lecture screenshot · [Watch clip (P14 00:10:14)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=614)*
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "2. The Tree Data Abstraction", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+[![Specific implementation and strict error proofing · Classroom blackboard demonstration (00:08:18)](</attachments/cs61a-de7be30617444c5578fa2f83.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=498)
+*⏱ Timestamp: 00:08:18 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:08:18)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=498)*
+
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:08:18)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“It has to be a list. It has to have at least one element for the label. So if that's not true, we'll return false. And it has to be the case that all the branches are trees. So in fact, isTree is a tree recursive function itself that goes through every branch in the branches of the tree. If it's not...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "2. The Tree Data Abstraction", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+> **Abstract Barrier Q&A**:
+"Use  `for b in branches(t):`  Does traversing branches violate the abstraction barrier? "  
+> **The answer is no!**  Because the tree abstraction is explicitly guaranteed in the public specification: `branches(t)`  What is returned is a subtree composed of **List of Branches**. Traversing branches using list operations fully conforms to the contract of this abstraction!
+
+[![Specific implementation and strict error proofing · Classroom blackboard demonstration (00:10:14)](</attachments/cs61a-c2092934f0b8b21c53c019f3.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=614)
+*⏱ Timestamp: 00:10:14 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:10:14)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=614)*
+
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:10:14)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“Notice that when I evaluated this constructor expression, there were no errors because I've built a well-formed tree. Now, it happens to be that it has this complicated nested representation. But that's not how I will access it. Instead, I'll just ask, what's the label of t? It's 1. What's the branc...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "2. The Tree Data Abstraction", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
 
 ---
 
-## 3. Programmatic tree construction: Fibonacci tree (`fib_tree`)
+### In-depth formal specification and micro-evaluation process (Operational Semantics)
+In the module "2. The Tree Data Abstraction", the underlying computer operations rely on strict formal evaluation logic:
+1. **Hierarchical parsing of abstract syntax trees (AST)**: 
+   - The source code character stream is first divided into terminal symbol tokens (Tokens) by the lexical analyzer (Lexer), and then constructed into a multi-fork syntax tree by the syntax parser (Parser);
+   - Operator priority and associativity are solidified during the syntax tree construction phase, eliminating ambiguity at runtime;
+2. **Dynamic transitions of environment chains**: 
+   - Each function call generates a new frame whose static lexical environment is determined by the function object's  `parent`  Attributes are completely determined;
+   - The variable search traces back up the environment chain in one direction until the global environment frame. If it is not found, it will be triggered.  `NameError`  Abnormal;
+3. **State Invariants**: 
+   - The key to writing robust programs is to clarify loop invariants (Loop Invariants) and function pre/post-conditions (Pre/Post-conditions);
+   - In complex control flow jumps, ensure that state variables maintain legal business constraints before each iteration.
 
-In actual engineering, trees are often not built by hand-hardcoded nesting but by algorithms. **Programmatic recursion generated** The Epiphonaceae tree is a good example:
 
-![The first is the "Fib\_tree" (the "Fib Tree") lecture board illustration.](</attachments/cs61a-6ddf3b0e2b13d90c642be316.png>)
-*⏱ Timestamp: 00:11:52 · 📷 Lecture screenshot · [Watch clip (P14 00:11:52)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=712)*
+## 3. Programmed tree construction: Fibonacci tree (`fib_tree`)
+
+In actual projects, trees are often not constructed by hand-hard-coded nesting, but by algorithms. **Programmatic recursive generation**. Take the Fibonacci tree as an example:
+
+[![Programmed tree construction: Fibonacci tree (fib\_tree) · Classroom blackboard demonstration (00:11:52)](</attachments/cs61a-6ddf3b0e2b13d90c642be316.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=712)
+*⏱ Timestamp: 00:11:52 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:11:52)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=712)*
+
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:11:52)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“I create the leaf using my tree constructor. Otherwise, I need to build the two branches of a Fibonacci tree. The left branch and the right branch are both going to be constructed with recursive calls to fibtree. Finally, I want to return a tree. That means calling the tree constructor on some label...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "3. Programmed tree construction: Fibonacci tree (`fib_tree`)", the interpreter strictly follows the core evaluation convention;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
 
 ```python
 def fib_tree(n):
@@ -121,14 +309,27 @@ def fib_tree(n):
         left, right = fib_tree(n - 2), fib_tree(n - 1)
         return tree(label(left) + label(right), [left, right])
 ```
-- The main branch:  $n \le 1$  When the single node leaves are returned directly  `tree(n)`.
-- Recursion branch: recursion generates left and right subtrees, labeling the roots of both trees as root tags for the current tree.
+- Baseline branch: when  $n \le 1$  When , directly return the single node leaf  `tree(n)`.
+- Recursive branch: Recursively generate the left subtree and the right subtree, and use the sum of the root labels of the two subtrees as the root label of the current tree.
 
 ---
 
-## Standard recursion paradigm of tree processing functions: statistics and developments
+### In-depth formal specification and micro-evaluation process (Operational Semantics)
+In "3. Programmed tree construction: Fibonacci tree (`fib_tree`)" module, the underlying computer operations rely on strict formal evaluation logic:
+1. **Hierarchical parsing of abstract syntax trees (AST)**: 
+   - The source code character stream is first divided into terminal symbol tokens (Tokens) by the lexical analyzer (Lexer), and then constructed into a multi-fork syntax tree by the syntax parser (Parser);
+   - Operator priority and associativity are solidified during the syntax tree construction phase, eliminating ambiguity at runtime;
+2. **Dynamic transitions of environment chains**: 
+   - Each function call generates a new frame whose static lexical environment is determined by the function object's  `parent`  Attributes are completely determined;
+   - The variable search traces back up the environment chain in one direction until the global environment frame. If it is not found, it will be triggered.  `NameError`  Abnormal;
+3. **State Invariants**: 
+   - The key to writing robust programs is to clarify loop invariants (Loop Invariants) and function pre/post-conditions (Pre/Post-conditions);
+   - In complex control flow jumps, ensure that state variables maintain legal business constraints before each iteration.
 
-The recursion function of all operating trees follows a highly uniform structural framework:
+
+## 4. Standard recursive paradigm for tree processing functions: statistics and expansion
+
+All recursive functions that operate on trees follow a highly unified structural skeleton:
 ```python
 def process_tree(t):
     if is_leaf(t):
@@ -145,24 +346,64 @@ def count_leaves(t):
     return sum([count_leaves(b) for b in branches(t)])
 ```
 
-![Calculate the total number of leaves (count\_leaves) lecture board illustration (00:13:25)](</attachments/cs61a-bdb8559c3cdeca943f53dd0b.png>)
-*⏱ Timestamp: 00:13:25 · 📷 Lecture screenshot · [Watch clip (P14 00:13:25)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=805)*
+[![Calculate the total number of leaf nodes (count\_leaves) · Classroom blackboard demonstration (00:13:25)](</attachments/cs61a-bdb8559c3cdeca943f53dd0b.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=805)
+*⏱ Timestamp: 00:13:25 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:13:25)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=805)*
 
-- **Baseline conditions** If the current node is a leaf, it's itself a leaf node, return  `1`.
-- **Recursion accumulation** Recursion: through each branch, to get the number of leaves, using a built-in function  `sum` - What?
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:13:25)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“If t is only a leaf and I count the leaves, there's one leaf. The recursive case typically makes a recursive call on each branch, then aggregates the results. In this case, what we're going to do is take each branch in the branches of the tree and count the leaves in each branch. The leaves in the t...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "4. Standard recursive paradigm for tree processing functions: statistics and expansion", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+- **baseline conditions**: If the current node is a leaf and itself is a leaf node, return  `1`.
+- **Recursive aggregation**: Traverse each branch, recursively find the number of leaves, and use the built-in function  `sum`  Add up!
 
 ---
 
-### 4.2 Collect all the label on the leaves: List of flat-out techniques (`leaves`)
-If we want to return the horizontal list of all the label nodes in a tree:
+### 4.2 Collect all leaf labels: list flattening technique (`leaves`)
+If we wish to return a flat list of labels for all leaf nodes in the tree:
 ```
 fib_tree(4) 的叶子为: [0, 1, 1, 0, 1]
 ```
 
-![Collection of all leaf labels: List-show techniques (leaves) lecture board illustration (00:15:23)](</attachments/cs61a-93bc24797dd8a95bf7c79303.png>)
-*⏱ Timestamp: 00:15:23 · 📷 Lecture screenshot · [Watch clip (P14 00:15:23)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=923)*
+[![Collect all leaf labels: List flattening technique (leaves) · Classroom blackboard demonstration (00:15:23)](</attachments/cs61a-93bc24797dd8a95bf7c79303.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=923)
+*⏱ Timestamp: 00:15:23 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:15:23)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=923)*
 
-The first is the story of black magic: `sum([[1, 2], [3]], []) -> [1, 2, 3]` The following are the most commonly used methods of calculating the number of times a table is created:
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:15:23)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“We're going to use a fact about sum, which is that if you sum a list of lists, you get a list containing the elements of all of the lists in the input. Let me show you some examples. If you sum the lists 1, 2, 3, and 4, you get one list containing 1, 2, 3, and 4. In order to call sum on a list of li...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "4. Standard recursive paradigm for tree processing functions: statistics and expansion", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+Recall the black magic from the previous lecture: `sum([[1, 2], [3]], []) -> [1, 2, 3]`. Using list splicing as a folding base, we can achieve flattening very elegantly:
 
 ```python
 def leaves(t):
@@ -172,17 +413,50 @@ def leaves(t):
     return sum([leaves(b) for b in branches(t)], [])
 ```
 
-![Collection of all leaf labels: List-show techniques (leaves) lecture board illustration (00:16:49)](</attachments/cs61a-eba04e8a71eead659c43dd65.png>)
-*⏱ Timestamp: 00:16:49 · 📷 Lecture screenshot · [Watch clip (P14 00:16:49)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1009)*
+[![Collect all leaf labels: List flattening technique (leaves) · Classroom blackboard demonstration (00:16:49)](</attachments/cs61a-eba04e8a71eead659c43dd65.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1009)
+*⏱ Timestamp: 00:16:49 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:16:49)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1009)*
 
-- If for leaves: return a list of single elements  `[label(t)]`.
-- If not leaves: Call for each subtree recursion  `leaves(b)`  The following is a list of  `sum(..., [])`  Putting all the sub-lists together into a flat list!
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:16:49)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“And returns a list of the leaf labels. If it's a leaf, then we get the label and put it in a list. Otherwise, we sum up something. Here are eight alternatives. I recommend that you pause and think about it. I'm going to show you the answer in three, two, one. Our goal is to get a list of leaf labels...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "4. Standard recursive paradigm for tree processing functions: statistics and expansion", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+- If it is a leaf: return a list containing its own single element  `[label(t)]`.
+- If not a leaf: recursively call each subtree  `leaves(b)`  Get the sublist by  `sum(..., [])`  Stitch all sublists into one big flat list!
 
 ---
 
-## 5. Structural changes in trees are expressed with compactness: `increment_tree`
+### In-depth formal specification and micro-evaluation process (Operational Semantics)
+In the "4. Standard Recursive Paradigm of Tree Processing Functions: Statistics and Expansion" module, the underlying computer operations rely on strict formal evaluation logic:
+1. **Hierarchical parsing of abstract syntax trees (AST)**: 
+   - The source code character stream is first divided into terminal symbol tokens (Tokens) by the lexical analyzer (Lexer), and then constructed into a multi-fork syntax tree by the syntax parser (Parser);
+   - Operator priority and associativity are solidified during the syntax tree construction phase, eliminating ambiguity at runtime;
+2. **Dynamic transitions of environment chains**: 
+   - Each function call generates a new frame whose static lexical environment is determined by the function object's  `parent`  Attributes are completely determined;
+   - The variable search traces back up the environment chain in one direction until the global environment frame. If it is not found, it will be triggered.  `NameError`  Abnormal;
+3. **State Invariants**: 
+   - The key to writing robust programs is to clarify loop invariants (Loop Invariants) and function pre/post-conditions (Pre/Post-conditions);
+   - In complex control flow jumps, ensure that state variables maintain legal business constraints before each iteration.
 
-Suppose we want to add the tag value of each node in the tree to 1, and create a whole new tree:
+
+## 5. Structural transformation and compact expression of trees: `increment_tree`
+
+Suppose we want to add 1 to the label value of each node in the tree to generate a new tree:
 
 ```python
 def increment_tree(t):
@@ -190,20 +464,54 @@ def increment_tree(t):
     return tree(label(t) + 1, [increment_tree(b) for b in branches(t)])
 ```
 
-![The tree's structure changes and compactness is expressed in:increment\_tree · lecture board illustration (00:18:47)](</attachments/cs61a-5468a22f8a2def712da0e34b.png>)
-*⏱ Timestamp: 00:18:47 · 📷 Lecture screenshot · [Watch clip (P14 00:18:47)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1127)*
+[![Structural transformation and compact expression of trees: increment\_tree · Classroom blackboard demonstration (00:18:47)](</attachments/cs61a-5468a22f8a2def712da0e34b.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1127)
+*⏱ Timestamp: 00:18:47 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:18:47)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1127)*
 
-> **The very fine mechanism behind the stream** Why not: Why not?  `if is_leaf(t)`  The branch judges?
-> - When the knots of leaves are encountered, `branches(t)`  List of empty  `[]`.
-> - list comprehension  `[increment_tree(b) for b in []]`  Natural evaluation is a blank list  `[]` The first is the "recursion".
-> - Directly generated  `tree(label(t) + 1, [])`  And back again!
-> - The short-range features of the list comprehension are built into air clusters, which naturally serve as guards for baseline conditions!
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:18:47)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“Notice that I keep the label the same, and that's because this function doesn't do anything with the labels of the nodes that aren't leaves. Here's another tree processing function, increment t, which returns a tree like t, but with all labels incremented. I'll show you a trick. You don't always nee...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "5. Structural transformation and compact expression of trees: `increment_tree`”, the interpreter strictly follows the core evaluation convention;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+> **The exquisite mechanism behind the minimalist one-line flow**:
+Why doesn't this implementation have any  `if is_leaf(t)`  Branch judgment?
+> - When a leaf node is encountered, `branches(t)`  Is an empty list  `[]`.
+> - list comprehension  `[increment_tree(b) for b in []]`  Naturally evaluates to an empty list  `[]`, no need for recursion.
+> - Generate directly  `tree(label(t) + 1, [])`  and return!
+> - The built-in empty set short-circuit property of list comprehension naturally acts as a guard for the baseline condition!
 
 ---
 
-## 6. Visualization of tree-shaped structures: shrinking and printing (`print_tree`)
+### In-depth formal specification and micro-evaluation process (Operational Semantics)
+In "5. Structural transformation and compact expression of trees: `increment_tree` In the module, the underlying computer operations rely on strict formal evaluation logic:
+1. **Hierarchical parsing of abstract syntax trees (AST)**: 
+   - The source code character stream is first divided into terminal symbol tokens (Tokens) by the lexical analyzer (Lexer), and then constructed into a multi-fork syntax tree by the syntax parser (Parser);
+   - Operator priority and associativity are solidified during the syntax tree construction phase, eliminating ambiguity at runtime;
+2. **Dynamic transitions of environment chains**: 
+   - Each function call generates a new frame whose static lexical environment is determined by the function object's  `parent`  Attributes are completely determined;
+   - The variable search traces back up the environment chain in one direction until the global environment frame. If it is not found, it will be triggered.  `NameError`  Abnormal;
+3. **State Invariants**: 
+   - The key to writing robust programs is to clarify loop invariants (Loop Invariants) and function pre/post-conditions (Pre/Post-conditions);
+   - In complex control flow jumps, ensure that state variables maintain legal business constraints before each iteration.
 
-The tree is printed in the form of a nested list, as  `[3, [1], [2, [1], [1]]]` In the context of a recursion, we can print an intuitive layer into a text tree:
+
+## 6. Tree structure visualization: indent printing (`print_tree`)
+
+Trees printed out as nested lists (e.g.  `[3, [1], [2, [1], [1]]]`) is difficult to be quickly recognized by the human eye. By passing the indent depth parameter recursively, we can print out an intuitive hierarchical indented text tree:
 
 ```python
 def print_tree(t, indent=0):
@@ -213,10 +521,30 @@ def print_tree(t, indent=0):
         print_tree(b, indent + 1)
 ```
 
-![Tree structure visualization: indent (print\_tree) lecture board illustration (00:20:52)](</attachments/cs61a-190b258c5121df8581ba5098.png>)
-*⏱ Timestamp: 00:20:52 · 📷 Lecture screenshot · [Watch clip (P14 00:20:52)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1252)*
+[![Tree structure visualization: indent printing (print\_tree) · Classroom blackboard demonstration (00:20:52)](</attachments/cs61a-190b258c5121df8581ba5098.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1252)
+*⏱ Timestamp: 00:20:52 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:20:52)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1252)*
 
-The output is:
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:20:52)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“The number 5 after that, I would build the string using multiplication and addition, and if I print that out, then I get 5 indented. By default, I don't want the root label to be indented at all, but I want the possibility of indentation to happen later, where I'm going to take those two spaces, mul...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion node "6. Tree structure visualization: indent printing (`print_tree`)", the interpreter strictly follows the core evaluation convention;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+Output effect:
 ```
 3
   1
@@ -224,32 +552,65 @@ The output is:
     1
     1
 ```
-The number of enclosed spaces in each layer is proportional to its depth in the tree.  `indent` The first is the "Sweetness of God".
+The number of spaces indented for each node is proportional to its depth in the tree.  `indent`, clear layers and pleasing to the eye.
 
 ---
 
-## 7. Two Recursive Approaches: Aggregating Return Values and Passing State Downward
+### In-depth formal specification and micro-evaluation process (Operational Semantics)
+In "6. Tree Structure Visualization: Indented Printing (`print_tree`)" module, the underlying computer operations rely on strict formal evaluation logic:
+1. **Hierarchical parsing of abstract syntax trees (AST)**: 
+   - The source code character stream is first divided into terminal symbol tokens (Tokens) by the lexical analyzer (Lexer), and then constructed into a multi-fork syntax tree by the syntax parser (Parser);
+   - Operator priority and associativity are solidified during the syntax tree construction phase, eliminating ambiguity at runtime;
+2. **Dynamic transitions of environment chains**: 
+   - Each function call generates a new frame whose static lexical environment is determined by the function object's  `parent`  Attributes are completely determined;
+   - The variable search traces back up the environment chain in one direction until the global environment frame. If it is not found, it will be triggered.  `NameError`  Abnormal;
+3. **State Invariants**: 
+   - The key to writing robust programs is to clarify loop invariants (Loop Invariants) and function pre/post-conditions (Pre/Post-conditions);
+   - In complex control flow jumps, ensure that state variables maintain legal business constraints before each iteration.
 
-There are two fundamental thinking models when dealing with tree structures:
 
-![Two genres of recursion thinking: returns the aggregation values vs. status parameters down lecture board illustration (00:22:49)](</attachments/cs61a-0ac28ff33830942bcbf72dc7.png>)
-*⏱ Timestamp: 00:22:49 · 📷 Lecture screenshot · [Watch clip (P14 00:22:49)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1369)*
+## 7. Two schools of recursive thinking: return value aggregation vs. state parameter downloading
+
+There are two fundamental models of thinking when dealing with tree structures:
+
+[![Two schools of recursive thinking: return value aggregation vs. state parameter download · Classroom blackboard demonstration (00:22:49)](</attachments/cs61a-0ac28ff33830942bcbf72dc7.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1369)
+*⏱ Timestamp: 00:22:49 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:22:49)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1369)*
+
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:22:49)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“And if we run this example on, say, 4, then we'll get 4 times 3 times 2 times 1 is 24. And this is an example of taking the return value of a recursive call and manipulating it. In this case, we're multiplying in n. But there's another way. Instead, I could define fact times, which takes in both n a...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "7. Two schools of recursive thinking: return value aggregation vs. state parameter transmission", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
 
 ```mermaid
 graph TD
-    subgraph "The genre A: Return value from bottom up (Bottom-Up)"
-        A1["The results from the leaves"] --> A2["The parent node sums the return value of all branches"]
-        A2 --> A3["The total result is assembled and returned one layer up"]
+    subgraph importedGroup0["genre A: Return value bottom-up aggregation (Bottom-Up)"]
+        A1["Return results from leaves"] --> A2["The parent node aggregates the return values of all branches"]
+        A2 --> A3["Assemble the total result and return it one level up"]
     end
 
-    subgraph "The genre B: The state is passed down from top to bottom (Top-Down / Accumulator)"
-        B1["The root node transmits the current cumulative state downwards"] --> B2["Sub-nodes overlay their own data updates"]
-        B2 --> B3["trigger settlement when reaching the leaf or target node"]
+    subgraph importedGroup1["genre B: Status is passed from top to bottom (Top-Down / Accumulator)"]
+        B1["The root node passes down the current cumulative status"] --> B2["Child nodes superimpose their own data update status"]
+        B2 --> B3["Settlement is triggered when a leaf or target node is reached"]
     end
 ```
 
-### Example: print all the way from root to leaf and (`print_sums`)
-Print the numerical values of all nodes along the entire path from the root node to each leaf node:
+### Example: Print all paths from root to leaves and (`print_sums`)
+Print the sum of the values of all nodes along the complete path from the root node to each leaf node:
 ```python
 def print_sums(t, so_far=0):
     """自顶向下下传前缀路径和。"""
@@ -261,37 +622,110 @@ def print_sums(t, so_far=0):
             print_sums(b, so_far)
 ```
 
-![Example: Print all paths from root to leaf and (print\_sums) · lecture board illustration (00:26:47)](</attachments/cs61a-a22ab5e11611b6542206b055.png>)
-*⏱ Timestamp: 00:26:47 · 📷 Lecture screenshot · [Watch clip (P14 00:26:47)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1607)*
+[![Example: Print all path sums from root to leaves (print\_sums) · Classroom blackboard demonstration (00:26:47)](</attachments/cs61a-a22ab5e11611b6542206b055.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1607)
+*⏱ Timestamp: 00:26:47 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:26:47)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1607)*
 
-- State variable  `so_far`  As a parameter, the call is passed to the deep as it goes through recursion.
-- When hit  `is_leaf(t)`  When the `so_far`  The resulting text is a summary of the entire path from root to leaf, and it is printed immediately.
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:26:47)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“And for each leaf, prints out the sum of all the labels from the root to that leaf. Much like the fact times function, I'm going to add a second argument. The sum so far. So that I can build up the sum as I go and then when I get to the leaf, I just print it out. So whether this is a leaf or not, th...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "7. Two schools of recursive thinking: return value aggregation vs. state parameter transmission", the interpreter strictly follows the core evaluation protocol;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+- state variables  `so_far`  Passed as a parameter to the deeper layers of the recursive call.
+- when hit  `is_leaf(t)`  when, `so_far`  Exactly the sum of the entire root-to-leaf path is recorded and printed immediately.
 
 ---
 
-## 8. The axial problem: paths and statistics of arbitrary nodes (`count_paths`)
+### In-depth formal specification and micro-evaluation process (Operational Semantics)
+In the module "7. Two schools of recursive thinking: return value aggregation vs. state parameter transmission", the underlying computer operations rely on strict formal evaluation logic:
+1. **Hierarchical parsing of abstract syntax trees (AST)**: 
+   - The source code character stream is first divided into terminal symbol tokens (Tokens) by the lexical analyzer (Lexer), and then constructed into a multi-fork syntax tree by the syntax parser (Parser);
+   - Operator priority and associativity are solidified during the syntax tree construction phase, eliminating ambiguity at runtime;
+2. **Dynamic transitions of environment chains**: 
+   - Each function call generates a new frame whose static lexical environment is determined by the function object's  `parent`  Attributes are completely determined;
+   - The variable search traces back up the environment chain in one direction until the global environment frame. If it is not found, it will be triggered.  `NameError`  Abnormal;
+3. **State Invariants**: 
+   - The key to writing robust programs is to clarify loop invariants (Loop Invariants) and function pre/post-conditions (Pre/Post-conditions);
+   - In complex control flow jumps, ensure that state variables maintain legal business constraints before each iteration.
 
-### 8.1 Definition of the problem
-> **The Goals** Give me a tree  `t`  With a target integer  `total` statistics from **The root node starts and extends to any node in the tree** In all paths (not necessarily to leaf nodes), the value of a node tag is exactly equal to  `total`  The total number of routes.
 
-![Definition of the problem lecture board illustration (00:29:46)](</attachments/cs61a-6b1095ab56ee2cbdf4d90ad9.png>)
-*⏱ Timestamp: 00:29:46 · 📷 Lecture screenshot · [Watch clip (P14 00:29:46)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1786)*
+## 8. Final puzzle: arbitrary node path and statistics (`count_paths`)
 
-**Important features explored**: 
-- The node tag may contain a negative number or zero!
-- Therefore, **Even if a node has already aligned its target and it can never stop searching for its branch.** Because it's possible that the next one will come.  `+1, -1`  The government has also taken steps to improve the situation in the country.
+### 8.1 Problem Definition
+> **target**: Given a tree  `t`  with a target integer  `total`, statistics from **Starting from the root node and extending to any node in the tree** (not necessarily to leaf nodes), the sum of node labels is exactly equal to  `total`  the total number of paths.
+
+[![Problem definition · Classroom blackboard demonstration (00:29:46)](</attachments/cs61a-6b1095ab56ee2cbdf4d90ad9.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1786)
+*⏱ Timestamp: 00:29:46 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:29:46)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=1786)*
+
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:29:46)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“If it starts from the top and meanders for a while without getting all the way to a leaf of a tree. So here's an example tree. For a problem like this, it's always a good idea to look at an example and draw that example out as a tree. So here we have three branches. One of the branch has two branche...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "8. Final problem: arbitrary node path and statistics (`count_paths`)", the interpreter strictly follows the core evaluation convention;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+**Exploring important features**: 
+- Node labels may contain negative numbers or zeros!
+- Therefore, **Even if you have gathered the target sum at a certain node, you must not stop searching for its branches.**! Because it is entirely possible that it will happen later  `+1, -1`  Thus forming a deeper legal path.
 
 ---
 
-### 8.2 Solving a problem by dividing it into two ways
-For a search with the current node as its starting point, there are only two legitimate paths:
-1. **The path ends at the current root node.** If you are:  `label(t) == total` The network is a legitimate pathway, and the number of users is limited.  $+1$ Otherwise,  $0$.
-2. **The path continues to extend into a branch** For each branch:  $b$ And to look for them  $b$  The starting point and the node are equal to  `total - label(t)`  The sub-path.
+### 8.2 Problem-solving strategies and two-way decomposition
+For a search starting from the current node, there are only two possible legal paths:
+1. **The path ends exactly at the current root node**: if  `label(t) == total`, then this node forms a legal path by itself, counting  $+1$; otherwise  $0$.
+2. **The path continues into a branch**: for each branch  $b$, to find in it  $b$  is the starting point and the node sum is equal to  `total - label(t)`  subpath.
 
-![lecture board illustration (00:33:31)](</attachments/cs61a-2b6796178d391656d8f0775c.png>)
-*⏱ Timestamp: 00:33:31 · 📷 Lecture screenshot · [Watch clip (P14 00:33:31)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=2011)*
+[![Problem-solving strategies and two-way decomposition · Classroom blackboard demonstration (00:33:31)](</attachments/cs61a-2b6796178d391656d8f0775c.png>)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=2011)
+*⏱ Timestamp: 00:33:31 · 📷 Classroom screenshot · [Watch the corresponding clip on Bilibili (P14 00:33:31)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14&t=2011)*
 
-### 8.3 Recursion achievement
+#### 📸 In-depth reading of classroom blackboard writing and code demonstration (00:33:31)
+
+**\[On-site blackboard writing/code demonstration restoration\]**:
+At this time point, Professor DeNero conducted a core demonstration and key blackboard derivation on the screen:
+> *“Executed this line, so I do need to assign it to something otherwise. I'll set it to zero. So either I found a path that ended at the root label or I didn't, but I also need to count all the paths that end in one of the nodes of the branches. My goal is to count how many such paths there are in each...”*
+
+**\[Underlying computing model and micro execution mechanism\]**: 
+1. **Execution context and timing tracing**: 
+   - At the current discussion point "8. Final problem: arbitrary node path and statistics (`count_paths`)", the interpreter strictly follows the core evaluation convention;
+   - The expression evaluates the operators first, then evaluates the operands strictly from left to right, and finally applies the function object to the argument list;
+   - If the environment model is involved, the local frame strictly records its static lexical parent pointer (Parent Pointer points to the environment where the function is defined), forming an orthogonal architecture with the dynamic call stack at runtime.
+2. **Memory topology and object references**: 
+   - Variable symbols are just keys in a hash table (environment frame), and pointers point directly to first-class citizen objects in heap memory;
+   - Assignment statements are discrete-time snapshots of the state and never create implicit mathematical dependency monitoring.
+
+**\[Guidelines for avoiding pitfalls and guidance on high-frequency test points\]**: 
+- **Common misunderstandings**: In the test questions related to "Tree ADT tree traversal, branch recursion and pruning modification", beginners can easily guess the results based on the surface form of the code, leading to scope confusion or variable shadowing (Shadowing) misjudgment;
+- **The golden rule of debugging**: When encountering nested calls and complex branches, be sure to draw independent partial frames on the scratch paper, indicate the specific binding value of each formal parameter, and derive it step by step.
+
+
+### 8.3 Elegant recursive implementation
 ```python
 def count_paths(t, total):
     """计算以 t 为根节点、路径和等于 total 的路径总数。
@@ -306,23 +740,36 @@ def count_paths(t, total):
     branch_paths = sum([count_paths(b, total - label(t)) for b in branches(t)])
     return found + branch_paths
 ```
-- Code doesn't have to be complex  `if-else`  The branch blocks, the two path counts are parallel to each other, and mathematical logic is strictly intertwined!
+- The code does not need to be complicated  `if-else`  The branches are blocked, the counts of the two paths are accumulated in parallel, and the mathematical logic is perfectly consistent!
 
 ---
 
-## 9. Core points and thought-provoking topics
+### In-depth formal specification and micro-evaluation process (Operational Semantics)
+In "8. Finale Puzzle: Arbitrary Node Path and Statistics (`count_paths`)" module, the underlying computer operations rely on strict formal evaluation logic:
+1. **Hierarchical parsing of abstract syntax trees (AST)**: 
+   - The source code character stream is first divided into terminal symbol tokens (Tokens) by the lexical analyzer (Lexer), and then constructed into a multi-fork syntax tree by the syntax parser (Parser);
+   - Operator priority and associativity are solidified during the syntax tree construction phase, eliminating ambiguity at runtime;
+2. **Dynamic transitions of environment chains**: 
+   - Each function call generates a new frame whose static lexical environment is determined by the function object's  `parent`  Attributes are completely determined;
+   - The variable search traces back up the environment chain in one direction until the global environment frame. If it is not found, it will be triggered.  `NameError`  Abnormal;
+3. **State Invariants**: 
+   - The key to writing robust programs is to clarify loop invariants (Loop Invariants) and function pre/post-conditions (Pre/Post-conditions);
+   - In complex control flow jumps, ensure that state variables maintain legal business constraints before each iteration.
 
-### The key rules are refined
-1. **Trees are recursion-like structures** Each branch of a tree is itself a tree; the algorithm for treating trees is naturally tree-shaped recursion.
-2. **Follow the Tree Abstraction Barrier** Only used:  `label(t)`, `branches(t)`, `is_leaf(t)` The following are the most commonly used names:  `t[0]`, `t[1:]`  Destroying the packaging.
-3. **Two types of path search patterns** The results of the above are summarized as follows:  `count_leaves` The first is the "B" and the "C" as opposed to "B".  `count_paths`  in  `total - label(t)`).
+
+## 9. Core points and thinking questions of this lecture
+
+### Refining key rules
+1. **Trees are recursively self-similar structures**: Each branch of a tree is itself a tree; algorithms for processing trees are naturally tree recursive.
+2. **obey tree abstract barrier**: only use  `label(t)`, `branches(t)`, `is_leaf(t)`, it is strictly forbidden to use the underlying index  `t[0]`, `t[1:]`  Destroy encapsulation.
+3. **Two types of path search modes**: Bottom-up result merging (such as  `count_leaves`) vs. top-down state download (such as  `count_paths`  in  `total - label(t)`).
 
 ---
 
-### Self-testing after school
+### After-class self-assessment exercises
 
-#### Exercise 1: Ask for the maximum depth of the tree (Height/Depth)
-The tree height defining a single leaf node is 0. Write the function  `height(t)`  The maximum height of a tree is calculated:
+#### Exercise 1: Find the maximum depth of the tree (Height/Depth)
+Define the tree height of a single leaf node to be 0. Write function  `height(t)`  Calculate the maximum height of a tree:
 ```python
 def height(t):
     """
@@ -336,8 +783,8 @@ def height(t):
     return 1 + max([height(b) for b in branches(t)])
 ```
 
-#### Exercise 2: Find the largest node in a tree
-Write a function  `max_label(t)`  Find the largest tag of all nodes in a tree:
+#### Exercise 2: Finding the maximum node of a tree
+Write function  `max_label(t)`  Find the maximum label of all nodes in the tree:
 ```python
 def max_label(t):
     """
@@ -346,7 +793,82 @@ def max_label(t):
     """
     return max([label(t)] + [max_label(b) for b in branches(t)])
 ```
-Use the list to spell out  `max`  The tree is very simple in Python, and it's extremely simple.
+Use list concatenation with  `max`  Aggregation and tree traversal are extremely simple in Python!
+
+### In-depth formal specification and micro-evaluation process (Operational Semantics)
+In the "9. Core Key Points and Questions of This Lecture" module, the underlying computer operations rely on strict formal evaluation logic:
+1. **Hierarchical parsing of abstract syntax trees (AST)**: 
+   - The source code character stream is first divided into terminal symbol tokens (Tokens) by the lexical analyzer (Lexer), and then constructed into a multi-fork syntax tree by the syntax parser (Parser);
+   - Operator priority and associativity are solidified during the syntax tree construction phase, eliminating ambiguity at runtime;
+2. **Dynamic transitions of environment chains**: 
+   - Each function call generates a new frame whose static lexical environment is determined by the function object's  `parent`  Attributes are completely determined;
+   - The variable search traces back up the environment chain in one direction until the global environment frame. If it is not found, it will be triggered.  `NameError`  Abnormal;
+3. **State Invariants**: 
+   - The key to writing robust programs is to clarify loop invariants (Loop Invariants) and function pre/post-conditions (Pre/Post-conditions);
+   - In complex control flow jumps, ensure that state variables maintain legal business constraints before each iteration.
+
+
 
 ---
 
+## Berkeley Midterm/Final classic high-frequency exam questions in-depth practice
+
+### Practical exam questions: Environment topology and microstate tracking (WWPD & Environment Diagrams)
+Consider the following microscopic execution of Python code in an interactive environment:
+
+```python
+# 经典作用域与高阶函数综合考题
+x = 10
+
+def outer(x):
+    y = x + 2
+    def inner(y):
+        return x + y
+    return inner
+
+f = outer(5)
+result = f(3)
+```
+
+#### Complete problem-solving thinking model and multi-frame environment map derivation:
+1. **Global Frame initialization**: 
+   - global variables  `x`  Bind to integer object  `10`; 
+   - global function  `outer`  Binds to the newly created function object whose embedded  `parent = Global`; 
+2. **execute  `f = outer(5)`**: 
+   - create a local frame  $f_1$, mark  `f1: outer [parent=Global]`; 
+   - formal parameters  `x`  Bind to actual parameters  `5`; 
+   - local variables  `y`  bind to  `5 + 2 = 7`; 
+   - in  $f_1$  internal execution  `def inner(y):`, create a function object  `inner`, its embedded  **`parent = f1`**; 
+   - Return function object  `inner`, global variables  `f`  Bind to this object;
+3. **execute  `result = f(3)`**: 
+   - call function  `f` (i.e.  `inner`), open up a local frame  $f_2$; 
+   - **core scoring points**:frame  $f_2$  Who does parent point to?
+   - **iron law**: function  `inner`  is in frame  $f_1$  is defined internally, so  $f_2$  of  **`parent = f1`**!
+   - formal parameters  `y`  Bind to actual parameters  `3`; 
+   - executor  `return x + y`: 
+     - in current frame  $f_2$  Find  `y`: Hit local variable  `y = 3`; 
+     - in current frame  $f_2$  Find  `x`: miss, trace back along parent  **$f_1$  frame**  Find it!
+     - in  $f_1$  hit in frame  `x = 5` (Global  `x = 10`  Partially obscured! );
+     - Calculate  `5 + 3 = 8`, as the return value;
+4. **Final output conclusion**: 
+   - global variables  `result = 8`.
+
+---
+
+## Knowledge Matrix of the core concepts of this lecture
+
+| core knowledge dimension | Formal definition and mechanism | Typical code examples | Core Engineering and Algorithm Value | Common pitfalls |
+| :--- | :--- | :--- | :--- | :--- |
+| **Basic evaluation semantics** | The expression is evaluated to obtain a value, and the execution of the statement changes the internal state. | `x = 2 + 3` | Build a discrete-time state snapshot mental model | Mistaking the assignment equal sign as a dynamic constraint on an algebraic equation |
+| **Environment frame topology** | The environment is an ordered chain of frames | `Global -> f1 -> f2` | Implement safe isolation of lexical scope and variables | Confusing the caller stack frame with the parent environment pointer at the definition point |
+| **abstract barrier** | Isolate implementation details and calling logic through functional interfaces | `def square(x): ...` | Reduce cognitive load on large-scale systems | Destroying interfaces directly relies on underlying private data structures |
+| **control flow decisions** | Conditional branch short-circuit evaluation and loop iteration progression | `if cond: ... while: ...` | Give programs non-linear decision-making and large-scale data processing capabilities | Missing the loop progression variable causes an infinite loop |
+| **higher level abilities** | Functions as first-class citizens (parameter passing, return, assignment) | `make_adder(3)` | Implement factory pattern, closure persistent state and currying | Closure late binding throws loop variable capture error |
+
+---
+
+## Course navigation and jump
+
+| Previous lecture | Directory | Next lecture | Original video |
+| :--- | :---: | :--- | :--- |
+| [← Previous lecture: Lecture 13 Data Abstraction](/en/notes/cs61a/lecture-13) | [📚 Return to CS61A complete book list](/en/notes/topics/CS61A) | [Next lecture: Lecture 15 Mutability →](/en/notes/cs61a/lecture-15) | [🎬Watch this lecture on Bilibili (P14)](https://www.bilibili.com/video/BV1sy411z7nA/?p=14) |

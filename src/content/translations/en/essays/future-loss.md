@@ -2,7 +2,7 @@
 kind: essays
 source: future-loss
 title: Regretting What I Have Yet to Lose
-sourceHash: 76a74cad5bc549c079e58d418712887fe519cae4c4462421d1dd200d9bdfd24a
+sourceHash: 29ccb3dc287b9a2e4db63451f3db4e238b46ff0e3cb596b90aab58798b53ab5b
 publish: true
 translationMethod: ai-assisted
 ---
