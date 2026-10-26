@@ -4,6 +4,7 @@ import { render } from 'astro:content'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import Icon from '@/components/Icon.astro'
 import ArticleTools from '@/components/ArticleTools.astro'
+import TypewriterText from '@/components/TypewriterText.astro'
 import { getEssays } from '@/lib/essays'
 import { essayUrl, formatWritingDate } from '@/lib/essay-utils'
 import { essayPresentation } from '@/lib/essay-presentation'
@@ -40,24 +41,20 @@ const { short } = essayPresentation(essay)
     <span class="lift-text">{t('随笔')}</span>
   </a>
   <article
-    class:list={[
-      'article-body',
-      'essay-article',
-      'literary-article',
-      'enter',
-      short && 'literary-short'
-    ]}
+    class:list={['article-body', 'essay-article', 'literary-article', short && 'literary-short']}
     data-pagefind-body
   >
     <header class="article-header">
-      <h1 data-pagefind-meta="title">{title}</h1>
-      <div class="article-date">
+      <h1 data-pagefind-meta="title" aria-label={title} data-title-typing>
+        <TypewriterText text={title} article />
+      </h1>
+      <div class="article-date enter">
         <time datetime={written}>
           {locale === 'en' ? 'Written' : '写于'} {formatWritingDate(written, locale)}
         </time>
       </div>
     </header>
-    <div class="prose essay-prose" id="article-content">
+    <div class="prose essay-prose enter" id="article-content">
       <Content />
     </div>
     <div class="literary-endmark" aria-hidden="true">

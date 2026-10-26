@@ -1,0 +1,210 @@
+---
+import { localeFromPath } from '@/lib/i18n'
+
+interface Props {
+  text: string
+  translation?: string
+  article?: boolean
+}
+interface Key {
+  character: string
+  delay: number
+  hold: number
+  last: boolean
+  tilt: number
+}
+const { text, translation, article = false } = Astro.props
+const locale = localeFromPath(Astro.url.pathname)
+const rhythm = [0, 24, -12, 32, -8]
+const tilts = [0.35, -0.25, 0.15, -0.35]
+let nextStrike = 80
+function makeKeys(value: string, step: number): Key[] {
+  return Array.from(value).map((character, index) => {
+    const key = {
+      character,
+      delay: nextStrike,
+      hold: 0,
+      last: false,
+      tilt: tilts[index % tilts.length]
+    }
+    nextStrike += character.trim() ? step + rhythm[index % rhythm.length] : 32
+    return key
+  })
+}
+const primaryKeys = makeKeys(
+  text,
+  article ? (locale === 'en' ? 74 : 120) : locale === 'en' ? 108 : 205
+)
+nextStrike += 100
+const translationText = translation ? ` / ${translation}` : ''
+const translationKeys = makeKeys(translationText, 74)
+const allKeys = [...primaryKeys, ...translationKeys]
+const printedKeys = allKeys.filter((key) => key.character.trim())
+// Long article titles keep the same strike rhythm without delaying their full title for seconds.
+const finalStrike = printedKeys.at(-1)?.delay ?? 80
+if (article && finalStrike > 1650) {
+  const scale = (1650 - 80) / (finalStrike - 80)
+  allKeys.forEach((key) => (key.delay = 80 + (key.delay - 80) * scale))
+}
+printedKeys.forEach((key, index) => {
+  key.last = index === printedKeys.length - 1
+  key.hold = key.last ? 480 : printedKeys[index + 1].delay - key.delay
+})
+const keyStyle = (key: Key) =>
+  `--type-delay: ${key.delay}ms; --guide-hold: ${key.hold}ms; --strike-tilt: ${key.tilt}deg`
+
+function groupWords(value: string, keys: Key[]) {
+  const groups: Key[][] = []
+  let offset = 0
+  const segments = new Intl.Segmenter(locale, { granularity: 'word' }).segment(value)
+  for (const { segment } of segments) {
+    const count = Array.from(segment).length
+    const group = keys.slice(offset, offset + count)
+    offset += count
+    const previous = groups.at(-1)
+    const previousText = previous?.map((key) => key.character).join('') ?? ''
+    // Keep words intact and avoid starting a wrapped line with closing punctuation.
+    if (
+      previous &&
+      ((/^[\p{Pe}\p{Pf}，。！？、：；…,.!?;:]+$/u.test(segment) && previousText.trim()) ||
+        /^[\p{Ps}\p{Pi}]+$/u.test(previousText))
+    ) {
+      previous.push(...group)
+    } else {
+      groups.push(group)
+    }
+  }
+  return groups
+}
+const primaryGroups = groupWords(text, primaryKeys)
+const translationGroups = groupWords(translationText, translationKeys)
+---
+
+<!-- Keep character nodes adjacent: template indentation must not insert spaces into titles. -->
+<!-- prettier-ignore -->
+<span class="typewriter-primary">{primaryGroups.map((group) => (
+  <span class="typewriter-word">{group.map((key) => (
+    <span
+      class:list={['typewriter-key', !key.character.trim() && 'typewriter-space', key.last && 'typewriter-last']}
+      style={keyStyle(key)}
+      set:text={key.character}
+    />
+  ))}</span>
+))}</span>
+<!-- prettier-ignore -->
+{translation && <span class="typewriter-translation" aria-hidden="true">{translationGroups.map((group) => (
+  <span class="typewriter-word">{group.map((key) => (
+    <span
+      class:list={['typewriter-key', !key.character.trim() && 'typewriter-space', key.last && 'typewriter-last']}
+      style={keyStyle(key)}
+      set:text={key.character}
+    />
+  ))}</span>
+))}</span>}
+
+<style>
+  .typewriter-word {
+    white-space: nowrap;
+  }
+  .typewriter-translation {
+    margin-left: 16px;
+    font-size: 20px;
+    font-style: italic;
+    letter-spacing: 0;
+    color: var(--secondary);
+  }
+  .typewriter-key {
+    position: relative;
+    display: inline-block;
+    white-space: pre;
+    animation: typewriter-strike 110ms linear var(--type-delay) both;
+    transform-origin: 50% 75%;
+  }
+  .typewriter-key::after {
+    content: '';
+    position: absolute;
+    right: -0.14em;
+    bottom: 0.02em;
+    width: 0.28em;
+    height: 0.09em;
+    border: 1px solid var(--accent);
+    border-top: 0;
+    border-bottom-width: 2px;
+    opacity: 0;
+    pointer-events: none;
+    animation: typewriter-guide var(--guide-hold) linear var(--type-delay) both;
+  }
+  .typewriter-space::after {
+    content: none;
+  }
+  .typewriter-space {
+    display: inline;
+    white-space: normal;
+    animation: none;
+  }
+  .typewriter-last::after {
+    animation-name: typewriter-guide-finish;
+  }
+  @keyframes typewriter-strike {
+    0% {
+      opacity: 0;
+      transform: translateY(1.4px) rotate(var(--strike-tilt));
+      text-shadow: none;
+    }
+    8% {
+      opacity: 1;
+      transform: translateY(-0.6px) rotate(var(--strike-tilt));
+      text-shadow:
+        0.45px 0 currentColor,
+        -0.2px 0.3px currentColor;
+    }
+    38% {
+      opacity: 1;
+      transform: translateY(0.25px);
+      text-shadow: 0.15px 0.1px hsl(var(--foreground) / 0.2);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+      text-shadow: none;
+    }
+  }
+  @keyframes typewriter-guide {
+    0%,
+    94% {
+      opacity: 1;
+    }
+    98%,
+    100% {
+      opacity: 0;
+    }
+  }
+  @keyframes typewriter-guide-finish {
+    0%,
+    42% {
+      opacity: 1;
+    }
+    58%,
+    72% {
+      opacity: 0;
+    }
+    80% {
+      opacity: 0.7;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .typewriter-key,
+    .typewriter-key::after {
+      animation: none;
+    }
+  }
+  @media (max-width: 600px) {
+    .typewriter-translation {
+      margin-left: 8px;
+      font-size: 17px;
+    }
+  }
+</style>

@@ -19,7 +19,7 @@ const { title, englishTitle, description, back = '/', backLabel = '首页' } = A
   <Icon name="back" />
   <span class="lift-text">{t(backLabel)}</span>
 </a>
-<div class="page-heading enter">
+<div class:list={['page-heading', !englishTitle && 'enter']}>
   {englishTitle ? <SectionTitle title={t(title)} {englishTitle} /> : <h1>{t(title)}</h1>}
   {description && <p>{t(description)}</p>}
   <slot />
