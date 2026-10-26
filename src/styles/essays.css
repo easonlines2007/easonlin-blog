@@ -34,7 +34,6 @@
 }
 .journal-entry h2 {
   margin: 0 0 16px;
-  padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
   font-size: 26px;
   font-weight: 400;
@@ -42,6 +41,8 @@
   transition: border-color 180ms ease;
 }
 .journal-entry h2 a {
+  display: block;
+  padding-bottom: 12px;
   text-decoration: none;
   transition: color 180ms;
 }

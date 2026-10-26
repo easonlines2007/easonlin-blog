@@ -1,0 +1,44 @@
+---
+import QrCodeCards from './QrCodeCards.astro'
+import alipay from '../assets/support/alipay.jpg'
+import wechatPay from '../assets/support/wechat-pay.jpg'
+
+const cards = [
+  { name: '支付宝', image: alipay, detail: '扫码支持', alt: '支付宝收款二维码' },
+  { name: '微信支付', image: wechatPay, detail: '扫码支持', alt: '微信支付收款二维码' }
+]
+---
+
+<section class="support-section enter delay-1" aria-labelledby="support">
+  <div class="support-intro">
+    <span class="support-eyebrow">SUPPORT</span>
+    <h2 id="support" data-section-heading>
+      Buy me a cup of coffee ☕️
+    </h2>
+  </div>
+  <QrCodeCards
+    {cards}
+    idPrefix="support-code"
+    viewLabel="查看收款码 ↗"
+    closeLabel="关闭收款码大图"
+  />
+</section>
+
+<style>
+  .support-section {
+    margin-top: 56px;
+    padding-top: 36px;
+    border-top: 1px solid var(--line);
+  }
+  .support-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+  .support-intro h2 {
+    font-family: var(--font-editorial);
+    font-size: var(--heading-size);
+    font-weight: 400;
+    margin: 8px 0 28px;
+  }
+</style>

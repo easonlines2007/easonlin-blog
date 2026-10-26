@@ -1,89 +1,108 @@
 ---
 import { localeFromPath, useTranslations } from '@/lib/i18n'
-import Icon from './Icon.astro'
-const locale = localeFromPath(Astro.url.pathname)
-const t = useTranslations(locale)
-const options = [
-  { value: 'system', label: '跟随系统', icon: 'monitor' },
-  { value: 'light', label: '浅色', icon: 'sun' },
-  { value: 'dark', label: '深色', icon: 'moon' }
-] as const
+const t = useTranslations(localeFromPath(Astro.url.pathname))
 ---
 
-<details class="theme-picker header-disclosure">
-  <summary class="icon-button" aria-label={t('主题设置')} title={t('主题设置')}>
-    <span data-mode-icon="system">
-      <Icon name="monitor" />
-    </span>
-    <span data-mode-icon="light">
-      <Icon name="sun" />
-    </span>
-    <span data-mode-icon="dark">
-      <Icon name="moon" />
-    </span>
-  </summary>
-  <div class="theme-options" role="group" aria-label={t('主题模式')}>
-    {options.map((option) => (
-      <button
-        type="button"
-        data-theme-choice={option.value}
-        data-current-label={
-          locale === 'en'
-            ? `Theme settings, current: ${t(option.label)}`
-            : `主题设置，当前${option.label}`
-        }
-        aria-pressed={option.value === 'system'}
-      >
-        <Icon name={option.icon} />
-        <span>{t(option.label)}</span>
-        <span class="choice-check" aria-hidden="true">
-          ✓
-        </span>
-      </button>
-    ))}
-  </div>
-</details>
+<button
+  class="theme-toggle icon-button"
+  type="button"
+  data-theme-toggle
+  data-label-light={t('切换到浅色模式')}
+  data-label-dark={t('切换到深色模式')}
+  aria-label={t('切换到深色模式')}
+  title={t('切换到深色模式')}
+>
+  <svg class="theme-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+    <mask id="theme-moon-cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+      <rect width="24" height="24" fill="white" />
+      <circle class="theme-cutout" cx="20" cy="4" r="6" fill="black" />
+    </mask>
+    <g mask="url(#theme-moon-cutout)">
+      <circle class="theme-disc" cx="12" cy="12" r="7" fill="currentColor" />
+    </g>
+    <path
+      class="theme-rays"
+      d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+    />
+  </svg>
+</button>
+
 <script>
-  import { normalizeTheme, resolveTheme, type ThemePreference } from '../lib/theme'
-  const media = window.matchMedia('(prefers-color-scheme: dark)')
-  let preference: ThemePreference = 'system'
-  try {
-    preference = normalizeTheme(localStorage.getItem('notes-theme'))
-  } catch {
-    /* Storage is optional. */
-  }
-  const picker = document.querySelector<HTMLDetailsElement>('.theme-picker')!
-  const choices = picker.querySelectorAll<HTMLButtonElement>('[data-theme-choice]')
+  import { normalizeTheme, type ThemePreference } from '../lib/theme'
+  const toggle = document.querySelector<HTMLButtonElement>('[data-theme-toggle]')!
+  let preference: ThemePreference = normalizeTheme(
+    document.documentElement.dataset.themePreference ?? null
+  )
+
   function apply() {
-    const resolved = resolveTheme(preference, media.matches)
-    document.documentElement.classList.toggle('dark', resolved === 'dark')
+    document.documentElement.classList.toggle('dark', preference === 'dark')
     document.documentElement.dataset.themePreference = preference
-    document.documentElement.style.colorScheme = resolved
+    document.documentElement.style.colorScheme = preference
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', resolved === 'dark' ? '#3b3935' : '#f2f0e8')
-    choices.forEach((button) =>
-      button.setAttribute('aria-pressed', String(button.dataset.themeChoice === preference))
-    )
-    const choice = picker.querySelector<HTMLButtonElement>(`[data-theme-choice="${preference}"]`)!
-    picker.querySelector('summary')?.setAttribute('aria-label', choice.dataset.currentLabel!)
+      ?.setAttribute('content', preference === 'dark' ? '#3b3935' : '#f2f0e8')
+    const label = preference === 'dark' ? toggle.dataset.labelLight! : toggle.dataset.labelDark!
+    toggle.setAttribute('aria-label', label)
+    toggle.title = label
   }
-  choices.forEach((button) =>
-    button.addEventListener('click', () => {
-      preference = normalizeTheme(button.dataset.themeChoice ?? null)
+
+  async function changeTheme() {
+    if (toggle.disabled) return
+    const root = document.documentElement
+    const next = preference === 'dark' ? 'light' : 'dark'
+    const commit = () => {
+      preference = next
+      apply()
       try {
         localStorage.setItem('notes-theme', preference)
       } catch {
-        /* Keep the choice for this page. */
+        /* Keep the choice for this page when storage is unavailable. */
       }
-      apply()
-      picker.open = false
-      picker.querySelector('summary')?.focus()
-    })
-  )
-  media.addEventListener('change', () => {
-    if (preference === 'system') apply()
-  })
+    }
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      commit()
+      return
+    }
+
+    toggle.disabled = true
+    try {
+      if (!document.startViewTransition) {
+        root.dataset.themeFade = ''
+        commit()
+        await new Promise((resolve) => setTimeout(resolve, 350))
+        return
+      }
+
+      // Viewport coordinates keep the reveal anchored to the button after scrolling.
+      const bounds = toggle.getBoundingClientRect()
+      const x = bounds.left + bounds.width / 2
+      const y = bounds.top + bounds.height / 2
+      const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
+      root.style.setProperty('--theme-reveal-x', `${x}px`)
+      root.style.setProperty('--theme-reveal-y', `${y}px`)
+      root.style.setProperty('--theme-reveal-radius', `${radius + 2}px`)
+      root.dataset.themeTransition = ''
+      const transition = document.startViewTransition(commit)
+      // Hidden tabs and interrupted captures can skip the animation but still apply the theme.
+      await transition.ready.catch(() => {})
+      await transition.finished
+    } catch {
+      if (preference !== next) commit()
+    } finally {
+      delete root.dataset.themeTransition
+      delete root.dataset.themeFade
+      root.style.removeProperty('--theme-reveal-x')
+      root.style.removeProperty('--theme-reveal-y')
+      root.style.removeProperty('--theme-reveal-radius')
+      toggle.disabled = false
+    }
+  }
+
+  toggle.addEventListener('click', () => void changeTheme())
   window.addEventListener('storage', (event) => {
     if (event.key === 'notes-theme' || event.key === null) {
       preference = normalizeTheme(event.newValue)
@@ -91,4 +110,49 @@ const options = [
     }
   })
   apply()
+  requestAnimationFrame(() => toggle.setAttribute('data-ready', ''))
 </script>
+
+<style>
+  .theme-icon {
+    display: block;
+    overflow: visible;
+  }
+  .theme-disc,
+  .theme-rays {
+    transform-origin: 12px 12px;
+  }
+  .theme-disc {
+    transform: scale(0.57);
+  }
+  .theme-cutout {
+    transform: translate(8px, -8px);
+  }
+  .theme-rays {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+  :global(.dark) .theme-disc {
+    transform: scale(1);
+  }
+  :global(.dark) .theme-cutout {
+    transform: translate(-3px, 3px);
+  }
+  :global(.dark) .theme-rays {
+    opacity: 0;
+    transform: rotate(-45deg) scale(0.55);
+  }
+  .theme-toggle[data-ready] :is(.theme-disc, .theme-cutout) {
+    transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .theme-toggle[data-ready] .theme-rays {
+    transition:
+      transform 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 240ms ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle[data-ready] :is(.theme-disc, .theme-cutout, .theme-rays) {
+      transition: none;
+    }
+  }
+</style>

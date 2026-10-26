@@ -42,6 +42,39 @@
   --code-background: 40 7% 17%;
   color-scheme: dark;
 }
+/* Reveal the live new theme over the previous page, starting at the theme button. */
+html[data-theme-transition]::view-transition-group(root) {
+  animation: none;
+}
+html[data-theme-transition]::view-transition-image-pair(root) {
+  isolation: auto;
+}
+html[data-theme-transition]::view-transition-old(root),
+html[data-theme-transition]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-theme-transition]::view-transition-old(root) {
+  z-index: 1;
+}
+html[data-theme-transition]::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-reveal 700ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0 at var(--theme-reveal-x) var(--theme-reveal-y));
+  }
+  to {
+    clip-path: circle(var(--theme-reveal-radius) at var(--theme-reveal-x) var(--theme-reveal-y));
+  }
+}
+/* Older browsers retain a gentle page-color transition. */
+html[data-theme-fade] body {
+  transition:
+    background-color 350ms ease,
+    color 350ms ease;
+}
 * {
   box-sizing: border-box;
 }
@@ -168,8 +201,27 @@ a:hover {
 .entry-surface:has(.entry-link:is(:hover, :focus-visible)):not(
     :has(.entry-surface .entry-link:is(:hover, :focus-visible))
   ) {
-  background-color: var(--soft);
+  background-color: var(--entry-hover-bg, var(--soft));
   border-color: hsl(var(--primary) / 0.4);
+}
+/* Keep the original border thickness on framed controls. */
+:is(.index-card, .project-card, .friend-link).entry-surface:is(:hover, :focus-visible),
+:is(.note-card, .github-profile).entry-surface:has(.entry-link:is(:hover, :focus-visible)):not(
+    :has(.entry-surface .entry-link:is(:hover, :focus-visible))
+  ),
+:is(
+  .back-link,
+  .tag,
+  .theme-toggle,
+  .mobile-menu > summary,
+  .profile-link,
+  .list-sort select,
+  .contact-dialog button
+):is(:hover, :focus-visible) {
+  border-color: hsl(var(--primary) / 0.4);
+}
+.home-row.entry-surface:is(:hover, :focus-visible) {
+  border-bottom-color: hsl(var(--foreground) / 0.22);
 }
 .entry-link::after {
   content: '';
@@ -185,45 +237,64 @@ a:hover {
   outline-offset: 4px;
 }
 .lift-text {
-  transition:
-    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
-    text-shadow 260ms ease;
+  width: fit-content;
+  max-width: 100%;
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 0 1.5px;
+  transition: background-size 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 span.lift-text {
   display: inline-block;
 }
-/* Keep clickable shells and their hit areas still, including stretched note links. */
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+/* CSS transitions reverse from their current progress when hover is interrupted. */
+@media (hover: hover) and (pointer: fine) {
   :where(main, .site-footer)
     :is(a[href], button:enabled, summary):is(:hover, :focus-visible)
     .lift-text {
-    transform: translateY(-2px);
-    text-shadow: 0 3px 7px hsl(var(--foreground) / 0.1);
+    background-size: 100% 1.5px;
   }
   /* Rendered Markdown and Pagefind links stay inline so long labels can wrap. */
   :where(.prose a, .pagefind-ui__result-link):not(:has(img, svg, .lift-text)) {
-    position: relative;
-    top: 0;
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: 0 1.5px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
     transition:
-      top 260ms cubic-bezier(0.22, 1, 0.36, 1),
-      text-shadow 260ms ease,
+      background-size 320ms cubic-bezier(0.22, 1, 0.36, 1),
       color 160ms ease;
   }
   :where(.prose a, .pagefind-ui__result-link):not(:has(img, svg, .lift-text)):is(
       :hover,
       :focus-visible
     ) {
-    top: -2px;
-    text-shadow: 0 3px 7px hsl(var(--foreground) / 0.1);
+    background-size: 100% 1.5px;
   }
-  :where(.pagefind-ui__search-clear, .pagefind-ui__button) {
+  .search-container .pagefind-ui :is(.pagefind-ui__search-clear, .pagefind-ui__button) {
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-repeat: no-repeat;
+    background-position: center calc(50% + 0.8em);
+    background-size: 0 1.5px;
     transition:
-      translate 260ms cubic-bezier(0.22, 1, 0.36, 1),
-      text-shadow 260ms ease;
+      background-size 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 160ms ease;
   }
-  :where(.pagefind-ui__search-clear, .pagefind-ui__button):is(:hover, :focus-visible) {
-    translate: 0 -2px;
-    text-shadow: 0 3px 7px hsl(var(--foreground) / 0.1);
+  .search-container
+    .pagefind-ui
+    :is(.pagefind-ui__search-clear, .pagefind-ui__button):is(:hover, :focus-visible) {
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-position: center calc(50% + 0.8em);
+    background-size: min(100%, 4em) 1.5px;
+  }
+  .search-container .pagefind-ui .pagefind-ui__search-clear {
+    background-position: calc(50% - 6px) calc(50% + 0.8em);
+  }
+  .search-container .pagefind-ui .pagefind-ui__search-clear:is(:hover, :focus-visible) {
+    background-position: calc(50% - 6px) calc(50% + 0.8em);
+    background-size: min(100%, 2em) 1.5px;
   }
 }
 button,
@@ -485,7 +556,6 @@ summary {
 summary::-webkit-details-marker {
   display: none;
 }
-.theme-options,
 .mobile-menu nav {
   position: absolute;
   right: 0;
@@ -497,39 +567,6 @@ summary::-webkit-details-marker {
   background: var(--page-bg);
   box-shadow: 0 8px 28px #00000014;
   animation: pop-in 140ms ease;
-}
-.theme-options button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  background: none;
-  border: 0;
-  border-radius: var(--radius);
-  padding: 8px 10px;
-  font-size: 14px;
-  color: var(--secondary);
-  text-align: left;
-}
-.theme-options button:hover,
-.theme-options button[aria-pressed='true'] {
-  background: var(--soft);
-  color: var(--text);
-}
-.choice-check {
-  margin-left: auto;
-  opacity: 0;
-}
-[aria-pressed='true'] .choice-check {
-  opacity: 1;
-}
-[data-mode-icon] {
-  display: none;
-}
-[data-theme-preference='system'] [data-mode-icon='system'],
-[data-theme-preference='light'] [data-mode-icon='light'],
-[data-theme-preference='dark'] [data-mode-icon='dark'] {
-  display: flex;
 }
 .mobile-menu {
   display: none;
@@ -676,6 +713,7 @@ summary::-webkit-details-marker {
   letter-spacing: -0.025em;
 }
 .home-sections {
+  --entry-hover-bg: transparent;
   max-width: 870px;
   margin: auto;
   display: flex;
@@ -1442,12 +1480,6 @@ summary::-webkit-details-marker {
 .search-container .entry-surface {
   --entry-radius: 0;
   position: relative;
-}
-.search-container .lift-text {
-  display: inline-block;
-  transition:
-    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
-    text-shadow 260ms ease;
 }
 .search-container mark {
   background: hsl(var(--primary) / 0.14);
