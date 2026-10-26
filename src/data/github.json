@@ -1,43 +1,8 @@
 {
   "username": "easonlines2007",
-  "updatedAt": "2026-10-19T04:46:58.937Z",
-  "total": 244,
+  "updatedAt": "2026-10-26T04:53:31.740Z",
+  "total": 258,
   "days": [
-    {
-      "date": "2025-10-19",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-20",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-21",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-22",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-23",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-24",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-10-25",
-      "level": 0,
-      "count": 0
-    },
     {
       "date": "2025-10-26",
       "level": 0,
@@ -1832,6 +1797,41 @@
       "date": "2026-10-19",
       "level": 0,
       "count": 0
+    },
+    {
+      "date": "2026-10-20",
+      "level": 1,
+      "count": 2
+    },
+    {
+      "date": "2026-10-21",
+      "level": 1,
+      "count": 3
+    },
+    {
+      "date": "2026-10-22",
+      "level": 1,
+      "count": 1
+    },
+    {
+      "date": "2026-10-23",
+      "level": 1,
+      "count": 1
+    },
+    {
+      "date": "2026-10-24",
+      "level": 1,
+      "count": 2
+    },
+    {
+      "date": "2026-10-25",
+      "level": 1,
+      "count": 4
+    },
+    {
+      "date": "2026-10-26",
+      "level": 1,
+      "count": 1
     }
   ],
   "repositories": [
@@ -1855,7 +1855,7 @@
       "name": "easonlin-blog",
       "description": "Eason Lin's personal notes and blog, built with Astro.",
       "url": "https://github.com/easonlines2007/easonlin-blog",
-      "language": "TypeScript",
+      "language": "JavaScript",
       "stars": 0,
       "fork": false
     }
