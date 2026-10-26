@@ -52,7 +52,7 @@ const excerpts: Record<string, Record<Locale, ExcerptPart[]>> = {
   'ability-and-desire': {
     zh: [
       {
-        text: '现实与理想的巨大反差，将给人以无边的痛苦，若不回心转意，可将大抵如贾琏一般溺死于一片幻想的阴湿之上了。'
+        text: '现实与理想的巨大反差，将给人以无边的痛苦，若不回心转意，可将大抵如贾瑞一般溺死于一片幻想的阴湿之上了。'
       }
     ],
     en: [
