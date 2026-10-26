@@ -17,11 +17,7 @@ const tags = countValues(notes, 'tags')
 ---
 
 <BaseLayout title={t('笔记')}>
-  <PageHeader
-    title={t('笔记')}
-    englishTitle="Notes"
-    description={t('从一篇笔记、一个专题，或一个关键词开始读。')}
-  />
+  <PageHeader title={t('笔记')} englishTitle="Notes" />
   <div class="notes-hub enter delay-1">
     <a class="index-card entry-surface" href={path('/notes/all')}>
       <div>

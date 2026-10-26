@@ -1,5 +1,5 @@
-const duration = 3000
-const settleAt = 0.68
+const duration = 3200
+const settleAt = 0.72
 const ease = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
 /** Animate the actual hero elements so the final layout never swaps or jumps. */
@@ -35,12 +35,26 @@ export async function startHomeEntrance() {
 
   try {
     const picture = avatar.querySelector('img')
+    const drawing = avatar.querySelector<SVGElement>('.avatar-drawing')
+    const texture = new Image()
+    texture.src = drawing?.dataset.introTexture ?? ''
+    let textureReady = false
+    const decodeTexture = texture
+      .decode()
+      .then(() => {
+        textureReady = true
+      })
+      .catch(() => {})
     // Measure the name in its display font before moving it into place.
     await Promise.race([
-      Promise.all([document.fonts.ready, picture?.decode().catch(() => {})]),
-      new Promise((resolve) => setTimeout(resolve, 600))
+      Promise.all([document.fonts.ready, picture?.decode().catch(() => {}), decodeTexture]),
+      new Promise((resolve) => setTimeout(resolve, 800))
     ])
     if (finished || root.dataset.homeEntrance !== 'pending') return
+    if (!textureReady) {
+      finish()
+      return
+    }
     try {
       sessionStorage.setItem('notes-intro-seen', 'true')
     } catch {}
@@ -95,21 +109,20 @@ export async function startHomeEntrance() {
     }
 
     drawPaths('[data-intro-name] [data-intro-ink]', 180, 280)
-    drawPaths('[data-intro-avatar] [data-intro-outline]', 200, 650)
-    drawPaths('[data-intro-avatar] [data-intro-shading]', 0, 1050, 380)
+    drawPaths('[data-intro-avatar] [data-intro-outline]', 160, 600)
+    drawPaths('[data-intro-avatar] [data-intro-shading]', 0, 1000, 320)
 
-    const drawing = avatar.querySelector<SVGElement>('.avatar-drawing')
     if (picture && drawing) {
       animations.push(
         picture.animate([{ opacity: 0 }, { opacity: 1 }], {
-          duration: 450,
-          delay: 1550,
+          duration: 700,
+          delay: 1460,
           easing: 'ease-in-out',
           fill: 'both'
         }),
-        drawing.animate([{ opacity: 1 }, { opacity: 0 }], {
-          duration: 350,
-          delay: 1650,
+        drawing.animate([{ opacity: 1 }, { opacity: 1, offset: 0.8 }, { opacity: 0 }], {
+          duration: 700,
+          delay: 1460,
           easing: 'ease-in-out',
           fill: 'both'
         })

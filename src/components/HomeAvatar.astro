@@ -2,29 +2,27 @@
 import { localeFromPath, useTranslations } from '@/lib/i18n'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
-import { Image } from 'astro:assets'
+import { Image, getImage } from 'astro:assets'
+import pencil from '../assets/avatar-pencil.png'
 import avatar from '../assets/avatar.png'
 import woodstock from '../assets/woodstock.png'
 
+const pencilTexture = await getImage({ src: pencil, width: 384, format: 'webp', quality: 85 })
+
 const pencilOutlines = [
   {
-    color: '#37372f',
     d: 'M345 501C363 394 421 246 513 202Q594 155 679 196 M755 226C829 213 903 188 961 232C1010 268 1037 337 1017 410C999 500 902 539 803 574Q715 596 670 662L621 680Q593 674 585 641Q564 608 521 590'
   },
   {
-    color: '#48463d',
     d: 'M480 408C510 439 537 521 512 587C489 669 404 677 364 618C333 575 334 519 353 471 M418 401C370 454 362 560 395 601C437 650 499 592 488 533Q485 453 418 401Z'
   },
   {
-    color: '#34362f',
     d: 'M490 409L683 304 M687 202C699 169 744 179 747 216L750 350C749 399 706 391 692 358C679 323 674 231 687 202Z M747 191Q785 165 784 207L761 226 M1025 299C1092 298 1095 376 1031 387 M613 172Q602 115 639 96 M648 178Q657 139 684 132'
   },
   {
-    color: '#813a34',
     d: 'M601 674Q550 624 508 666Q477 689 488 735C415 760 392 798 408 866Q405 916 460 924L706 918Q748 914 746 862C765 812 724 758 700 739L687 680L657 669 M504 747L460 842L470 869H684L689 895 M457 877L453 906 M500 878L495 910 M541 880L537 911 M581 880L580 911 M624 880L622 911 M661 879L661 910 M581 720L595 810 M644 721L662 811'
   },
   {
-    color: '#3c4437',
     d: 'M449 926L493 954L480 1020C405 1025 333 1041 332 1085Q330 1110 386 1104L744 1061Q832 1045 811 1013C778 973 718 994 677 989Q627 975 668 929 M577 981L572 1048 M81 1106Q212 1079 331 1093 M735 1070Q911 1027 1017 1010'
   }
 ]
@@ -43,86 +41,27 @@ const pencilOutlines = [
         fetchpriority="high"
         data-intro-avatar-image
       />
-      <svg class="avatar-drawing" viewBox="0 0 1254 1254" fill="none" aria-hidden="true">
+      <svg
+        class="avatar-drawing"
+        viewBox="0 0 1254 1254"
+        fill="none"
+        aria-hidden="true"
+        data-intro-texture={pencilTexture.src}
+      >
         <defs>
-          <filter id="intro-colored-pencil" x="-5%" y="-5%" width="110%" height="110%">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.035 0.075"
-              numOctaves="2"
-              seed="8"
-              result="edge-noise"
-            />
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="edge-noise"
-              scale="9"
-              xChannelSelector="R"
-              yChannelSelector="G"
-              result="rough-pencil"
-            />
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.17 0.24"
-              numOctaves="3"
-              seed="19"
-              result="paper-noise"
-            />
-            <feColorMatrix
-              in="paper-noise"
-              type="matrix"
-              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 1 1 0 -0.7"
-              result="paper-tooth"
-            />
-            <feComposite in="rough-pencil" in2="paper-tooth" operator="in" />
-          </filter>
-          <pattern
-            id="intro-ruby-pencil"
-            width="38"
-            height="38"
-            patternUnits="userSpaceOnUse"
-            patternTransform="rotate(-12)"
-          >
-            <path
-              d="M-8 12L48 2M-8 31L48 20M-8 49L48 39"
-              stroke="#bf3c38"
-              stroke-width="14"
-              opacity="0.78"
-            />
-            <path d="M3-8L30 47M24-8L49 43" stroke="#de7860" stroke-width="5" opacity="0.62" />
-          </pattern>
-          <pattern
-            id="intro-graphite-pencil"
-            width="28"
-            height="28"
-            patternUnits="userSpaceOnUse"
-            patternTransform="rotate(16)"
-          >
-            <path
-              d="M-8 7L36 1M-8 20L36 14M-8 33L36 27"
-              stroke="#414238"
-              stroke-width="10"
-              opacity="0.8"
-            />
-            <path d="M0 0L28 28" stroke="#8b8778" stroke-width="3" opacity="0.5" />
-          </pattern>
-          <pattern
-            id="intro-ivory-pencil"
-            width="36"
-            height="36"
-            patternUnits="userSpaceOnUse"
-            patternTransform="rotate(-18)"
-          >
-            <path d="M-8 10L44 0M-8 30L44 20" stroke="#b3aa92" stroke-width="8" opacity="0.28" />
-          </pattern>
           <mask
-            id="intro-pencil-color-sweep"
+            id="intro-pencil-reveal"
             maskUnits="userSpaceOnUse"
             x="0"
             y="0"
             width="1254"
             height="1254"
           >
+            <g stroke="white" stroke-width="64" stroke-linecap="round" stroke-linejoin="round">
+              {pencilOutlines.map(({ d }, index) => (
+                <path data-intro-outline data-intro-stroke={index} {d} />
+              ))}
+            </g>
             <path
               data-intro-shading
               d="M270 210L1020 240L260 400L1040 430L260 610L1040 640L270 790L870 820L250 1000L920 1030L200 1140L1000 1100"
@@ -132,52 +71,14 @@ const pencilOutlines = [
             />
           </mask>
         </defs>
-        <g filter="url(#intro-colored-pencil)" stroke-linecap="round" stroke-linejoin="round">
-          <g mask="url(#intro-pencil-color-sweep)">
-            <path
-              fill="url(#intro-ivory-pencil)"
-              d="M345 501C363 394 421 246 513 202Q594 155 679 196L755 226C829 213 903 188 961 232C1010 268 1037 337 1017 410C999 500 902 539 803 574Q715 596 670 662L621 680Q593 674 585 641Q564 608 521 590Z"
-            />
-            <path
-              fill="url(#intro-graphite-pencil)"
-              d="M418 401C370 454 362 560 395 601C437 650 499 592 488 533Q485 453 418 401ZM687 202C699 169 744 179 747 216L750 350C749 399 706 391 692 358C679 323 674 231 687 202ZM1025 299C1092 298 1095 376 1031 387Z"
-            />
-            <path
-              fill="url(#intro-ruby-pencil)"
-              d="M601 674Q550 624 508 666Q477 689 488 735C415 760 392 798 408 866Q405 916 460 924L706 918Q748 914 746 862C765 812 724 758 700 739L687 680L657 669Z"
-            />
-            <path
-              fill="url(#intro-ivory-pencil)"
-              d="M449 926L493 954L480 1020C405 1025 333 1041 332 1085Q330 1110 386 1104L744 1061Q832 1045 811 1013C778 973 718 994 677 989Q627 975 668 929Z"
-            />
-            <path
-              d="M96 1108L305 1086M130 1120L330 1097M748 1069L1017 1010M782 1074L994 1027"
-              stroke="#66765b"
-              stroke-width="16"
-              opacity="0.75"
-            />
-            <path
-              d="M161 1097L144 1079M237 1100L226 1080M804 1056L786 1039M893 1038L906 1019"
-              stroke="#8b9670"
-              stroke-width="9"
-            />
-          </g>
-          <g opacity="0.3" transform="translate(5 3)" stroke-width="29">
-            {pencilOutlines.map(({ d, color }, index) => (
-              <path data-intro-outline data-intro-stroke={index} {d} stroke={color} />
-            ))}
-          </g>
-          <g stroke-width="17">
-            {pencilOutlines.map(({ d, color }, index) => (
-              <path data-intro-outline data-intro-stroke={index} {d} stroke={color} />
-            ))}
-          </g>
-          <g opacity="0.38" transform="translate(-4 2)" stroke-width="6">
-            {pencilOutlines.map(({ d, color }, index) => (
-              <path data-intro-outline data-intro-stroke={index} {d} stroke={color} />
-            ))}
-          </g>
-        </g>
+        <image
+          href={pencilTexture.src}
+          x="0"
+          y="0"
+          width="1254"
+          height="1254"
+          mask="url(#intro-pencil-reveal)"
+        />
       </svg>
     </div>
     <div class="avatar-face avatar-back" aria-hidden="true">
@@ -196,11 +97,20 @@ const pencilOutlines = [
     width: calc(100% - 14px);
     height: calc(100% - 14px);
     pointer-events: none;
+    z-index: 1;
   }
   :global([data-home-entrance='pending']) .avatar-drawing {
     display: block;
   }
+  [data-intro-avatar-image] {
+    position: relative;
+    z-index: 2;
+  }
+  :global([data-home-entrance='pending']) .avatar-card {
+    will-change: transform;
+  }
   :global([data-home-entrance='pending']) [data-intro-avatar-image] {
+    will-change: opacity;
     opacity: 0;
   }
   .avatar-drawing :is([data-intro-outline], [data-intro-shading]) {

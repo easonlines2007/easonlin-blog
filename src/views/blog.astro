@@ -89,17 +89,8 @@ const pictureDescriptions: Record<
 
 <BaseLayout title={t('随笔')}>
   <div class="essay-journal" data-sortable-listing data-list-label="随笔">
-    <PageHeader
-      title={t('随笔')}
-      englishTitle="Essays"
-      description={t('一些感受，一些想法，写下来，留在这里。')}
-    />
+    <PageHeader title={t('随笔')} englishTitle="Essays" />
     <div class="journal-edition">
-      <span>
-        {locale === 'en'
-          ? `${essays.length} pieces, gathered here`
-          : `${essays.length} 篇文字，收在这里`}
-      </span>
       <label class="journal-order">
         <span>{locale === 'en' ? 'Order' : '排列'}</span>
         <select
@@ -113,7 +104,7 @@ const pictureDescriptions: Record<
         </select>
       </label>
     </div>
-    <ol class="journal-contents" data-list-items>
+    <ol class="journal-contents" data-list-items data-essay-masonry>
       {essays.map((essay) => {
         const { excerpt, image } = essayPresentation(essay)
         return (
@@ -163,4 +154,6 @@ const pictureDescriptions: Record<
 
 <script>
   import '../scripts/list-sort'
+  import { setupEssayMasonry } from '../scripts/essay-masonry'
+  setupEssayMasonry()
 </script>
