@@ -49,6 +49,11 @@ const pencilOutlines = [
         data-intro-texture={pencilTexture.src}
       >
         <defs>
+          <linearGradient id="intro-soft-color-edge" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="white" />
+            <stop offset="0.88" stop-color="white" />
+            <stop offset="1" stop-color="white" stop-opacity="0" />
+          </linearGradient>
           <mask
             id="intro-pencil-reveal"
             maskUnits="userSpaceOnUse"
@@ -62,12 +67,13 @@ const pencilOutlines = [
                 <path data-intro-outline data-intro-stroke={index} {d} />
               ))}
             </g>
-            <path
-              data-intro-shading
-              d="M270 210L1020 240L260 400L1040 430L260 610L1040 640L270 790L870 820L250 1000L920 1030L200 1140L1000 1100"
-              stroke="white"
-              stroke-width="250"
-              stroke-linecap="round"
+            <rect
+              data-intro-smooth-shading
+              x="0"
+              y="-1500"
+              width="1254"
+              height="1500"
+              fill="url(#intro-soft-color-edge)"
             />
           </mask>
         </defs>
@@ -113,7 +119,7 @@ const pencilOutlines = [
     will-change: opacity;
     opacity: 0;
   }
-  .avatar-drawing :is([data-intro-outline], [data-intro-shading]) {
+  .avatar-drawing :is([data-intro-outline], [data-intro-smooth-shading]) {
     opacity: 0;
   }
   .avatar-card {

@@ -1,11 +1,22 @@
-const duration = 3200
-const settleAt = 0.72
+const timing = {
+  outlineSpacing: 160,
+  outlineDuration: 600,
+  colorStart: 280,
+  colorDuration: 1300,
+  blendDuration: 360,
+  moveDuration: 560
+}
 const ease = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
 /** Animate the actual hero elements so the final layout never swaps or jumps. */
 export async function startHomeEntrance() {
   const root = document.documentElement
   if (root.dataset.homeEntrance !== 'pending') return
+  // Drawing, blending, and moving into place follow one another without a hold.
+  const blendStart = timing.colorStart + timing.colorDuration
+  const moveStart = blendStart + timing.blendDuration
+  const duration = moveStart + timing.moveDuration
+  const settleAt = moveStart / duration
 
   const avatar = document.querySelector<HTMLElement>('[data-intro-avatar]')
   const name = document.querySelector<HTMLElement>('[data-intro-name]')
@@ -109,20 +120,40 @@ export async function startHomeEntrance() {
     }
 
     drawPaths('[data-intro-name] [data-intro-ink]', 180, 280)
-    drawPaths('[data-intro-avatar] [data-intro-outline]', 160, 600)
-    drawPaths('[data-intro-avatar] [data-intro-shading]', 0, 1000, 320)
+    drawPaths(
+      '[data-intro-avatar] [data-intro-outline]',
+      timing.outlineSpacing,
+      timing.outlineDuration
+    )
+    const colorSweep = avatar.querySelector<SVGGraphicsElement>('[data-intro-smooth-shading]')
+    if (colorSweep) {
+      animations.push(
+        colorSweep.animate(
+          [
+            { opacity: 1, transform: 'translateY(0px)' },
+            { opacity: 1, transform: 'translateY(1500px)' }
+          ],
+          {
+            duration: timing.colorDuration,
+            delay: timing.colorStart,
+            easing: 'linear',
+            fill: 'both'
+          }
+        )
+      )
+    }
 
     if (picture && drawing) {
       animations.push(
         picture.animate([{ opacity: 0 }, { opacity: 1 }], {
-          duration: 700,
-          delay: 1460,
+          duration: timing.blendDuration,
+          delay: blendStart,
           easing: 'ease-in-out',
           fill: 'both'
         }),
         drawing.animate([{ opacity: 1 }, { opacity: 1, offset: 0.8 }, { opacity: 0 }], {
-          duration: 700,
-          delay: 1460,
+          duration: timing.blendDuration,
+          delay: blendStart,
           easing: 'ease-in-out',
           fill: 'both'
         })
