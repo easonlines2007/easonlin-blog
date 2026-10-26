@@ -3,8 +3,9 @@ import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import PageHeader from '@/components/PageHeader.astro'
 import { getEssays } from '@/lib/essays'
-import { essayUrl, formatWritingDate, writingTimestamp } from '@/lib/essay-utils'
+import { essayUrl, formatWritingDate } from '@/lib/essay-utils'
 import { essayPresentation } from '@/lib/essay-presentation'
+import { directoryExcerpt } from '@/lib/essay-excerpts'
 import '@/styles/essays.css'
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
@@ -88,32 +89,14 @@ const pictureDescriptions: Record<
 ---
 
 <BaseLayout title={t('随笔')}>
-  <div class="essay-journal" data-sortable-listing data-list-label="随笔">
+  <div class="essay-journal">
     <PageHeader title={t('随笔')} englishTitle="Essays" />
-    <div class="journal-edition">
-      <label class="journal-order">
-        <span>{locale === 'en' ? 'Order' : '排列'}</span>
-        <select
-          data-list-sort
-          aria-label={locale === 'en' ? 'Essay order' : '随笔排列顺序'}
-          disabled
-        >
-          <option value="default">{locale === 'en' ? 'Newest first' : '由近及远'}</option>
-          <option value="date-asc">{locale === 'en' ? 'Oldest first' : '由远及近'}</option>
-          <option value="title-asc">{locale === 'en' ? 'By title' : '按篇名'}</option>
-        </select>
-      </label>
-    </div>
-    <ol class="journal-contents" data-list-items data-essay-masonry>
+    <ol class="journal-contents" data-essay-masonry>
       {essays.map((essay) => {
         const { excerpt, image } = essayPresentation(essay)
+        const selectedExcerpt = directoryExcerpt(essay.id, locale)
         return (
-          <li
-            class="journal-entry"
-            data-list-item
-            data-sort-title={essay.data.title}
-            data-sort-date={writingTimestamp(essay.data.written)}
-          >
+          <li class="journal-entry" data-list-item>
             <article class="journal-entry-inner">
               <time datetime={essay.data.written}>
                 {formatWritingDate(essay.data.written, locale)}
@@ -123,7 +106,13 @@ const pictureDescriptions: Record<
                   <span class="lift-text">{essay.data.title}</span>
                 </a>
               </h2>
-              <p class="journal-excerpt">{excerpt}</p>
+              <p class="journal-excerpt">
+                {selectedExcerpt
+                  ? selectedExcerpt.map((part) =>
+                      part.strong ? <strong>{part.text}</strong> : part.text
+                    )
+                  : excerpt}
+              </p>
               {image && (
                 <figure
                   class="journal-photo"
@@ -153,7 +142,6 @@ const pictureDescriptions: Record<
 </BaseLayout>
 
 <script>
-  import '../scripts/list-sort'
   import { setupEssayMasonry } from '../scripts/essay-masonry'
   setupEssayMasonry()
 </script>
