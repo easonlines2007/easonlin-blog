@@ -5,7 +5,16 @@ const t = useTranslations(locale)
 import { Image, getImage } from 'astro:assets'
 import pencil from '../assets/avatar-pencil.png'
 import avatar from '../assets/avatar.png'
-import woodstock from '../assets/woodstock.png'
+import autumn from '../assets/avatar-backs/9042.webp'
+import bench from '../assets/avatar-backs/9043.webp'
+import leaf from '../assets/avatar-backs/9044.webp'
+import battery from '../assets/avatar-backs/9045.webp'
+import winter from '../assets/avatar-backs/9046.webp'
+import canoe from '../assets/avatar-backs/9047.webp'
+import music from '../assets/avatar-backs/9048.webp'
+import train from '../assets/avatar-backs/9049.webp'
+
+const backImages = [autumn, bench, leaf, battery, winter, canoe, music, train]
 
 const pencilTexture = await getImage({ src: pencil, width: 384, format: 'webp', quality: 85 })
 
@@ -28,7 +37,14 @@ const pencilOutlines = [
 ]
 ---
 
-<div class="avatar" data-intro-avatar>
+<button
+  class="avatar"
+  type="button"
+  data-intro-avatar
+  aria-label={
+    locale === 'en' ? 'Hold to enlarge the picture; release to restore' : '按住放大图片，松开还原'
+  }
+>
   <div class="avatar-card">
     <div class="avatar-face avatar-front">
       <Image
@@ -88,13 +104,138 @@ const pencilOutlines = [
       </svg>
     </div>
     <div class="avatar-face avatar-back" aria-hidden="true">
-      <Image src={woodstock} width={256} height={256} format="webp" alt="" loading="eager" />
+      {backImages.map((src, index) => (
+        <Image
+          src={src}
+          width={512}
+          height={512}
+          format="webp"
+          alt=""
+          loading="eager"
+          data-avatar-back-image
+          hidden={index !== 0}
+        />
+      ))}
     </div>
   </div>
-</div>
+</button>
+
+<script>
+  const avatar = document.querySelector<HTMLElement>('[data-intro-avatar]')
+  const images = Array.from(
+    avatar?.querySelectorAll<HTMLImageElement>('[data-avatar-back-image]') ?? []
+  )
+  let previous = -1
+  let pointerId: number | undefined
+  let restoreTimer: ReturnType<typeof setTimeout>
+  const canHover = matchMedia('(hover: hover) and (pointer: fine)')
+
+  function chooseImage() {
+    if (images.length < 2 || avatar?.hasAttribute('data-avatar-hold')) return
+    // Exclude the last revealed image while keeping the remaining choices equally likely.
+    let next = Math.floor(Math.random() * (images.length - (previous < 0 ? 0 : 1)))
+    if (previous >= 0 && next >= previous) next += 1
+    images.forEach((image, index) => {
+      image.hidden = index !== next
+    })
+    previous = next
+  }
+
+  function enlarge() {
+    if (!avatar || document.documentElement.dataset.homeEntrance === 'pending') return
+    if (avatar.hasAttribute('data-avatar-focused')) return
+    clearTimeout(restoreTimer)
+    avatar.setAttribute('data-avatar-hold', '')
+    avatar.setAttribute('data-avatar-focused', '')
+  }
+
+  function restore() {
+    if (!avatar?.hasAttribute('data-avatar-focused')) return
+    avatar.removeAttribute('data-avatar-focused')
+    // Keep the same picture and flipped face while the card returns to its place.
+    restoreTimer = setTimeout(() => avatar.removeAttribute('data-avatar-hold'), 260)
+    if (pointerId !== undefined && avatar.hasPointerCapture(pointerId)) {
+      avatar.releasePointerCapture(pointerId)
+    }
+    pointerId = undefined
+  }
+
+  avatar?.addEventListener('pointerenter', chooseImage)
+  avatar?.addEventListener('focus', chooseImage)
+  avatar?.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || !canHover.matches || !avatar.matches(':hover')) return
+    event.preventDefault()
+    enlarge()
+    if (avatar.hasAttribute('data-avatar-focused')) {
+      pointerId = event.pointerId
+      avatar.setPointerCapture(pointerId)
+    }
+  })
+  avatar?.addEventListener('pointerup', restore)
+  avatar?.addEventListener('pointercancel', restore)
+  avatar?.addEventListener('lostpointercapture', restore)
+  avatar?.addEventListener('keydown', (event) => {
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault()
+      enlarge()
+    }
+  })
+  avatar?.addEventListener('keyup', (event) => {
+    if (event.key === ' ' || event.key === 'Enter') restore()
+  })
+  avatar?.addEventListener('blur', restore)
+  avatar?.addEventListener('dragstart', (event) => event.preventDefault())
+  window.addEventListener('blur', restore)
+  window.addEventListener('pagehide', restore)
+  window.addEventListener('resize', restore)
+  window.addEventListener('scroll', restore, { passive: true })
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') restore()
+  })
+</script>
+
 <style>
   .avatar {
+    position: relative;
+    padding: 0;
+    border: 0;
+    background: transparent;
     perspective: 650px;
+    user-select: none;
+    cursor: zoom-in;
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .avatar[data-avatar-hold] {
+    z-index: 31;
+  }
+  .avatar[data-avatar-focused] {
+    cursor: grabbing;
+    transform: scale(2);
+  }
+  .avatar::before {
+    content: '';
+    position: absolute;
+    inset: -44px;
+    z-index: -1;
+    border-radius: 36px;
+    pointer-events: none;
+    opacity: 0;
+    background: hsl(var(--background) / 0.22);
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+    /* Feather each axis equally so the blur extends past all four card edges. */
+    -webkit-mask-image:
+      linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent),
+      linear-gradient(to bottom, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent),
+      linear-gradient(to bottom, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+    mask-composite: intersect;
+    transition: opacity 220ms ease;
+  }
+  .avatar[data-avatar-focused]::before {
+    opacity: 1;
   }
   .avatar-drawing {
     display: none;
@@ -142,12 +283,21 @@ const pencilOutlines = [
   .avatar-back {
     transform: rotateX(180deg);
   }
+  .avatar-back img[hidden] {
+    display: none;
+  }
+  .avatar[data-avatar-hold] .avatar-card,
+  :global(html:not([data-home-entrance='pending'])) .avatar:focus-visible .avatar-card {
+    transform: rotateX(180deg);
+  }
   @media (hover: hover) and (pointer: fine) {
     :global(html:not([data-home-entrance='pending'])) .avatar:hover .avatar-card {
       transform: rotateX(180deg);
     }
   }
   @media (prefers-reduced-motion: reduce) {
+    .avatar,
+    .avatar::before,
     .avatar-card {
       transition: none;
     }
