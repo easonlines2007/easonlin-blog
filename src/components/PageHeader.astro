@@ -12,14 +12,16 @@ interface Props {
   back?: string
   backLabel?: string
 }
-const { title, englishTitle, description, back = '/', backLabel = '首页' } = Astro.props
+const { title, englishTitle, description, back, backLabel = '首页' } = Astro.props
 ---
 
-<a class="back-link" href={path(back)}>
-  <Icon name="back" />
-  <span class="lift-text">{t(backLabel)}</span>
-</a>
-<div class:list={['page-heading', !englishTitle && 'enter']}>
+{back && (
+  <a class="back-link" href={path(back)}>
+    <Icon name="back" />
+    <span class="lift-text">{t(backLabel)}</span>
+  </a>
+)}
+<div class:list={['page-heading', !back && 'page-heading-top', !englishTitle && 'enter']}>
   {englishTitle ? <SectionTitle title={t(title)} {englishTitle} /> : <h1>{t(title)}</h1>}
   {description && <p>{t(description)}</p>}
   <slot />
