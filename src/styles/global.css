@@ -758,7 +758,7 @@ summary::-webkit-details-marker {
 }
 .section-index {
   display: inline-block;
-  color: inherit;
+  color: var(--accent);
   font-family: var(--font-editorial);
   font-size: inherit;
   font-weight: 400;
