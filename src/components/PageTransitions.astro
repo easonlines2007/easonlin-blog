@@ -1,0 +1,161 @@
+---
+import '../styles/page-transitions.css'
+---
+
+<!-- Wait for the document shell, not images or third-party scripts, before capture. -->
+<link rel="expect" href="#page-transition-ready" blocking="render" />
+<!-- Opt in before an incoming document can paint, including a warm stylesheet cache. -->
+<style is:inline>
+  @view-transition {
+    navigation: auto;
+  }
+  @media (prefers-reduced-motion: reduce), (scripting: none) {
+    @view-transition {
+      navigation: none;
+    }
+  }
+</style>
+<script is:inline>
+  ;(() => {
+    const root = document.documentElement
+    const motion = matchMedia('(prefers-reduced-motion: reduce)')
+    let activeTransition
+    let sharedTitle
+
+    function reset() {
+      sharedTitle?.style.removeProperty('view-transition-name')
+      sharedTitle = undefined
+      delete root.dataset.newspaperTransition
+      delete root.dataset.newspaperView
+      delete root.dataset.essayTitleOptimized
+      root.style.removeProperty('--newspaper-clip-outgoing')
+      root.style.removeProperty('--newspaper-clip-incoming')
+      root.style.removeProperty('--essay-title-width')
+      root.style.removeProperty('--essay-title-height')
+      root.style.removeProperty('--essay-title-from')
+      root.style.removeProperty('--essay-title-to')
+    }
+
+    function optimizeTitleSnapshot() {
+      // Native shared groups animate width/height on every frame. Keep the final
+      // snapshot size fixed and express the same geometry with transform only.
+      // Use our own CSS animation: mutating the browser's generated effect can
+      // briefly expose its unscaled transform while a cold navigation starts.
+      const animation = document
+        .getAnimations()
+        .find(
+          (item) => item.effect?.pseudoElement === '::view-transition-group(newspaper-essay-title)'
+        )
+      const effect = animation?.effect
+      if (!effect?.getKeyframes) return
+      const frames = effect.getKeyframes()
+      if (frames.length !== 2) return
+      const [from, to] = frames
+      const width = Number.parseFloat(to.width)
+      const height = Number.parseFloat(to.height)
+      const scaleX = Number.parseFloat(from.width) / width
+      const scaleY = Number.parseFloat(from.height) / height
+      if (![width, height, scaleX, scaleY].every((value) => Number.isFinite(value) && value > 0))
+        return
+      root.style.setProperty('--essay-title-width', `${width}px`)
+      root.style.setProperty('--essay-title-height', `${height}px`)
+      root.style.setProperty(
+        '--essay-title-from',
+        new DOMMatrixReadOnly(from.transform).scale(scaleX, scaleY).toString()
+      )
+      root.style.setProperty('--essay-title-to', to.transform)
+      root.dataset.essayTitleOptimized = ''
+    }
+
+    function prepareEssayTitle(activation, view) {
+      const otherUrl = view === 'outgoing' ? activation?.entry?.url : activation?.from?.url
+      if (!otherUrl) return
+      const pathname = (url) => new URL(url, location.href).pathname.replace(/\/$/, '')
+      const otherPath = pathname(otherUrl)
+      // Match by the article's canonical path, never by list order or title text.
+      // Only the selected pair gets a snapshot; all other titles stay in main.
+      const title = [...document.querySelectorAll('#main [data-essay-title]')].find((element) =>
+        element.dataset.essayList
+          ? pathname(element.dataset.essayList) === otherPath
+          : pathname(element.dataset.essayTitle) === otherPath
+      )
+      if (!title) return
+      const bounds = title.getBoundingClientRect()
+      const headerBottom =
+        document.querySelector('.site-header')?.getBoundingClientRect().bottom ?? 0
+      // An offscreen title (e.g. returning from deep in an article) simply fades
+      // with the page instead of travelling through the fixed navigation.
+      if (bounds.top < Math.max(0, headerBottom) || bounds.bottom > innerHeight) return
+      sharedTitle = title
+      title.style.viewTransitionName = 'newspaper-essay-title'
+    }
+
+    function prepare(transition, activation, view) {
+      if (!transition) return
+      // Captures may be skipped in hidden tabs, on rapid navigation, or on a resize.
+      transition.ready.catch(() => {})
+      // Note titles retain their original entrance animation. Essay titles use a
+      // separate wrapper, leaving the live link's hover transform untouched.
+      if (
+        motion.matches ||
+        root.hasAttribute('data-theme-transition') ||
+        root.dataset.homeEntrance === 'pending'
+      ) {
+        transition.skipTransition()
+        return
+      }
+      activeTransition = transition
+      const backwards =
+        activation?.navigationType === 'traverse' && activation.entry.index < activation.from?.index
+      root.dataset.newspaperTransition = backwards ? 'back' : 'forward'
+      root.dataset.newspaperView = view
+      prepareEssayTitle(activation, view)
+      if (view === 'incoming') {
+        transition.ready
+          .then(() => {
+            if (activeTransition !== transition) return
+            // Leave the 3D navigation in root's stationary snapshot. Crop only the
+            // content snapshots so a scrolled article cannot paint over that header.
+            const bottom = Math.max(
+              0,
+              document.querySelector('.site-header').getBoundingClientRect().bottom
+            )
+            const clips = ['outgoing', 'incoming'].map((side) => {
+              const transform = getComputedStyle(
+                root,
+                `::view-transition-group(newspaper-${side})`
+              ).transform
+              const top = transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m42
+              return [side, Math.max(0, bottom - top)]
+            })
+            clips.forEach(([side, clip]) =>
+              root.style.setProperty(`--newspaper-clip-${side}`, `${clip}px`)
+            )
+            optimizeTitleSnapshot()
+          })
+          .catch(() => {})
+      }
+      const finish = () => {
+        if (activeTransition !== transition) return
+        activeTransition = undefined
+        reset()
+      }
+      transition.finished.then(finish, finish)
+    }
+
+    // Native document navigation retains every existing script's load/unload lifecycle,
+    // beforeunload protection, focus behavior, and browser scroll restoration.
+    window.addEventListener('pageswap', (event) => {
+      reset()
+      prepare(event.viewTransition, event.activation, 'outgoing')
+    })
+    window.addEventListener('pagereveal', (event) => {
+      // Outgoing names/flags can survive in the back/forward cache.
+      reset()
+      prepare(event.viewTransition, window.navigation?.activation, 'incoming')
+    })
+    motion.addEventListener('change', () => {
+      if (motion.matches) activeTransition?.skipTransition()
+    })
+  })()
+</script>

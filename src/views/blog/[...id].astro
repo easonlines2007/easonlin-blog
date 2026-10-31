@@ -4,7 +4,6 @@ import { render } from 'astro:content'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import Icon from '@/components/Icon.astro'
 import ArticleTools from '@/components/ArticleTools.astro'
-import TypewriterText from '@/components/TypewriterText.astro'
 import { getEssays } from '@/lib/essays'
 import { essayUrl, formatWritingDate } from '@/lib/essay-utils'
 import { essayPresentation } from '@/lib/essay-presentation'
@@ -45,8 +44,14 @@ const { short } = essayPresentation(essay)
     data-pagefind-body
   >
     <header class="article-header">
-      <h1 data-pagefind-meta="title" aria-label={title} data-title-typing>
-        <TypewriterText text={title} article />
+      <h1 data-pagefind-meta="title">
+        <span
+          class="essay-transition-title"
+          data-essay-title={path(essayUrl(essay.id))}
+          data-essay-list={path('/blog')}
+        >
+          {title}
+        </span>
       </h1>
       <div class="article-date enter">
         <time datetime={written}>

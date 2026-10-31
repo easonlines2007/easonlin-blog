@@ -1,0 +1,148 @@
+/* Names exist only during navigation. The theme's circular reveal still captures root. */
+.essay-transition-title {
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* The browser interpolates the selected title's bounds between both documents.
+   Animate only its snapshots; the nested .lift-text keeps its existing hover. */
+html[data-newspaper-transition]::view-transition-group(newspaper-essay-title) {
+  transform-origin: 0 0;
+  /* Zero velocity at both ends, with continuous acceleration/deceleration.
+     The symmetric curve also feels natural when returning to the list. */
+  animation-duration: 440ms;
+  animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+  z-index: 2;
+}
+html[data-essay-title-optimized]::view-transition-group(newspaper-essay-title) {
+  width: var(--essay-title-width);
+  height: var(--essay-title-height);
+  /* Only paired, moving titles need paper; one-sided fades must not leave a
+     blank patch behind. Keep this outside the isolated title crossfade. */
+  background-color: var(--page-bg);
+  box-shadow: 0 0 14px 8px var(--page-bg);
+  animation-name: newspaper-title-move, newspaper-title-paper;
+  /* Hold the scaled first frame while the new animation is pending, too. */
+  animation-fill-mode: both;
+}
+@keyframes newspaper-title-paper {
+  0%,
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 14px 8px transparent;
+  }
+  12%,
+  82% {
+    background-color: var(--page-bg);
+    box-shadow: 0 0 14px 8px var(--page-bg);
+  }
+}
+@keyframes newspaper-title-move {
+  from {
+    transform: var(--essay-title-from);
+  }
+  to {
+    transform: var(--essay-title-to);
+  }
+}
+html[data-newspaper-transition]::view-transition-old(newspaper-essay-title),
+html[data-newspaper-transition]::view-transition-new(newspaper-essay-title) {
+  height: 100%;
+  width: 100%;
+  /* Keep blending static: the browser's default blend-mode keyframes otherwise
+     force main-thread animation even though position and opacity can composite. */
+  mix-blend-mode: plus-lighter;
+}
+html[data-newspaper-transition]::view-transition-old(newspaper-essay-title) {
+  animation: newspaper-title-out 200ms ease-out both;
+}
+html[data-newspaper-transition]::view-transition-new(newspaper-essay-title) {
+  animation: newspaper-title-in 200ms ease-out both;
+}
+@keyframes newspaper-title-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes newspaper-title-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+html[data-newspaper-view='outgoing']:not([data-theme-transition]) #main {
+  view-transition-name: newspaper-outgoing;
+}
+html[data-newspaper-view='incoming']:not([data-theme-transition]) #main {
+  view-transition-name: newspaper-incoming;
+}
+
+/* The paper, navigation and footer stay still; only the content has motion. */
+html[data-newspaper-transition]:not([data-theme-transition])::view-transition-group(root),
+html[data-newspaper-transition]:not([data-theme-transition])::view-transition-old(root),
+html[data-newspaper-transition]:not([data-theme-transition])::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-newspaper-transition]:not([data-theme-transition])::view-transition-old(root) {
+  display: none;
+}
+
+/* Separate snapshot names preserve each page's own viewport position and size.
+   Matching main to main would interpolate the entire article's height/scroll offset. */
+html[data-newspaper-transition]::view-transition-group(newspaper-outgoing),
+html[data-newspaper-transition]::view-transition-group(newspaper-incoming) {
+  animation: revert;
+  animation-duration: 0s;
+  animation-fill-mode: both;
+  z-index: 1;
+}
+html[data-newspaper-transition]::view-transition-old(newspaper-outgoing) {
+  animation: newspaper-out 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  mix-blend-mode: normal;
+  clip-path: inset(var(--newspaper-clip-outgoing, 0px) 0 0);
+}
+html[data-newspaper-transition]::view-transition-new(newspaper-incoming) {
+  animation: newspaper-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  mix-blend-mode: normal;
+  clip-path: inset(var(--newspaper-clip-incoming, 0px) 0 0);
+}
+html[data-newspaper-transition='back'] {
+  --newspaper-direction: -1;
+}
+
+/* These keyframes animate snapshots, never the live elements' transform/opacity. */
+@keyframes newspaper-out {
+  to {
+    opacity: 0;
+    transform: translateX(calc(-16px * var(--newspaper-direction, 1)));
+  }
+}
+@keyframes newspaper-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(20px * var(--newspaper-direction, 1)));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (scripting: none) {
+  html[data-newspaper-transition]::view-transition-group(newspaper-essay-title),
+  html[data-newspaper-transition]::view-transition-old(newspaper-essay-title),
+  html[data-newspaper-transition]::view-transition-new(newspaper-essay-title),
+  html[data-newspaper-transition]::view-transition-group(newspaper-outgoing),
+  html[data-newspaper-transition]::view-transition-group(newspaper-incoming),
+  html[data-newspaper-transition]::view-transition-old(newspaper-outgoing),
+  html[data-newspaper-transition]::view-transition-new(newspaper-incoming) {
+    animation: none;
+  }
+}

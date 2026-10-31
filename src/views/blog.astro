@@ -102,8 +102,10 @@ const pictureDescriptions: Record<
                 {formatWritingDate(essay.data.written, locale)}
               </time>
               <h2>
-                <a href={path(essayUrl(essay.id))}>
-                  <span class="lift-text">{essay.data.title}</span>
+                <a href={path(essayUrl(essay.id))} data-astro-prefetch>
+                  <span class="essay-transition-title" data-essay-title={path(essayUrl(essay.id))}>
+                    <span class="lift-text">{essay.data.title}</span>
+                  </span>
                 </a>
               </h2>
               <p class="journal-excerpt">
