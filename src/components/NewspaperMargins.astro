@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets'
 import { localeFromPath, localizePath } from '../lib/i18n'
+import { essayMarginArt } from '../lib/essay-margin-art'
 import home from '../assets/newspaper/home.png'
 import notes from '../assets/newspaper/notes.png'
 import projects from '../assets/newspaper/projects.png'
@@ -18,10 +19,21 @@ const illustrations = {
 }
 const locale = localeFromPath(Astro.url.pathname)
 const normalize = (path: string) => path.replace(/\/$/, '')
-// Only navigation landing pages get illustrations; articles keep the edge dots.
 const illustration = Object.entries(illustrations).find(
   ([path]) => normalize(Astro.url.pathname) === normalize(localizePath(path, locale))
 )?.[1]
+const articlePrefix = `${localizePath('/blog', locale)}/`
+const pathname = normalize(Astro.url.pathname)
+const essayId = pathname.startsWith(articlePrefix) ? pathname.slice(articlePrefix.length) : ''
+const essayArt = essayMarginArt[essayId]
+const sides = ['left', 'right'] as const
+const articleImages = essayArt
+  ? sides.map((side) => {
+      const paired = 'pair' in essayArt
+      const src = paired ? essayArt.pair : essayArt[side]
+      return { side, src, paired, aspect: `${src.width / (paired ? 2 : 1)} / ${src.height}` }
+    })
+  : []
 ---
 
 {illustration && (
@@ -46,3 +58,38 @@ const illustration = Object.entries(illustrations).find(
     ))}
   </div>
 )}
+
+{articleImages.length > 0 && (
+  <div class="newspaper-margins essay-margins" data-essay-decoration={essayId} aria-hidden="true">
+    {articleImages.map(({ side, src, paired, aspect }) => (
+      <span
+        class:list={['margin-illustration', `margin-${side}`, !paired && 'margin-single']}
+        style={`--margin-aspect: ${aspect}`}
+      >
+        <Image
+          {src}
+          width={paired ? 960 : 480}
+          format="webp"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          fetchpriority="low"
+          draggable="false"
+        />
+      </span>
+    ))}
+  </div>
+)}
+
+<style>
+  /* Portraits have their own aspect ratio; paired sheets retain the existing half-sheet crop. */
+  .margin-single img {
+    width: 100%;
+  }
+
+  /* Anchor the lower illustration by its bottom so tall portraits stay inside short windows. */
+  .essay-margins .margin-right {
+    top: auto;
+    bottom: clamp(28px, 8vh, 80px);
+  }
+</style>
