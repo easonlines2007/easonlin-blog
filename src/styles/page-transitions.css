@@ -1,4 +1,18 @@
 /* Names exist only during navigation. The theme's circular reveal still captures root. */
+/* Capture a flat text header on both sides of navigation, including a hovered link. */
+html[data-newspaper-transition] .character-link {
+  perspective: none;
+}
+html[data-newspaper-transition] .nav-flip,
+html[data-newspaper-transition] .nav-label {
+  transform: none;
+  transform-style: flat;
+  transition: none;
+}
+html[data-newspaper-transition] .nav-character {
+  display: none;
+}
+
 .essay-transition-title {
   display: inline-block;
   max-width: 100%;
@@ -17,25 +31,9 @@ html[data-newspaper-transition]::view-transition-group(newspaper-essay-title) {
 html[data-essay-title-optimized]::view-transition-group(newspaper-essay-title) {
   width: var(--essay-title-width);
   height: var(--essay-title-height);
-  /* Only paired, moving titles need paper; one-sided fades must not leave a
-     blank patch behind. Keep this outside the isolated title crossfade. */
-  background-color: var(--page-bg);
-  box-shadow: 0 0 14px 8px var(--page-bg);
-  animation-name: newspaper-title-move, newspaper-title-paper;
+  animation-name: newspaper-title-move;
   /* Hold the scaled first frame while the new animation is pending, too. */
   animation-fill-mode: both;
-}
-@keyframes newspaper-title-paper {
-  0%,
-  100% {
-    background-color: transparent;
-    box-shadow: 0 0 14px 8px transparent;
-  }
-  12%,
-  82% {
-    background-color: var(--page-bg);
-    box-shadow: 0 0 14px 8px var(--page-bg);
-  }
 }
 @keyframes newspaper-title-move {
   from {
@@ -113,6 +111,37 @@ html[data-newspaper-transition]::view-transition-new(newspaper-incoming) {
   mix-blend-mode: normal;
   clip-path: inset(var(--newspaper-clip-incoming, 0px) 0 0);
 }
+
+/* Soften the outgoing page once, then crossfade to delayed, sharp incoming text.
+   A constant blur keeps filter interpolation off the main thread. Only snapshots
+   receive the effect; the shared title, live hovers and header stay sharp. */
+html[data-essay-title-optimized]::view-transition-old(newspaper-outgoing) {
+  filter: blur(2px);
+  animation: newspaper-reading-out 160ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+html[data-essay-title-optimized]::view-transition-new(newspaper-incoming) {
+  animation: newspaper-reading-in 320ms cubic-bezier(0.42, 0, 0.58, 1) 120ms both;
+}
+@keyframes newspaper-reading-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(calc(-12px * var(--newspaper-direction, 1)));
+  }
+}
+@keyframes newspaper-reading-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(12px * var(--newspaper-direction, 1)));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 html[data-newspaper-transition='back'] {
   --newspaper-direction: -1;
 }
@@ -144,5 +173,6 @@ html[data-newspaper-transition='back'] {
   html[data-newspaper-transition]::view-transition-old(newspaper-outgoing),
   html[data-newspaper-transition]::view-transition-new(newspaper-incoming) {
     animation: none;
+    filter: none;
   }
 }
