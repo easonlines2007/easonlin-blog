@@ -56,8 +56,12 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
         <Icon name="menu" />
       </summary>
       <nav aria-label={t('手机导航')}>
-        {theme.header.menu.map((item) => (
-          <a href={path(item.link)} aria-current={active(path(item.link)) ? 'page' : undefined}>
+        {theme.header.menu.map((item, index) => (
+          <a
+            href={path(item.link)}
+            aria-current={active(path(item.link)) ? 'page' : undefined}
+            style={`--menu-item-index: ${index}`}
+          >
             {t(item.title)}
           </a>
         ))}
@@ -104,11 +108,14 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
       }
     })
   )
-  document.addEventListener('click', (event) => {
+  function closeOutside(event: Event) {
     disclosures.forEach((item) => {
       if (!item.contains(event.target as Node)) item.open = false
     })
-  })
+  }
+  // Touching blank space in Safari can omit the synthetic click event.
+  document.addEventListener('pointerdown', closeOutside)
+  document.addEventListener('click', closeOutside)
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape')
       disclosures.forEach((item) => {
