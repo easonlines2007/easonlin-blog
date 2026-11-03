@@ -73,6 +73,60 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
 <script>
   const header = document.querySelector<HTMLElement>('.site-header')!
   const disclosures = [...header.querySelectorAll<HTMLDetailsElement>('.header-disclosure')]
+  const closing = new Set<HTMLDetailsElement>()
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+
+  function closeDisclosure(item: HTMLDetailsElement) {
+    if (!item.open || closing.has(item)) return
+    const nav = item.matches('.mobile-menu') ? item.querySelector('nav') : null
+    const animations = nav?.getAnimations({ subtree: true }) ?? []
+    if (reducedMotion.matches || !animations.length) {
+      item.open = false
+      return
+    }
+
+    // Keep native details visible until its opening animation has run backwards.
+    closing.add(item)
+    nav!.inert = true
+    const endTime = Math.max(
+      ...animations.map((animation) => Number(animation.effect!.getComputedTiming().endTime))
+    )
+    const panel = animations.find(
+      (animation) => (animation.effect as KeyframeEffect).target === nav
+    )!
+    const time = panel.playState === 'finished' ? endTime : Number(panel.currentTime)
+    animations.forEach((animation) => {
+      // A shared timeline reverses the link stagger as well as the panel reveal.
+      animation.updatePlaybackRate(-1.5)
+      animation.play()
+      animation.currentTime =
+        animation === panel
+          ? Math.min(time, Number(animation.effect!.getComputedTiming().endTime))
+          : time
+    })
+    Promise.allSettled(animations.map((animation) => animation.finished)).then(() => {
+      if (!closing.delete(item)) return
+      item.open = false
+      nav!.inert = false
+    })
+  }
+
+  disclosures.forEach((item) => {
+    item.querySelector('summary')?.addEventListener('click', (event) => {
+      if (!item.open) return
+      event.preventDefault()
+      if (closing.delete(item)) {
+        const nav = item.querySelector('nav')!
+        nav.inert = false
+        nav.getAnimations({ subtree: true }).forEach((animation) => {
+          animation.updatePlaybackRate(1)
+          animation.play()
+        })
+      } else {
+        closeDisclosure(item)
+      }
+    })
+  })
   let previousY = window.scrollY
   let scheduled = false
   function updateHeader() {
@@ -101,16 +155,27 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
   disclosures.forEach((item) =>
     item.addEventListener('toggle', () => {
       if (item.open) {
+        // Browsers can retain CSS animations while a details subtree is hidden.
+        item
+          .querySelector('nav')
+          ?.getAnimations({ subtree: true })
+          .forEach((animation) => {
+            if (animation.playbackRate < 0 && !closing.has(item)) {
+              animation.playbackRate = 1
+              animation.currentTime = 0
+              animation.play()
+            }
+          })
         header.classList.remove('is-hidden')
         disclosures.forEach((other) => {
-          if (other !== item) other.open = false
+          if (other !== item) closeDisclosure(other)
         })
       }
     })
   )
   function closeOutside(event: Event) {
     disclosures.forEach((item) => {
-      if (!item.contains(event.target as Node)) item.open = false
+      if (!item.contains(event.target as Node)) closeDisclosure(item)
     })
   }
   // Touching blank space in Safari can omit the synthetic click event.
@@ -120,7 +185,7 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
     if (event.key === 'Escape')
       disclosures.forEach((item) => {
         if (item.open) {
-          item.open = false
+          closeDisclosure(item)
           item.querySelector('summary')?.focus()
         }
       })
