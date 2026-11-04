@@ -56,12 +56,8 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
         <Icon name="menu" />
       </summary>
       <nav aria-label={t('手机导航')}>
-        {theme.header.menu.map((item, index) => (
-          <a
-            href={path(item.link)}
-            aria-current={active(path(item.link)) ? 'page' : undefined}
-            style={`--menu-item-index: ${index}`}
-          >
+        {theme.header.menu.map((item) => (
+          <a href={path(item.link)} aria-current={active(path(item.link)) ? 'page' : undefined}>
             {t(item.title)}
           </a>
         ))}
@@ -73,58 +69,89 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
 <script>
   const header = document.querySelector<HTMLElement>('.site-header')!
   const disclosures = [...header.querySelectorAll<HTMLDetailsElement>('.header-disclosure')]
-  const closing = new Set<HTMLDetailsElement>()
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+  const motions = new Map<HTMLDetailsElement, { expanded: boolean; animations: Animation[] }>()
+  const hiddenPanel: Keyframe = {
+    opacity: '0',
+    transform: 'translateY(-6px) scale(0.98)',
+    clipPath: 'inset(-12px -28px 100% -28px round var(--radius))'
+  }
+  const hiddenLink: Keyframe = { opacity: '0', transform: 'translateY(-4px)' }
 
-  function closeDisclosure(item: HTMLDetailsElement) {
-    if (!item.open || closing.has(item)) return
+  function finishDisclosure(item: HTMLDetailsElement, expanded: boolean) {
+    const motion = motions.get(item)
+    motions.delete(item)
+    item.open = expanded
+    item.querySelector('nav')!.inert = false
+    motion?.animations.forEach((animation) => animation.cancel())
+  }
+
+  function setDisclosure(item: HTMLDetailsElement, expanded: boolean) {
+    const previous = motions.get(item)
+    if ((previous?.expanded ?? item.open) === expanded) return
     const nav = item.matches('.mobile-menu') ? item.querySelector('nav') : null
-    const animations = nav?.getAnimations({ subtree: true }) ?? []
-    if (reducedMotion.matches || !animations.length) {
-      item.open = false
+    if (!nav || reducedMotion.matches) {
+      if (nav) finishDisclosure(item, expanded)
+      else item.open = expanded
       return
     }
 
-    // Keep native details visible until its opening animation has run backwards.
-    closing.add(item)
-    nav!.inert = true
-    const endTime = Math.max(
-      ...animations.map((animation) => Number(animation.effect!.getComputedTiming().endTime))
-    )
-    const panel = animations.find(
-      (animation) => (animation.effect as KeyframeEffect).target === nav
-    )!
-    const time = panel.playState === 'finished' ? endTime : Number(panel.currentTime)
-    animations.forEach((animation) => {
-      // A shared timeline reverses the link stagger as well as the panel reveal.
-      animation.updatePlaybackRate(-1.5)
-      animation.play()
-      animation.currentTime =
-        animation === panel
-          ? Math.min(time, Number(animation.effect!.getComputedTiming().endTime))
-          : time
+    const wasOpen = item.open
+    item.open = true
+    const links = [...nav.querySelectorAll('a')]
+    const elements = [nav, ...links]
+    // Capture before cancellation so every reversal starts at its visible frame.
+    const frames = elements.map((element, index) => {
+      const style = getComputedStyle(element)
+      const resting: Keyframe = { opacity: '1', transform: 'none' }
+      if (index === 0) resting.clipPath = 'inset(-12px -28px -32px -28px round var(--radius))'
+      return {
+        from: wasOpen
+          ? {
+              opacity: style.opacity,
+              transform: style.transform,
+              ...(index === 0 ? { clipPath: style.clipPath } : {})
+            }
+          : index === 0
+            ? hiddenPanel
+            : hiddenLink,
+        to: expanded ? resting : index === 0 ? hiddenPanel : hiddenLink
+      }
     })
-    Promise.allSettled(animations.map((animation) => animation.finished)).then(() => {
-      if (!closing.delete(item)) return
-      item.open = false
-      nav!.inert = false
+    previous?.animations.forEach((animation) => animation.cancel())
+    nav.inert = !expanded
+    const distance = Math.abs(Number(expanded) - Number(frames[0].from.opacity))
+    const duration = (expanded ? 340 : 280) * (previous ? Math.max(0.35, distance) : 1)
+    const motion = {
+      expanded,
+      animations: elements.map((element, index) =>
+        element.animate([frames[index].from, frames[index].to], {
+          duration: index === 0 ? duration : duration * 0.65,
+          delay:
+            previous || index === 0
+              ? 0
+              : expanded
+                ? 20 + (index - 1) * 18
+                : (links.length - index) * 12,
+          easing: expanded ? 'cubic-bezier(0.22, 1, 0.36, 1)' : 'cubic-bezier(0.32, 0, 0.2, 1)',
+          fill: 'both'
+        })
+      )
+    }
+    motions.set(item, motion)
+    Promise.allSettled(motion.animations.map((animation) => animation.finished)).then(() => {
+      if (motions.get(item) === motion) finishDisclosure(item, expanded)
     })
   }
 
+  reducedMotion.addEventListener('change', () => {
+    if (reducedMotion.matches)
+      motions.forEach((motion, item) => finishDisclosure(item, motion.expanded))
+  })
   disclosures.forEach((item) => {
     item.querySelector('summary')?.addEventListener('click', (event) => {
-      if (!item.open) return
       event.preventDefault()
-      if (closing.delete(item)) {
-        const nav = item.querySelector('nav')!
-        nav.inert = false
-        nav.getAnimations({ subtree: true }).forEach((animation) => {
-          animation.updatePlaybackRate(1)
-          animation.play()
-        })
-      } else {
-        closeDisclosure(item)
-      }
+      setDisclosure(item, !(motions.get(item)?.expanded ?? item.open))
     })
   })
   let previousY = window.scrollY
@@ -155,27 +182,16 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
   disclosures.forEach((item) =>
     item.addEventListener('toggle', () => {
       if (item.open) {
-        // Browsers can retain CSS animations while a details subtree is hidden.
-        item
-          .querySelector('nav')
-          ?.getAnimations({ subtree: true })
-          .forEach((animation) => {
-            if (animation.playbackRate < 0 && !closing.has(item)) {
-              animation.playbackRate = 1
-              animation.currentTime = 0
-              animation.play()
-            }
-          })
         header.classList.remove('is-hidden')
         disclosures.forEach((other) => {
-          if (other !== item) closeDisclosure(other)
+          if (other !== item) setDisclosure(other, false)
         })
       }
     })
   )
   function closeOutside(event: Event) {
     disclosures.forEach((item) => {
-      if (!item.contains(event.target as Node)) closeDisclosure(item)
+      if (!item.contains(event.target as Node)) setDisclosure(item, false)
     })
   }
   // Touching blank space in Safari can omit the synthetic click event.
@@ -185,7 +201,7 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
     if (event.key === 'Escape')
       disclosures.forEach((item) => {
         if (item.open) {
-          closeDisclosure(item)
+          setDisclosure(item, false)
           item.querySelector('summary')?.focus()
         }
       })
