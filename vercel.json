@@ -14,6 +14,56 @@
       "source": "/en/notes/fc/laboratory/lab03---claude",
       "destination": "/en/notes/fc/laboratory/lab-03",
       "permanent": true
+    },
+    {
+      "source": "/notes/mit-1806/lecture-01-05",
+      "destination": "/notes/mit-1806/lec01",
+      "permanent": true
+    },
+    {
+      "source": "/notes/mit-1806/lecture-06-13",
+      "destination": "/notes/mit-1806/lec06",
+      "permanent": true
+    },
+    {
+      "source": "/notes/mit-1806/lecture-14-20",
+      "destination": "/notes/mit-1806/lec14",
+      "permanent": true
+    },
+    {
+      "source": "/notes/mit-1806/lecture-21-27",
+      "destination": "/notes/mit-1806/lec21",
+      "permanent": true
+    },
+    {
+      "source": "/notes/mit-1806/lecture-28-34",
+      "destination": "/notes/mit-1806/lec28",
+      "permanent": true
+    },
+    {
+      "source": "/en/notes/mit-1806/lecture-01-05",
+      "destination": "/notes/mit-1806/lec01",
+      "permanent": true
+    },
+    {
+      "source": "/en/notes/mit-1806/lecture-06-13",
+      "destination": "/notes/mit-1806/lec06",
+      "permanent": true
+    },
+    {
+      "source": "/en/notes/mit-1806/lecture-14-20",
+      "destination": "/notes/mit-1806/lec14",
+      "permanent": true
+    },
+    {
+      "source": "/en/notes/mit-1806/lecture-21-27",
+      "destination": "/notes/mit-1806/lec21",
+      "permanent": true
+    },
+    {
+      "source": "/en/notes/mit-1806/lecture-28-34",
+      "destination": "/notes/mit-1806/lec28",
+      "permanent": true
     }
   ]
 }

@@ -91,3 +91,40 @@ test('book import keeps sources intact, resolves PDF page links and is repeatabl
     await rm(temporary, { recursive: true, force: true })
   }
 })
+
+test('MIT book imports the review lecture in sequence and resolves chapter, index and image links', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'mit-book-test-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const sourceDirectory = join(root, 'source')
+  const projectRoot = join(root, 'blog')
+  await mkdir(join(sourceDirectory, 'images'), { recursive: true })
+  await mkdir(projectRoot)
+  await writeFile(join(sourceDirectory, 'images', 'board.png'), 'image fixture')
+  const names = [...Array.from({ length: 34 }, (_, i) => String(i + 1)), '24b']
+  for (const name of names) {
+    await writeFile(
+      join(sourceDirectory, `MIT18.06-lec${name}.md`),
+      `---\ntitle: Lecture ${name}\ndescription: Course notes\n---\n\n# Lecture ${name}\n\n[目录](index.md) [复习](MIT18.06-lec24b.md)\n\n![板书](images/board.png)\n`
+    )
+  }
+  await writeFile(
+    join(sourceDirectory, 'index.md'),
+    '---\ntitle: Overview\ndescription: Course overview\n---\n\n# Overview\n\n[第一讲](MIT18.06-lec1.md)\n'
+  )
+  const options = { course: 'mit1806', sourceDirectory, projectRoot, date: '2026-11-14' }
+  const result = await importCourseBook(options)
+  assert.equal(result.notes, 36)
+  assert.equal(result.attachments, 1)
+  const notes = join(projectRoot, 'src/content/notes/MIT 18.06')
+  const first = await readFile(join(notes, 'lec01.md'), 'utf8')
+  const review = await readFile(join(notes, 'lec24b.md'), 'utf8')
+  const next = await readFile(join(notes, 'lec25.md'), 'utf8')
+  const overview = await readFile(join(notes, 'overview.md'), 'utf8')
+  assert.match(first, /\/notes\/mit-1806\/overview/)
+  assert.match(first, /\/notes\/mit-1806\/lec24b/)
+  assert.match(first, /\/attachments\/mit1806-[a-f0-9]+\.png/)
+  assert.match(overview, /\/notes\/mit-1806\/lec01/)
+  assert.match(review, /order: 26/)
+  assert.match(next, /order: 27/)
+  assert.equal((await importCourseBook(options)).written, 0)
+})

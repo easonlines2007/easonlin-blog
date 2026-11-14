@@ -9,6 +9,7 @@ import { syncObsidian } from './obsidian-sync-lib.mjs'
 
 const projectDirectory = fileURLToPath(new URL('../', import.meta.url))
 const courses = {
+  mit1806: { topic: 'MIT 18.06', lectures: 34, modules: [] },
   cs61a: {
     topic: 'CS61A',
     lectures: 40,
@@ -81,7 +82,7 @@ export async function importCourseBook({
   projectRoot = projectDirectory
 }) {
   const config = courses[course]
-  if (!config) throw new Error('课程应为 cs61a 或 cs231n。')
+  if (!config) throw new Error('课程应为 cs61a、cs231n 或 mit1806。')
   if (
     !/^\d{4}-\d{2}-\d{2}$/.test(date ?? '') ||
     new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date
@@ -91,10 +92,15 @@ export async function importCourseBook({
   const sourceNames = await readdir(sourceRoot)
   const { topic, lectures, modules } = config
   const chapters = Array.from({ length: lectures }, (_, index) => ({
-    name: `${topic}-lec${course === 'cs61a' ? String(index + 1).padStart(2, '0') : index + 1}.md`,
+    name: `${course === 'mit1806' ? 'MIT18.06' : topic}-lec${course === 'cs61a' ? String(index + 1).padStart(2, '0') : index + 1}.md`,
     filename: `lec${String(index + 1).padStart(2, '0')}.md`,
     order: index + 1
   }))
+  if (course === 'mit1806') {
+    chapters.splice(24, 0, { name: 'MIT18.06-lec24b.md', filename: 'lec24b.md', order: 25 })
+    chapters.forEach((chapter, index) => (chapter.order = index + 2))
+    chapters.unshift({ name: 'index.md', filename: 'overview.md', order: 1 })
+  }
   modules.forEach((name, index) =>
     chapters.push({
       name: `${topic}-${name}.md`,
@@ -109,18 +115,25 @@ export async function importCourseBook({
       filename: 'slides.md',
       order: lectures + modules.length + 1
     })
-  const actual = sourceNames.filter((name) => name.startsWith(`${topic}-`) && name.endsWith('.md'))
+  const prefix = course === 'mit1806' ? 'MIT18.06' : topic
+  const actual = sourceNames.filter((name) => name.startsWith(`${prefix}-`) && name.endsWith('.md'))
   if (
-    actual.length !== lectures + modules.length ||
+    actual.length !== lectures + modules.length + (course === 'mit1806' ? 1 : 0) ||
     actual.some((name) => !chapters.some((chapter) => chapter.name === name))
   )
     throw new Error(`${topic} 的单讲与模块清单不完整。`)
   const destinations = new Map([
     ['index.html', `/notes/topics/${encodeURIComponent(topic)}`],
-    ['README.md', `/notes/topics/${encodeURIComponent(topic)}`]
+    ['README.md', `/notes/topics/${encodeURIComponent(topic)}`],
+    [
+      'index.md',
+      course === 'mit1806'
+        ? '/notes/mit-1806/overview'
+        : `/notes/topics/${encodeURIComponent(topic)}`
+    ]
   ])
   for (const chapter of chapters) {
-    const url = `/notes/${course}/${chapter.filename.slice(0, -3)}`
+    const url = `/notes/${course === 'mit1806' ? 'mit-1806' : course}/${chapter.filename.slice(0, -3)}`
     destinations.set(chapter.name, url)
     destinations.set(chapter.name.replace(/\.md$/, '.html'), url)
   }
@@ -201,7 +214,7 @@ export async function importCourseBook({
         topic,
         category: 'ai',
         order: chapter.order,
-        tags: [course],
+        tags: [course === 'mit1806' ? 'lineal algebra' : course],
         status: 'completed',
         publish: true
       })
