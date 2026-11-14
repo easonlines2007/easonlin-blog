@@ -44,7 +44,7 @@ const t = useTranslations(localeFromPath(Astro.url.pathname))
     document.documentElement.style.colorScheme = preference
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', preference === 'dark' ? '#3b3935' : '#f2f0e8')
+      ?.setAttribute('content', preference === 'dark' ? '#262522' : '#f9f9f5')
     const label = preference === 'dark' ? toggle.dataset.labelLight! : toggle.dataset.labelDark!
     toggle.setAttribute('aria-label', label)
     toggle.title = label

@@ -12,10 +12,17 @@ interface Props {
   title: string
   description?: string
   home?: boolean
+  reading?: boolean
   noindex?: boolean
   alternatePath?: string | null
 }
-const { title, description = theme.description, home = false, noindex = false } = Astro.props
+const {
+  title,
+  description = theme.description,
+  home = false,
+  reading = false,
+  noindex = false
+} = Astro.props
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 const alternatePath =
@@ -32,7 +39,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{t(title)} · {theme.title}</title>
     {description && <meta name="description" content={t(description)} />}
-    <meta name="theme-color" content="#f2f0e8" />
+    <meta name="theme-color" content="#f9f9f5" />
     <meta name="color-scheme" content="light dark" />
     <meta name="generator" content={Astro.generator} />
     {noindex && <meta name="robots" content="noindex" />}
@@ -81,7 +88,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
         document.documentElement.classList.toggle('dark', dark)
         document.documentElement.dataset.themePreference = choice
         document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
-        document.querySelector('meta[name="theme-color"]').content = dark ? '#3b3935' : '#f2f0e8'
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#262522' : '#f9f9f5'
       })()
     </script>
     <!-- Vercel Web Analytics: lightweight script, no build dependency required. -->
@@ -96,7 +103,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     <slot name="head" />
     <PageTransitions />
   </head>
-  <body class:list={['newspaper-page', home && 'home-page']}>
+  <body class:list={['newspaper-page', home && 'home-page', reading && 'reading-page']}>
     <NewspaperMargins />
     <a class="skip-link" href="#main">
       {t('跳转到正文')}
@@ -137,8 +144,5 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
       </footer>
     </div>
     <span id="page-transition-ready" hidden></span>
-    <script>
-      import '../scripts/hover-ink'
-    </script>
   </body>
 </html>

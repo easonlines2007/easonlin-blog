@@ -5,6 +5,7 @@ import 'katex/dist/katex.min.css'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import Icon from '@/components/Icon.astro'
 import TableOfContents from '@/components/TableOfContents.astro'
+import NoteTocSidebar from '@/components/NoteTocSidebar.astro'
 import ArticleTools from '@/components/ArticleTools.astro'
 import MermaidDiagrams from '@/components/MermaidDiagrams.astro'
 import PdfReader from '@/components/PdfReader.astro'
@@ -30,6 +31,7 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
 <BaseLayout
   {title}
   {description}
+  reading
   alternatePath={
     locale === 'en'
       ? noteUrl(note.id)
@@ -42,7 +44,7 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
     <Icon name="back" />
     <span class="lift-text">{t(note.data.order ? topic : '全部笔记')}</span>
   </a>
-  <div class="article-grid">
+  <div class:list={['article-grid', 'note-layout', hasToc && 'has-toc']}>
     <article class="article-body enter" data-pagefind-body>
       <header class="article-header">
         <div class="article-kicker">
@@ -120,12 +122,7 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
         </nav>
       )}
     </article>
-    {hasToc && (
-      <aside class="toc-sidebar enter delay-1">
-        <h2 class="toc-title">{t('本页目录')}</h2>
-        <TableOfContents {headings} />
-      </aside>
-    )}
+    {hasToc && <NoteTocSidebar {headings} />}
   </div>
   <ArticleTools />
   <MermaidDiagrams />

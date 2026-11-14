@@ -1,0 +1,42 @@
+---
+import type { MarkdownHeading } from 'astro'
+import { localeFromPath, useTranslations } from '@/lib/i18n'
+import Icon from './Icon.astro'
+import TableOfContents from './TableOfContents.astro'
+
+interface Props {
+  headings: MarkdownHeading[]
+}
+const { headings } = Astro.props
+const t = useTranslations(localeFromPath(Astro.url.pathname))
+---
+
+<aside class="toc-sidebar note-toc enter delay-1" aria-label={t('本页目录')}>
+  <div class="note-toc-header">
+    <h2 class="toc-title" data-note-toc-title>
+      {t('本页目录')}
+    </h2>
+    <button
+      class="toc-toggle"
+      type="button"
+      aria-expanded="true"
+      aria-controls="note-toc-content"
+      aria-label={t('收起目录')}
+      title={t('收起目录')}
+      data-note-toc-toggle
+      data-label-expand={t('展开目录')}
+      data-label-collapse={t('收起目录')}
+      hidden
+    >
+      <Icon name="sidebar" />
+      <span class="toc-toggle-label">{t('目录')}</span>
+    </button>
+  </div>
+  <div id="note-toc-content">
+    <TableOfContents {headings} />
+  </div>
+</aside>
+
+<script>
+  import '../scripts/note-toc'
+</script>

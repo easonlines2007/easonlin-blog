@@ -86,9 +86,7 @@
   padding: 8px;
   margin: -8px;
   border-radius: var(--radius);
-  transition:
-    color 160ms ease,
-    background-color 160ms ease;
+  transition: color 160ms ease;
 }
 .home-essay-excerpt {
   max-width: 620px;

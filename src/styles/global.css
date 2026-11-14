@@ -1,10 +1,10 @@
 :root {
   --primary: 354 48% 35%;
-  --foreground: 35 9% 20%;
-  --muted-foreground: 35 6% 43%;
-  --background: 48 28% 93%; /* #F2F0E8 */
-  --muted: 38 18% 92%;
-  --card: 38 18% 93%;
+  --foreground: 35 9% 16%;
+  --muted-foreground: 35 6% 34%;
+  --background: 48 28% 97%; /* Soft warm white, #F9F9F5. */
+  --muted: 38 18% 94%;
+  --card: 38 18% 96%;
   --border: 35 15% 83%;
   --input: 35 15% 85%;
   --ring: 354 48% 35%;
@@ -30,16 +30,16 @@
   scrollbar-gutter: stable;
 }
 .dark {
-  --primary: 354 46% 72%;
-  --foreground: 42 27% 90%;
-  --muted-foreground: 40 14% 74%;
-  --background: 43 6% 22%; /* Warm charcoal paper, #3B3935. */
-  --muted: 40 7% 26%;
-  --card: 40 7% 28%;
-  --border: 38 10% 42%;
-  --input: 38 10% 45%;
-  --ring: 354 46% 72%;
-  --code-background: 40 7% 17%;
+  --primary: 354 30% 50%;
+  --foreground: 42 27% 94%;
+  --muted-foreground: 40 14% 82%;
+  --background: 43 6% 14%; /* Deep warm charcoal, #262522. */
+  --muted: 40 7% 18%;
+  --card: 40 7% 20%;
+  --border: 38 10% 34%;
+  --input: 38 10% 37%;
+  --ring: 354 30% 50%;
+  --code-background: 40 7% 11%;
   color-scheme: dark;
 }
 /* Reveal the live new theme over the previous page, starting at the theme button. */
@@ -192,17 +192,13 @@ a:hover {
 /* The hover and focus surface matches the full native link or button hit area. */
 .entry-surface {
   position: relative;
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
+  transition: color 160ms ease;
 }
 :is(a, button).entry-surface:is(:hover, :focus-visible),
 .entry-surface:not(.home-section):has(.entry-link:is(:hover, :focus-visible)):not(
     :has(.entry-surface .entry-link:is(:hover, :focus-visible))
   ) {
-  background-color: var(--entry-hover-bg, var(--soft));
-  border-color: hsl(var(--primary) / 0.4);
+  color: var(--accent);
 }
 /* Keep the original border thickness on framed controls. */
 :is(.index-card, .project-card, .friend-link).entry-surface:is(:hover, :focus-visible),
@@ -245,23 +241,6 @@ a:hover {
 }
 span.lift-text {
   display: inline-block;
-}
-/* A temporary resting-state cover reveals the live hover colors beneath it. */
-[data-ink-source],
-[data-ink-source] *,
-[data-ink-cover],
-[data-ink-cover] * {
-  transition: none !important;
-}
-[data-ink-cover],
-[data-ink-cover] *,
-[data-ink-cover]::before,
-[data-ink-cover]::after {
-  pointer-events: none !important;
-  animation: none !important;
-}
-[data-ink-cover] {
-  user-select: none;
 }
 button,
 summary {
@@ -465,13 +444,11 @@ img {
   border-radius: var(--radius);
   background: transparent;
   color: inherit;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease;
+  transition: color 150ms ease;
   cursor: pointer;
 }
 .icon-button:hover {
-  background: var(--soft);
+  color: var(--accent);
 }
 .site-header .icon-button {
   color: var(--secondary);
@@ -677,7 +654,6 @@ summary::-webkit-details-marker {
   letter-spacing: -0.025em;
 }
 .home-sections {
-  --entry-hover-bg: hsl(var(--primary) / 0.09);
   max-width: 870px;
   margin: auto;
   display: flex;
@@ -685,9 +661,6 @@ summary::-webkit-details-marker {
   gap: 24px;
   padding-bottom: 24px;
   border-bottom: 1px solid hsl(var(--foreground) / 0.4);
-}
-.dark .home-sections {
-  --entry-hover-bg: hsl(var(--primary) / 0.12);
 }
 .home-section {
   --entry-radius: 0;
@@ -698,28 +671,20 @@ summary::-webkit-details-marker {
   padding-top: 20px;
   border-top: 1px solid transparent;
 }
-/* Grow the rule inside the reserved border space, without moving the content. */
+/* Keep section rules still; hover only changes their color. */
 .home-section::before {
   content: '';
   position: absolute;
   inset-inline: 0;
   top: -1px;
-  height: 3px;
+  height: 1px;
   border-radius: 0;
   background-color: hsl(var(--foreground) / 0.4);
-  transform: scaleY(calc(1 / 3));
-  transform-origin: top;
   pointer-events: none;
-  transition:
-    transform 760ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-radius 760ms cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 240ms ease;
+  transition: background-color 160ms ease;
 }
 .home-section:has(> h2 > .home-section-link:is(:hover, :focus-visible))::before {
-  /* The same asymmetric, tapered pen stroke as the motto underline. */
-  border-radius: 50% 20% 40% 30%;
   background-color: var(--accent);
-  transform: scaleY(1);
 }
 .home-section > h2 {
   align-self: start;
@@ -825,12 +790,7 @@ summary::-webkit-details-marker {
   padding: 3px 8px;
   margin: -3px -8px;
   border-radius: var(--radius);
-  transition:
-    color 160ms ease,
-    background-color 160ms ease;
-}
-.home-sections :is(.more-link, .home-essay-feature > a):is(:hover, :focus-visible) {
-  background-color: var(--entry-hover-bg);
+  transition: color 160ms ease;
 }
 .listing-grid {
   display: grid;
@@ -934,8 +894,7 @@ summary::-webkit-details-marker {
   line-height: 1.7;
 }
 .tag:hover {
-  background: var(--soft);
-  color: var(--text);
+  color: var(--accent);
 }
 .status {
   white-space: nowrap;
@@ -1019,7 +978,7 @@ summary::-webkit-details-marker {
   margin-left: -8px;
 }
 .filter-options button:hover {
-  background: var(--soft);
+  color: var(--accent);
 }
 .filter-options button[aria-pressed='true'] {
   color: var(--accent);
@@ -1117,6 +1076,99 @@ summary::-webkit-details-marker {
   gap: 44px;
   align-items: start;
   margin-top: 24px;
+}
+.reading-page {
+  --paper-gutter: max(16px, calc((100vw - 1360px) / 2));
+}
+.reading-page .site-container {
+  max-width: 1360px;
+  padding-inline: clamp(24px, 3vw, 48px);
+}
+.note-layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+}
+.note-layout.has-toc {
+  grid-template-columns: minmax(0, 1fr) 224px;
+}
+.note-layout[data-toc-collapsed='true'] {
+  grid-template-columns: minmax(0, 1fr) 44px;
+}
+.note-layout .article-body {
+  width: 100%;
+  max-width: 1080px;
+  justify-self: center;
+}
+.note-layout .prose {
+  max-width: none;
+}
+.note-toc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.note-layout .note-toc {
+  max-height: none;
+  overflow: visible;
+}
+#note-toc-content {
+  max-height: calc(100dvh - var(--reading-offset) - 72px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.note-toc-header .toc-title {
+  margin-bottom: 0;
+}
+.toc-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  min-height: 32px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--page-bg);
+  color: var(--secondary);
+  transition: color 160ms ease;
+}
+.toc-toggle:is(:hover, :focus-visible) {
+  color: var(--accent);
+}
+.toc-toggle-label {
+  display: none;
+}
+[data-toc-collapsed='true'] .toc-toggle {
+  flex-direction: column;
+  gap: 4px;
+  width: 44px;
+  min-height: 54px;
+}
+[data-toc-collapsed='true'] .toc-toggle-label {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
+}
+@media (max-width: 900px) {
+  .note-layout.has-toc,
+  .note-layout[data-toc-collapsed='true'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .note-layout .note-toc {
+    display: none;
+  }
+  .note-layout .mobile-toc {
+    display: block;
+  }
+}
+@media (max-width: 600px) {
+  .reading-page .site-container {
+    padding-inline: 20px;
+  }
 }
 .article-body {
   min-width: 0;
@@ -1594,7 +1646,7 @@ summary::-webkit-details-marker {
     border-radius: var(--radius);
   }
   .mobile-menu a:hover {
-    background: var(--soft);
+    color: var(--accent);
   }
   .home-intro {
     margin-bottom: 42px;
@@ -1728,7 +1780,7 @@ summary::-webkit-details-marker {
     border-radius: var(--radius);
   }
   .mobile-menu a:hover {
-    background: var(--soft);
+    color: var(--accent);
   }
 }
 .translation-credit {
