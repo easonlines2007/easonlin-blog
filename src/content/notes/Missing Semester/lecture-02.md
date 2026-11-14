@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - missing-semester
 status: completed
-publish: true
+publish: false
 title: Lecture 02 · Shell 工具和脚本 (Shell Tools and Scripting)
 description: Missing Semester 第 2 讲：Shell 工具和脚本 (Shell Tools and Scripting)
 topic: Missing Semester

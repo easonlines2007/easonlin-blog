@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 30 · 尾递归与尾调用优化 (Tail Calls & Tail Recursion)
 description: CS61A 第 30 讲：尾递归与尾调用优化 (Tail Calls & Tail Recursion)
 topic: CS61A

@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 21 · 对象表示与多态接口 (Representation)
 description: CS61A 第 21 讲：对象表示与多态接口 (Representation)
 topic: CS61A

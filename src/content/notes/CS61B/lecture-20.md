@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 20 · 散列 II：负载因子、动态扩容与 Java HashMap 内核：负载因子 lambda、均摊 O(1)
   数学证明、可变键陷阱与工业级红黑树优化
 description: CS61B 第 20 讲：散列 II：负载因子、动态扩容与 Java HashMap 内核：负载因子 lambda、均摊 O(1)

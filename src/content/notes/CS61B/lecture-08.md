@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 08 · 继承 I：接口继承与默认方法：方法重载的局限、接口契约、静态与动态类型及 @Override 规范
 description: CS61B 第 8 讲：继承 I：接口继承与默认方法：方法重载的局限、接口契约、静态与动态类型及 @Override 规范
 topic: CS61B

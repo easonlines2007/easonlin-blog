@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 02 · 电子计算机-Electronic Computing
 description: CCCS 第 2 讲：电子计算机-Electronic Computing
 topic: CCCS

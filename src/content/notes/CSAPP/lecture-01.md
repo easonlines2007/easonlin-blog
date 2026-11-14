@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: Lecture 01 · Course Overview：深入理解计算机系统的核心世界观与五大现实
 description: CSAPP 第 1 讲：Course Overview：深入理解计算机系统的核心世界观与五大现实
 topic: CSAPP

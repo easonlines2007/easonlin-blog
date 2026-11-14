@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - missing-semester
 status: completed
-publish: true
+publish: false
 title: Lecture 11 · 提问答疑与进阶之路 (Q&A)
 description: Missing Semester 第 11 讲：提问答疑与进阶之路 (Q&A)
 topic: Missing Semester

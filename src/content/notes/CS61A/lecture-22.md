@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 22 · 对象组合与链表树形结构 (Composition)
 description: CS61A 第 22 讲：对象组合与链表树形结构 (Composition)
 topic: CS61A

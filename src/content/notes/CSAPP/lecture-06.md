@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 06 · Machine-Level Programming II: Control（条件码、分支跳转、循环翻译与条件传送）"
 description: "CSAPP 第 6 讲：Machine-Level Programming II: Control（条件码、分支跳转、循环翻译与条件传送）"
 topic: CSAPP

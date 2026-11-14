@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 24 · 冷战和消费主义-The Cold War and Consumerism
 description: CCCS 第 24 讲：冷战和消费主义-The Cold War and Consumerism
 topic: CCCS

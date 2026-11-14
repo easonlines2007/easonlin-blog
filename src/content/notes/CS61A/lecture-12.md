@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 12 · Containers (容器、盒式指针模型与字典抽象)
 description: CS61A 第 12 讲：Containers (容器、盒式指针模型与字典抽象)
 topic: CS61A

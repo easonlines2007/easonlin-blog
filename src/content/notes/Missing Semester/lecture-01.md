@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - missing-semester
 status: completed
-publish: true
+publish: false
 title: Lecture 01 · 课程概览与 Shell (Course Overview + The Shell)
 description: Missing Semester 第 1 讲：课程概览与 Shell (Course Overview + The Shell)
 topic: Missing Semester

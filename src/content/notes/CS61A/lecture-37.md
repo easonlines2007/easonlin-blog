@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 37 · 课程总结与综合实战演练 (Final Examples & Conclusion)
 description: CS61A 第 37 讲：课程总结与综合实战演练 (Final Examples & Conclusion)
 topic: CS61A

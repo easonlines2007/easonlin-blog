@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 14 · Exceptional Control Flow: Exceptions and
   Processes（异常架构、系统调用、进程抽象与并发控制）"
 description: "CSAPP 第 14 讲：Exceptional Control Flow: Exceptions and

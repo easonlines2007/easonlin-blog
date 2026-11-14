@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 06 · Sound (Optional)：高阶函数实战——从零合成音乐与超级马里奥
 description: CS61A 第 6 讲：Sound (Optional)：高阶函数实战——从零合成音乐与超级马里奥
 topic: CS61A

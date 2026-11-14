@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 07 · Machine-Level Programming III: Procedures（过程调用、栈帧模型与寄存器保护约定）"
 description: "CSAPP 第 7 讲：Machine-Level Programming III: Procedures（过程调用、栈帧模型与寄存器保护约定）"
 topic: CSAPP

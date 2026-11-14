@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 33 · 排序 IV：基于比较排序的理论下界证明：决策树模型、信息论熵、Stirling 公式与严格 Omega(N log N) 证明
 description: CS61B 第 33 讲：排序 IV：基于比较排序的理论下界证明：决策树模型、信息论熵、Stirling 公式与严格 Omega(N log N) 证明
 topic: CS61B

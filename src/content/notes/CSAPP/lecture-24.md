@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 24 · Synchronization: Basics（共享变量判定、数据竞争、进度图与 Dijkstra 信号量）"
 description: "CSAPP 第 24 讲：Synchronization: Basics（共享变量判定、数据竞争、进度图与 Dijkstra 信号量）"
 topic: CSAPP

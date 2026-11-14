@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 01 · Welcome：表达式与函数调用
 description: CS61A 第 1 讲：Welcome：表达式与函数调用
 topic: CS61A

@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 24 · 最短路径算法：Dijkstra 与 A* 启发式搜索：单源最短路径、边松弛操作、Dijkstra 贪心证明与 A* 曼哈顿启发式
 description: CS61B 第 24 讲：最短路径算法：Dijkstra 与 A* 启发式搜索：单源最短路径、边松弛操作、Dijkstra 贪心证明与 A* 曼哈顿启发式
 topic: CS61B

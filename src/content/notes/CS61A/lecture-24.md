@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 24 · 程序分解与模块化设计 (Decomposition)
 description: CS61A 第 24 讲：程序分解与模块化设计 (Decomposition)
 topic: CS61A

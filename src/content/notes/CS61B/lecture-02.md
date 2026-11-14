@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 02 · 类与对象的定义与使用：面向对象建模、静态与实例方法、引用数组与堆内存
 description: CS61B 第 2 讲：类与对象的定义与使用：面向对象建模、静态与实例方法、引用数组与堆内存
 topic: CS61B

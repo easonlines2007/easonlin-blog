@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 35 · 计算机视觉-Computer Vision
 description: CCCS 第 35 讲：计算机视觉-Computer Vision
 topic: CCCS

@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 33 · 声明式编程与 SQL 基础 (Declarative Programming & SQL)
 description: CS61A 第 33 讲：声明式编程与 SQL 基础 (Declarative Programming & SQL)
 topic: CS61A

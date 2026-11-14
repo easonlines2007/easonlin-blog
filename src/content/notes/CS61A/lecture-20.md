@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 20 · 继承与面向对象设计 (Inheritance)
 description: CS61A 第 20 讲：继承与面向对象设计 (Inheritance)
 topic: CS61A

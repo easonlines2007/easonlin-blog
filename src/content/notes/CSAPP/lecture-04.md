@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: Lecture 04 · Floating Point：IEEE 754 浮点数表示、舍入机制与数值异常
 description: CSAPP 第 4 讲：Floating Point：IEEE 754 浮点数表示、舍入机制与数值异常
 topic: CSAPP

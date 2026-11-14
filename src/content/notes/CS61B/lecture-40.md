@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 40 · 课程总结与未来航向：61B 之后的大道探索：40 讲全景知识复盘、十大工程心法、后续进阶课程与成为卓越架构师之路
 description: CS61B 第 40 讲：课程总结与未来航向：61B 之后的大道探索：40 讲全景知识复盘、十大工程心法、后续进阶课程与成为卓越架构师之路
 topic: CS61B

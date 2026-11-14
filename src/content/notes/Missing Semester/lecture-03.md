@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - missing-semester
 status: completed
-publish: true
+publish: false
 title: "Lecture 03 · 模态编辑器 Vim (Editors: Vim)"
 description: "Missing Semester 第 3 讲：模态编辑器 Vim (Editors: Vim)"
 topic: Missing Semester

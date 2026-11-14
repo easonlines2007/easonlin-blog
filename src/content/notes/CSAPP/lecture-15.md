@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 15 · Exceptional Control Flow: Signals and Nonlocal
   Jumps（信号生命周期、异步安全与非本地跳转）"
 description: "CSAPP 第 15 讲：Exceptional Control Flow: Signals and Nonlocal

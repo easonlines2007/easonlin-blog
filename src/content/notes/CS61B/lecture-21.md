@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 21 · 优先队列与二叉堆：PQ 接口契约、二叉堆性质、Swim/Sink 算法与数组紧凑表示
 description: CS61B 第 21 讲：优先队列与二叉堆：PQ 接口契约、二叉堆性质、Swim/Sink 算法与数组紧凑表示
 topic: CS61B

@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 15 · Mutability (可变性、对象别名与局部持久状态)
 description: CS61A 第 15 讲：Mutability (可变性、对象别名与局部持久状态)
 topic: CS61A

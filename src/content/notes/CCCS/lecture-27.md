@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 27 · 3D 图形-3D Graphics
 description: CCCS 第 27 讲：3D 图形-3D Graphics
 topic: CCCS

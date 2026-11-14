@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 19 · 散列 I：哈希表原理、散列函数与碰撞解决：直接寻址瓶颈、hashCode 机制、鸽巢原理、拉链法与开放寻址法
 description: CS61B 第 19 讲：散列 I：哈希表原理、散列函数与碰撞解决：直接寻址瓶颈、hashCode 机制、鸽巢原理、拉链法与开放寻址法
 topic: CS61B

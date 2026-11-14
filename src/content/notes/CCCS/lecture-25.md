@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 25 · 个人计算机革命-The Personal Computer Revolution
 description: CCCS 第 25 讲：个人计算机革命-The Personal Computer Revolution
 topic: CCCS

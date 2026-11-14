@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - missing-semester
 status: completed
-publish: true
+publish: false
 title: Lecture 09 · 安全和密码学实战 (Security and Cryptography)
 description: Missing Semester 第 9 讲：安全和密码学实战 (Security and Cryptography)
 topic: Missing Semester

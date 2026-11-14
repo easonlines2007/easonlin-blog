@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 05 · 链表 III：双向链表、泛型与原生数组：DLList 双向拓扑、循环哨兵、泛型擦除与二维数组内存
 description: CS61B 第 5 讲：链表 III：双向链表、泛型与原生数组：DLList 双向拓扑、循环哨兵、泛型擦除与二维数组内存
 topic: CS61B

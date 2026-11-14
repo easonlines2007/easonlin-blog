@@ -1,11 +1,14 @@
 ---
 import { localeFromPath, localizePath, useTranslations } from '@/lib/i18n'
 import NotesLayout from '@/layouts/NotesLayout.astro'
+import { getNotes } from '@/lib/notes'
 
 const locale = localeFromPath(Astro.url.pathname)
 const t = useTranslations(locale)
 const path = (href: string) => localizePath(href, locale)
 const { tag, notes, allNotes } = Astro.props
+const alternateLocale = locale === 'en' ? 'zh' : 'en'
+const hasAlternate = (await getNotes(alternateLocale)).some((note) => note.data.tags.includes(tag))
 ---
 
 <NotesLayout
@@ -14,4 +17,5 @@ const { tag, notes, allNotes } = Astro.props
   {allNotes}
   back={path('/notes/tags')}
   backLabel={t('全部标签')}
+  alternatePath={hasAlternate ? localizePath(Astro.url.pathname, alternateLocale) : null}
 />

@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 06 · 软件工程基石：单元测试与测试驱动开发：TDD 哲学、JUnit 5 断言体系、选择排序案例分解与代码重构
 description: CS61B 第 6 讲：软件工程基石：单元测试与测试驱动开发：TDD 哲学、JUnit 5 断言体系、选择排序案例分解与代码重构
 topic: CS61B

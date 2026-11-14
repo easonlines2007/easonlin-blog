@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 04 · 链表 II：单向链表、封装与哨兵节点：SLList 封装、访问控制、静态嵌套类、类不变量与哨兵模式
 description: CS61B 第 4 讲：链表 II：单向链表、封装与哨兵节点：SLList 封装、访问控制、静态嵌套类、类不变量与哨兵模式
 topic: CS61B

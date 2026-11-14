@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 01 · 课程导论与 Java 初探：面向对象、静态类型与编译执行模型
 description: CS61B 第 1 讲：课程导论与 Java 初探：面向对象、静态类型与编译执行模型
 topic: CS61B

@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 36 · 数据库系统与 Python 交互 (Databases & Python Integration)
 description: CS61A 第 36 讲：数据库系统与 Python 交互 (Databases & Python Integration)
 topic: CS61A

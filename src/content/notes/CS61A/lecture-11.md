@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 11 · Sequences (序列、列表与列表推导式)
 description: CS61A 第 11 讲：Sequences (序列、列表与列表推导式)
 topic: CS61A

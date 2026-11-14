@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 06 · 寄存器 & 内存-Registers and RAM
 description: CCCS 第 6 讲：寄存器 & 内存-Registers and RAM
 topic: CCCS

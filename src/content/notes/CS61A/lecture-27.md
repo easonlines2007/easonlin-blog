@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 27 · Scheme 列表与符号计算 (Scheme Lists)
 description: CS61A 第 27 讲：Scheme 列表与符号计算 (Scheme Lists)
 topic: CS61A

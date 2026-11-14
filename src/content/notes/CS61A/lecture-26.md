@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 26 · 函数式语言 Scheme 基础 (Scheme)
 description: CS61A 第 26 讲：函数式语言 Scheme 基础 (Scheme)
 topic: CS61A

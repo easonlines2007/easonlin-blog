@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 37 · 软件工程 IV：大规模系统演进与技术债务：技术债务隐患、CI/CD 自动化流水线、代码审查哲学与防御性架构演进
 description: CS61B 第 37 讲：软件工程 IV：大规模系统演进与技术债务：技术债务隐患、CI/CD 自动化流水线、代码审查哲学与防御性架构演进
 topic: CS61B

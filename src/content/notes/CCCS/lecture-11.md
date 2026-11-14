@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 11 · 编程语言发展史-The First Programming Languages
 description: CCCS 第 11 讲：编程语言发展史-The First Programming Languages
 topic: CCCS

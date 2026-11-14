@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 34 · 软件工程 III：软件工程伦理与技术反思：工程师的社会责任、技术伤害账本、算法偏见与安全防范
 description: CS61B 第 34 讲：软件工程 III：软件工程伦理与技术反思：工程师的社会责任、技术伤害账本、算法偏见与安全防范
 topic: CS61B

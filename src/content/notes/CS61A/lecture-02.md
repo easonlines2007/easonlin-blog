@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 02 · Functions：名称、环境与自定义函数
 description: CS61A 第 2 讲：Functions：名称、环境与自定义函数
 topic: CS61A

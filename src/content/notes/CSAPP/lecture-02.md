@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: Lecture 02 · Bits, Bytes, and Integers：信息的二进制存储、布尔代数与整数编码
 description: CSAPP 第 2 讲：Bits, Bytes, and Integers：信息的二进制存储、布尔代数与整数编码
 topic: CSAPP

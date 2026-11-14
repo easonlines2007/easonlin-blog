@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: Lecture 16 · System-Level I/O（Unix I/O 哲学、短计数陷阱、健壮 RIO 包与文件共享）
 description: CSAPP 第 16 讲：System-Level I/O（Unix I/O 哲学、短计数陷阱、健壮 RIO 包与文件共享）
 topic: CSAPP

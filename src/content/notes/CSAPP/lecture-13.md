@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: Lecture 13 · Linking（编译流水线、ELF 目标文件、符号解析与静态/动态链接）
 description: CSAPP 第 13 讲：Linking（编译流水线、ELF 目标文件、符号解析与静态/动态链接）
 topic: CSAPP

@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 07 · Functional Abstraction：函数抽象、环境模型进阶、反函数搜索与调试实战
 description: CS61A 第 7 讲：Functional Abstraction：函数抽象、环境模型进阶、反函数搜索与调试实战
 topic: CS61A

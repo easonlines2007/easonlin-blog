@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 18 · Objects (面向对象编程、类与实例方法)
 description: CS61A 第 18 讲：Objects (面向对象编程、类与实例方法)
 topic: CS61A

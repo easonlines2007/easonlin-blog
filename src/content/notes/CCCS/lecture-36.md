@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 36 · 自然语言处理-Natural Language Processing
 description: CCCS 第 36 讲：自然语言处理-Natural Language Processing
 topic: CCCS

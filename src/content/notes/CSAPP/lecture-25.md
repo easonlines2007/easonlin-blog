@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 25 · Synchronization: Advanced（生产者-消费者、读者-写者模型、线程安全与死锁预防）"
 description: "CSAPP 第 25 讲：Synchronization: Advanced（生产者-消费者、读者-写者模型、线程安全与死锁预防）"
 topic: CSAPP

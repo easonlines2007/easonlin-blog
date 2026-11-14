@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 09 · Recursion (递归与环境模型)
 description: CS61A 第 9 讲：Recursion (递归与环境模型)
 topic: CS61A

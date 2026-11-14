@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - missing-semester
 status: completed
-publish: true
+publish: false
 title: Lecture 05 · 命令行环境与远程连接 (Command-line Environment)
 description: Missing Semester 第 5 讲：命令行环境与远程连接 (Command-line Environment)
 topic: Missing Semester

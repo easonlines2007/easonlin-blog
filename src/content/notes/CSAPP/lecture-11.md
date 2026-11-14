@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: Lecture 11 · The Memory Hierarchy（存储技术、磁盘与 SSD 物理特性、局部性原理与存储金字塔）
 description: CSAPP 第 11 讲：The Memory Hierarchy（存储技术、磁盘与 SSD 物理特性、局部性原理与存储金字塔）
 topic: CSAPP

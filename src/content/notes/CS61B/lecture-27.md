@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 27 · 软件工程 I：版本控制与 Gitlet 架构设计：版本控制哲学、内容寻址存储、SHA-1 哈希、提交有向无环图与分支模型
 description: CS61B 第 27 讲：软件工程 I：版本控制与 Gitlet 架构设计：版本控制哲学、内容寻址存储、SHA-1 哈希、提交有向无环图与分支模型
 topic: CS61B

@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 01 · 计算机早期历史-Early Computing
 description: CCCS 第 1 讲：计算机早期历史-Early Computing
 topic: CCCS

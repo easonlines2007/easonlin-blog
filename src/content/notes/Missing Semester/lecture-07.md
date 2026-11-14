@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - missing-semester
 status: completed
-publish: true
+publish: false
 title: Lecture 07 · 调试及性能分析 (Debugging and Profiling)
 description: Missing Semester 第 7 讲：调试及性能分析 (Debugging and Profiling)
 topic: Missing Semester

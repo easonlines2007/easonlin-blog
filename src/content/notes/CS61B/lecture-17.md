@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 17 · 树结构 II：B 树与 2-3 树的绝对自平衡哲学：向上生长哲学、过载分裂机制、2-3 树形式化推演与对数高度数学保证
 description: CS61B 第 17 讲：树结构 II：B 树与 2-3 树的绝对自平衡哲学：向上生长哲学、过载分裂机制、2-3 树形式化推演与对数高度数学保证
 topic: CS61B

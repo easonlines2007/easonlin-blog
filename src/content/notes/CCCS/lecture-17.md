@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 17 · 集成电路&摩尔定律-Integrated Circuits & Moore's Law
 description: CCCS 第 17 讲：集成电路&摩尔定律-Integrated Circuits & Moore's Law
 topic: CCCS

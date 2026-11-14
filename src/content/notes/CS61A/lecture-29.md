@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 29 · 解释器架构与 Scheme 解释器实现 (Interpreters)
 description: CS61A 第 29 讲：解释器架构与 Scheme 解释器实现 (Interpreters)
 topic: CS61A

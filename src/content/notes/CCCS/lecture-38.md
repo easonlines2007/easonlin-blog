@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 38 · 计算机心理学 - Psychology of Computing
 description: CCCS 第 38 讲：计算机心理学 - Psychology of Computing
 topic: CCCS

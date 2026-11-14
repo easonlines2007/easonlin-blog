@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: Lecture 10 · Program Optimization（程序性能优化：编译器边界、CPE 与超标量流水线关键路径）
 description: CSAPP 第 10 讲：Program Optimization（程序性能优化：编译器边界、CPE 与超标量流水线关键路径）
 topic: CSAPP

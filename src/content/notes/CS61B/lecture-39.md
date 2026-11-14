@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 39 · 计算复杂性理论：规约与 P 与 NP 问题：多项式时间 P、非确定性多项式时间 NP、NP 完全性与千禧年数学猜想
 description: CS61B 第 39 讲：计算复杂性理论：规约与 P 与 NP 问题：多项式时间 P、非确定性多项式时间 NP、NP 完全性与千禧年数学猜想
 topic: CS61B

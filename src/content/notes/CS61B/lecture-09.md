@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 09 · 继承 II：Extends、类型转换与高阶函数：类继承与 super、编译与运行类型、强制类型转换与 Java 高阶函数
 description: CS61B 第 9 讲：继承 II：Extends、类型转换与高阶函数：类继承与 super、编译与运行类型、强制类型转换与 Java 高阶函数
 topic: CS61B

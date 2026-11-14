@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 05 · Machine Level Programming I: Basics：x86-64 架构演进与寄存器寻址"
 description: "CSAPP 第 5 讲：Machine Level Programming I: Basics：x86-64 架构演进与寄存器寻址"
 topic: CSAPP

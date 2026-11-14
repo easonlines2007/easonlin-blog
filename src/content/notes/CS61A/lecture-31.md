@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 31 · 代码即数据与元编程 (Programs as Data)
 description: CS61A 第 31 讲：代码即数据与元编程 (Programs as Data)
 topic: CS61A

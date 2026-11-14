@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 28 · 异常处理、语法解析与计算器解释器 (Calculator)
 description: CS61A 第 28 讲：异常处理、语法解析与计算器解释器 (Calculator)
 topic: CS61A

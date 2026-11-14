@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 05 · Environments：高阶函数环境模型、嵌套作用域、Lambda 与柯里化
 description: CS61A 第 5 讲：Environments：高阶函数环境模型、嵌套作用域、Lambda 与柯里化
 topic: CS61A

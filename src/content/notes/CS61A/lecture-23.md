@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 23 · 程序效率与复杂度分析 (Efficiency)
 description: CS61A 第 23 讲：程序效率与复杂度分析 (Efficiency)
 topic: CS61A

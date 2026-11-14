@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - missing-semester
 status: completed
-publish: true
+publish: false
 title: Lecture 10 · 生产力大杂烩 (Potpourri)
 description: Missing Semester 第 10 讲：生产力大杂烩 (Potpourri)
 topic: Missing Semester

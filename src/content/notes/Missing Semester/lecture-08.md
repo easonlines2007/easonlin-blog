@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - missing-semester
 status: completed
-publish: true
+publish: false
 title: Lecture 08 · 元编程与构建系统 (Metaprogramming)
 description: Missing Semester 第 8 讲：元编程与构建系统 (Metaprogramming)
 topic: Missing Semester

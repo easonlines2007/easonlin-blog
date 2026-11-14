@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 13 · 期中复习：Midterm 1 核心考点沙盘与大题剖析：指针模型、动态分派矩阵、循环求和与类不变量工程排错
 description: CS61B 第 13 讲：期中复习：Midterm 1 核心考点沙盘与大题剖析：指针模型、动态分派矩阵、循环求和与类不变量工程排错
 topic: CS61B

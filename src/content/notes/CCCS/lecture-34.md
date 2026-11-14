@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 34 · 机器学习&人工智能-Machine Learning & Artificial Intelligence
 description: CCCS 第 34 讲：机器学习&人工智能-Machine Learning & Artificial Intelligence
 topic: CCCS

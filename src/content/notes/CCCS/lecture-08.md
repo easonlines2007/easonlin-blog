@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 08 · 指令和程序-Instructions & Programs
 description: CCCS 第 8 讲：指令和程序-Instructions & Programs
 topic: CCCS

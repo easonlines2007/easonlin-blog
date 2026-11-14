@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 39 · 教育科技-Educational Technology
 description: CCCS 第 39 讲：教育科技-Educational Technology
 topic: CCCS

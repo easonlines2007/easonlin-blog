@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 07 · 链表 IV：数组列表、动态扩容与均摊分析：AList 架构设计、算术扩容灾难、几何扩容均摊 O(1)、内存游离与泛型擦除
 description: CS61B 第 7 讲：链表 IV：数组列表、动态扩容与均摊分析：AList 架构设计、算术扩容灾难、几何扩容均摊 O(1)、内存游离与泛型擦除
 topic: CS61B

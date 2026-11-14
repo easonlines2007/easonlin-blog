@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 05 · 算术逻辑单元-How Computers Calculate-the ALU
 description: CCCS 第 5 讲：算术逻辑单元-How Computers Calculate-the ALU
 topic: CCCS

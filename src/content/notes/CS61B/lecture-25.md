@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 25 · 最小生成树：割定理与 Prim/Kruskal 算法：MST 形式化定义、割定理严格证明、Prim 贪心与
   Kruskal 并查集防环
 description: CS61B 第 25 讲：最小生成树：割定理与 Prim/Kruskal 算法：MST 形式化定义、割定理严格证明、Prim 贪心与

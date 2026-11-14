@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 21 · 压缩-Compression
 description: CCCS 第 21 讲：压缩-Compression
 topic: CCCS

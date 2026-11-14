@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 13 · Data Abstraction (数据抽象与抽象屏障)
 description: CS61A 第 13 讲：Data Abstraction (数据抽象与抽象屏障)
 topic: CS61A

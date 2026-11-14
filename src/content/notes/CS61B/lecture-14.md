@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 14 · 并查集 I：动态连通性与树形结构演进：并查集 ADT 契约、Quick Find 架构、Quick Union 树形模型与退化瓶颈
 description: CS61B 第 14 讲：并查集 I：动态连通性与树形结构演进：并查集 ADT 契约、Quick Find 架构、Quick Union 树形模型与退化瓶颈
 topic: CS61B

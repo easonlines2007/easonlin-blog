@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: Lecture 12 · Cache Memories（高速缓存微架构、地址解构、写策略与矩阵分块优化）
 description: CSAPP 第 12 讲：Cache Memories（高速缓存微架构、地址解构、写策略与矩阵分块优化）
 topic: CSAPP

@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 08 · Function Examples：期中经典考题深度解析、代码综合设计与装饰器魔法
 description: CS61A 第 8 讲：Function Examples：期中经典考题深度解析、代码综合设计与装饰器魔法
 topic: CS61A

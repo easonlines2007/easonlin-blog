@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 22 · Network Programming: Part II（套接字接口 API、getaddrinfo 协议无关设计与
   Tiny Web 服务器）"
 description: "CSAPP 第 22 讲：Network Programming: Part II（套接字接口 API、getaddrinfo

@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 25 · 数据结构与期中经典题解 (Data Examples)
 description: CS61A 第 25 讲：数据结构与期中经典题解 (Data Examples)
 topic: CS61A

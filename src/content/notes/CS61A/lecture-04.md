@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 04 · Higher-Order Functions：高阶函数、控制流本质与计算抽象
 description: CS61A 第 4 讲：Higher-Order Functions：高阶函数、控制流本质与计算抽象
 topic: CS61A

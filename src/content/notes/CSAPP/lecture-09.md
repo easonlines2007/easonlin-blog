@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 09 · Machine-Level Programming V: Advanced
   Topics（缓冲区溢出、栈保护机制、ASLR 与 ROP 攻击）"
 description: "CSAPP 第 9 讲：Machine-Level Programming V: Advanced

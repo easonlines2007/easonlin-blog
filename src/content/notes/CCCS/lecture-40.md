@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 40 · 奇点,天网,计算机的未来-The Singularity, Skynet, and the Future of Computing
 description: CCCS 第 40 讲：奇点,天网,计算机的未来-The Singularity, Skynet, and the Future of Computing
 topic: CCCS

@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 09 · 高级CPU设计-Advanced CPU Designs
 description: CCCS 第 9 讲：高级CPU设计-Advanced CPU Designs
 topic: CCCS

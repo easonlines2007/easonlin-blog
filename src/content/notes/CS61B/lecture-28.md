@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 28 · 字典树：Tries 与前缀检索：字符串检索瓶颈、R-way 字典树、前缀匹配、自动补全与空间压缩
 description: CS61B 第 28 讲：字典树：Tries 与前缀检索：字符串检索瓶颈、R-way 字典树、前缀匹配、自动补全与空间压缩
 topic: CS61B

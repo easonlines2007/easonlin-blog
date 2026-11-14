@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - missing-semester
 status: completed
-publish: true
+publish: false
 title: "Lecture 06 · 版本控制与 Git 原理 (Version Control: Git)"
 description: "Missing Semester 第 6 讲：版本控制与 Git 原理 (Version Control: Git)"
 topic: Missing Semester

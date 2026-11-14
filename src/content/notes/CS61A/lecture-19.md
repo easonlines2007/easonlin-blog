@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 19 · 类属性与方法 (Attributes)
 description: CS61A 第 19 讲：类属性与方法 (Attributes)
 topic: CS61A

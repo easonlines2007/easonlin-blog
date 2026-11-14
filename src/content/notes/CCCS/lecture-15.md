@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 15 · 阿兰·图灵-Alan Turing
 description: CCCS 第 15 讲：阿兰·图灵-Alan Turing
 topic: CCCS

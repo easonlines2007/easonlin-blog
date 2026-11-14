@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 19 · Dynamic Memory Allocation: Basic Concepts（动态内存分配基础、吞吐率 vs
   利用率与隐式空闲链表）"
 description: "CSAPP 第 19 讲：Dynamic Memory Allocation: Basic

@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 31 · 软件工程 II：架构设计模式与工程解耦：高内聚低耦合、工厂模式、观察者模式、装饰器模式与大型系统重构
 description: CS61B 第 31 讲：软件工程 II：架构设计模式与工程解耦：高内聚低耦合、工厂模式、观察者模式、装饰器模式与大型系统重构
 topic: CS61B

@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 03 · 链表 I：引用传递、内存模型与递归链表：海象之谜、等号黄金法则、IntList 与破坏性操作
 description: CS61B 第 3 讲：链表 I：引用传递、内存模型与递归链表：海象之谜、等号黄金法则、IntList 与破坏性操作
 topic: CS61B

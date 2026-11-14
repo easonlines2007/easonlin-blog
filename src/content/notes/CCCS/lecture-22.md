@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 22 · 命令行界面-Keyboards & Command Line Interfaces
 description: CCCS 第 22 讲：命令行界面-Keyboards & Command Line Interfaces
 topic: CCCS

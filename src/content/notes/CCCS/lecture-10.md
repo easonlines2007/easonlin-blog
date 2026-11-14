@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 10 · 早期的编程方式-Early Programming
 description: CCCS 第 10 讲：早期的编程方式-Early Programming
 topic: CCCS

@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 16 · 树结构 I：二叉搜索树、操作实现与 Hibbard 删除：ADT 演化、二叉搜索树性质、递归查找插入、Hibbard 删除与平衡退化
 description: CS61B 第 16 讲：树结构 I：二叉搜索树、操作实现与 Hibbard 删除：ADT 演化、二叉搜索树性质、递归查找插入、Hibbard 删除与平衡退化
 topic: CS61B

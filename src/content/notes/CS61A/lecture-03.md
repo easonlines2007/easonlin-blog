@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 03 · Control：多帧环境模型、条件分支与循环控制
 description: CS61A 第 3 讲：Control：多帧环境模型、条件分支与循环控制
 topic: CS61A

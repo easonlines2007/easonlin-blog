@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 34 · 多表连接与关系运算 (Tables & Joins)
 description: CS61A 第 34 讲：多表连接与关系运算 (Tables & Joins)
 topic: CS61A

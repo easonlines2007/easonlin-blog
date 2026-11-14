@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 10 · 继承 III：子类型多态、Comparable 与 Comparator：通用比较体系、自建
   Maximizer、Comparable 接口契约与策略模式
 description: CS61B 第 10 讲：继承 III：子类型多态、Comparable 与 Comparator：通用比较体系、自建

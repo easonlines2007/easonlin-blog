@@ -1,0 +1,68 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { importCourseBook } from '../scripts/import-course-books.mjs'
+
+test('book import keeps sources intact, resolves PDF page links and is repeatable; conflicts copy nothing', async () => {
+  const temporary = await mkdtemp(join(tmpdir(), 'course-books-test-'))
+  try {
+    const sourceDirectory = join(temporary, 'source'),
+      projectRoot = join(temporary, 'blog')
+    await mkdir(join(sourceDirectory, 'slides'), { recursive: true })
+    await mkdir(projectRoot)
+    const originals = new Map()
+    for (const name of [
+      ...Array.from({ length: 18 }, (_, i) => `lec${i + 1}`),
+      'classification',
+      'optimization',
+      'cnn',
+      'sequence',
+      'detection',
+      'video',
+      'scaling',
+      'generative',
+      '3d-vision',
+      'embodied'
+    ]) {
+      const filename = `CS231n-${name}.md`
+      const text = `---\ntitle: ${name}\ndescription: Test chapter\n---\n\n# ${name}\n\n[课件索引](课件索引.md)\n\n[page](slides/lecture_1.pdf#page=7)\n\n\`\`\`python\nprint('hello $$ literal $$')\n\`\`\`\n`
+      originals.set(filename, text + '\nTwo formulas: $$x=1$$$$y=2$$ then $z$.\n')
+      await writeFile(join(sourceDirectory, filename), originals.get(filename))
+    }
+    await writeFile(join(sourceDirectory, 'slides/lecture_1.pdf'), '%PDF-1.4\nfixture')
+    await writeFile(
+      join(sourceDirectory, '课件索引.md'),
+      '# 课件\n\n| 讲次 | PDF |\n| --- | --- |\n| 1 | [PDF](slides/lecture_1.pdf) |\n'
+    )
+    const options = { course: 'cs231n', sourceDirectory, date: '2026-11-14', projectRoot }
+    const result = await importCourseBook(options)
+    assert.equal(result.notes, 29)
+    assert.equal(result.attachments, 1)
+    const markdown = await readFile(join(projectRoot, 'src/content/notes/CS231n/lec01.md'), 'utf8')
+    assert.match(markdown, /\/notes\/cs231n\/slides/)
+    assert.match(markdown, /\/attachments\/cs231n-[a-f0-9]+\.pdf#page=7/)
+    assert.ok(markdown.includes("print('hello $$ literal $$')"))
+    assert.match(markdown, /\$\$\nx=1\n\$\$\s+\$\$\ny=2\n\$\$/)
+    assert.doesNotMatch(markdown, /^# lec1$/m)
+    assert.equal((await importCourseBook(options)).written, 0)
+    for (const [name, text] of originals)
+      assert.equal(await readFile(join(sourceDirectory, name), 'utf8'), text)
+    const conflictingRoot = join(temporary, 'conflict')
+    await mkdir(join(conflictingRoot, 'src/content/notes/CS231n'), { recursive: true })
+    const conflict = join(conflictingRoot, 'src/content/notes/CS231n/embodied.md')
+    await writeFile(conflict, 'An existing note must survive.')
+    await assert.rejects(
+      importCourseBook({ ...options, projectRoot: conflictingRoot }),
+      /目标文件已有不同内容/
+    )
+    assert.equal(await readFile(conflict, 'utf8'), 'An existing note must survive.')
+    assert.deepEqual(await readdir(join(conflictingRoot, 'src/content/notes/CS231n')), [
+      'embodied.md'
+    ])
+    await assert.rejects(readdir(join(conflictingRoot, 'public')), { code: 'ENOENT' })
+  } finally {
+    await rm(temporary, { recursive: true, force: true })
+  }
+})

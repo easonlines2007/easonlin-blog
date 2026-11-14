@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: Lecture 26 · Thread-Level Parallelism（线程级并行、Amdahl 定律、伪共享 Cache 颠簸与课程总结）
 description: CSAPP 第 26 讲：Thread-Level Parallelism（线程级并行、Amdahl 定律、伪共享 Cache 颠簸与课程总结）
 topic: CSAPP

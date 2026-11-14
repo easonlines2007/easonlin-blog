@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 08 · Machine-Level Programming IV: Data（数组行优先布局、结构体对齐法则与联合体）"
 description: "CSAPP 第 8 讲：Machine-Level Programming IV: Data（数组行优先布局、结构体对齐法则与联合体）"
 topic: CSAPP

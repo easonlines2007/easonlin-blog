@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - csapp
 status: completed
-publish: true
+publish: false
 title: "Lecture 20 · Dynamic Memory Allocation: Advanced Concepts（显式空闲链表、分离存储、GC
   垃圾回收与 C 语言十大内存悬案）"
 description: "CSAPP 第 20 讲：Dynamic Memory Allocation: Advanced

@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 12 · 渐进分析 I：算法效率度量与大 O 阶梯：时间度量哲学、Big-Theta、Big-O、Big-Omega 形式化定义与循环求和
 description: CS61B 第 12 讲：渐进分析 I：算法效率度量与大 O 阶梯：时间度量哲学、Big-Theta、Big-O、Big-Omega 形式化定义与循环求和
 topic: CS61B

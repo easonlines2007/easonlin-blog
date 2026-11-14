@@ -3,7 +3,7 @@ date: 2026-10-09
 tags:
   - cs61a
 status: completed
-publish: true
+publish: false
 title: Lecture 32 · 宏与语法扩展 (Macros)
 description: CS61A 第 32 讲：宏与语法扩展 (Macros)
 topic: CS61A

@@ -3,7 +3,7 @@ date: 2026-10-24
 tags:
   - cccs
 status: completed
-publish: true
+publish: false
 title: Lecture 04 · 二进制-Representing Numbers and Letters with Binary
 description: CCCS 第 4 讲：二进制-Representing Numbers and Letters with Binary
 topic: CCCS

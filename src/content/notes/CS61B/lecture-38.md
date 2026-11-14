@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 38 · 数据压缩理论：哈夫曼编码与前缀无关码：香农信息论、变长编码、前缀无关码、哈夫曼树贪心构建与比特流 I/O
 description: CS61B 第 38 讲：数据压缩理论：哈夫曼编码与前缀无关码：香农信息论、变长编码、前缀无关码、哈夫曼树贪心构建与比特流 I/O
 topic: CS61B

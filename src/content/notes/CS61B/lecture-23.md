@@ -3,7 +3,7 @@ date: 2026-10-21
 tags:
   - cs61b
 status: completed
-publish: true
+publish: false
 title: Lecture 23 · 图遍历实战：DFS、BFS 与拓扑排序：迷宫搜索法则、visited 标记防死循环、最短步数与拓扑序列
 description: CS61B 第 23 讲：图遍历实战：DFS、BFS 与拓扑排序：迷宫搜索法则、visited 标记防死循环、最短步数与拓扑序列
 topic: CS61B
