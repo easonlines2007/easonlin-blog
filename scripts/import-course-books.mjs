@@ -77,6 +77,7 @@ export async function importCourseBook({
   course,
   sourceDirectory,
   date,
+  replaceExisting = false,
   projectRoot = projectDirectory
 }) {
   const config = courses[course]
@@ -87,6 +88,7 @@ export async function importCourseBook({
   )
     throw new Error('请指定真实的添加日期。')
   const sourceRoot = await realpath(sourceDirectory)
+  const sourceNames = await readdir(sourceRoot)
   const { topic, lectures, modules } = config
   const chapters = Array.from({ length: lectures }, (_, index) => ({
     name: `${topic}-lec${course === 'cs61a' ? String(index + 1).padStart(2, '0') : index + 1}.md`,
@@ -100,15 +102,14 @@ export async function importCourseBook({
       order: lectures + index + 1
     })
   )
-  if (course === 'cs231n')
+  const hasSlidesIndex = course === 'cs231n' && sourceNames.includes('课件索引.md')
+  if (hasSlidesIndex)
     chapters.push({
       name: '课件索引.md',
       filename: 'slides.md',
       order: lectures + modules.length + 1
     })
-  const actual = (await readdir(sourceRoot)).filter(
-    (name) => name.startsWith(`${topic}-`) && name.endsWith('.md')
-  )
+  const actual = sourceNames.filter((name) => name.startsWith(`${topic}-`) && name.endsWith('.md'))
   if (
     actual.length !== lectures + modules.length ||
     actual.some((name) => !chapters.some((chapter) => chapter.name === name))
@@ -234,20 +235,41 @@ export async function importCourseBook({
         markdown = markdown.replaceAll(`/attachments/${original}`, `/attachments/${destination}`)
       planned.push({
         path: join(projectRoot, 'src/content/notes', path),
-        bytes: Buffer.from(markdown)
+        bytes: Buffer.from(markdown),
+        replace: replaceExisting
       })
     }
+    if (course === 'cs231n' && !hasSlidesIndex && replaceExisting)
+      planned.push({
+        path: join(projectRoot, 'src/content/notes/CS231n/slides.md'),
+        bytes: null,
+        replace: true
+      })
     // Validate the entire import before copying anything into the blog.
     for (const file of planned) {
       const bytes = await existing(file.path)
-      if (bytes && !bytes.equals(file.bytes)) throw new Error(`目标文件已有不同内容：${file.path}`)
-      file.exists = bytes !== null
+      file.unchanged = file.bytes === null ? bytes === null : (bytes?.equals(file.bytes) ?? false)
+      if (bytes && !file.unchanged && !file.replace)
+        throw new Error(`目标文件已有不同内容：${file.path}`)
+      file.previousBytes = bytes
+    }
+    for (const file of planned) {
+      const bytes = await existing(file.path)
+      if (!(bytes === null && file.previousBytes === null) && !bytes?.equals(file.previousBytes))
+        throw new Error(`导入期间目标文件发生变化：${file.path}`)
     }
     let written = 0
     for (const file of planned) {
-      if (file.exists) continue
+      if (file.unchanged) continue
+      if (file.bytes === null) {
+        await rm(file.path)
+        written++
+        continue
+      }
       await mkdir(dirname(file.path), { recursive: true })
-      await writeFile(file.path, file.bytes, { flag: 'wx' })
+      await writeFile(file.path, file.bytes, {
+        flag: file.replace && file.previousBytes ? 'w' : 'wx'
+      })
       written++
     }
     return { notes: result.notes, attachments: new Set(assetNames.values()).size, written }
@@ -262,7 +284,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       await importCourseBook({
         course: process.argv[2],
         sourceDirectory: process.argv[3],
-        date: process.argv[4]
+        date: process.argv[4],
+        replaceExisting: process.argv[5] === '--replace'
       })
     )
   } catch (error) {

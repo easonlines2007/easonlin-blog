@@ -133,13 +133,15 @@ node scripts/import-course-lectures.mjs missing-semester /绝对路径/output/mi
 
 ### AI 与 Lin 分类
 
-2026-11-14 更新：AI 电子书现保留 MIT 18.06（6 篇），上线新版 CS61A（40 讲 + 8 篇模块汇总）与 CS231n（18 讲 + 10 篇专题汇总 + 课件索引）。旧 CS61A、CCCS、CS61B、CSAPP、Missing Semester 共 154 篇已下架，中文和对应英文页面、列表、RSS、搜索同步移除；Lin 9 篇与随笔保留。旧稿和附件仍留在仓库，下架不清除历史或旧部署。
+2026-11-14 更新：AI 电子书现保留 MIT 18.06（6 篇），上线新版 CS61A（40 讲 + 8 篇模块汇总）与 CS231n 图片版（18 讲 + 10 篇专题汇总）。旧 CS61A、CCCS、CS61B、CSAPP、Missing Semester 共 154 篇已下架，中文和对应英文页面、列表、RSS、搜索同步移除；Lin 9 篇与随笔保留。旧稿和附件仍留在仓库，下架不清除历史或旧部署。
 
-新版通过 `scripts/import-course-books.mjs` 从用户提供的课程目录导入，只读原稿；正文使用博客原生 Markdown 页面，CS61A 的 525 处课件图引用按内容去重为 482 个图片文件，CS231n 保留 18 份本地官方 PDF 和 `#page=` 定位。模块排在单讲之后，课件索引排在专题最后；新版本没有英文译文时不复用旧译文。导入器在临时目录校验整套章节、站内链接和实际引用的附件后再复制，重复执行不产生改动，遇到不同内容拒绝覆盖。
+新版通过 `scripts/import-course-books.mjs` 从用户提供的课程目录导入，只读原稿；正文使用博客原生 Markdown 页面，CS61A 的 525 处课件图引用按内容去重为 482 个图片文件。CS231n 按用户最新指定改为正文内嵌图片版：2,110 张源图按内容去重为 2,108 个文件，28 篇文章保留原网址，移除先前的 PPT/PDF 索引页与 18 份旧 PDF 附件。模块排在单讲之后；新版本没有英文译文时不复用旧译文。导入器在临时目录校验整套章节、站内链接和实际引用的附件后再复制，重复执行不产生改动，默认遇到不同内容拒绝覆盖；显式 `--replace` 替换课程副本，并在源目录不含课件索引时删除旧索引页。
 
 ```sh
 node scripts/import-course-books.mjs cs61a /绝对路径/CS61A 2026-11-14
 node scripts/import-course-books.mjs cs231n /绝对路径/CS231n 2026-11-14
+# 已发布课程明确更换版本时：
+node scripts/import-course-books.mjs cs231n /绝对路径/CS231n 2026-11-14 --replace
 ```
 
 笔记页在“专题”上方提供两类入口：`AI`（ai电子书）与 `Lin`（古法笔记），中英文共用分类数据。分类页同时展示所属专题和文章，列表侧栏也可切换分类。`category` 可选 `ai` / `lin`，未设置的既有笔记默认属于 AI。

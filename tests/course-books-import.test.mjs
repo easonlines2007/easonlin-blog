@@ -62,6 +62,31 @@ test('book import keeps sources intact, resolves PDF page links and is repeatabl
       'embodied.md'
     ])
     await assert.rejects(readdir(join(conflictingRoot, 'public')), { code: 'ENOENT' })
+
+    // Replacing the PDF edition with the illustrated source updates the same
+    // article URLs and retires the index that no longer exists in the source.
+    await mkdir(join(sourceDirectory, 'images'))
+    await writeFile(join(sourceDirectory, 'images/slide.png'), Buffer.from('PNG fixture'))
+    for (const [name, original] of originals) {
+      await writeFile(
+        join(sourceDirectory, name),
+        original
+          .replace('[课件索引](课件索引.md)\n\n', '')
+          .replace('[page](slides/lecture_1.pdf#page=7)', '![课件图](images/slide.png)')
+      )
+    }
+    await rm(join(sourceDirectory, '课件索引.md'))
+    await assert.rejects(importCourseBook(options), /目标文件已有不同内容/)
+    const illustrated = await importCourseBook({ ...options, replaceExisting: true })
+    assert.equal(illustrated.notes, 28)
+    assert.equal(illustrated.attachments, 1)
+    const refreshed = await readFile(join(projectRoot, 'src/content/notes/CS231n/lec01.md'), 'utf8')
+    assert.match(refreshed, /!\[课件图\]\(<\/attachments\/cs231n-[a-f0-9]+\.png>\)/)
+    assert.doesNotMatch(refreshed, /\.pdf|cs231n\/slides/)
+    await assert.rejects(readFile(join(projectRoot, 'src/content/notes/CS231n/slides.md')), {
+      code: 'ENOENT'
+    })
+    assert.equal((await importCourseBook({ ...options, replaceExisting: true })).written, 0)
   } finally {
     await rm(temporary, { recursive: true, force: true })
   }
