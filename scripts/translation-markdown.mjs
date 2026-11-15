@@ -35,9 +35,16 @@ export function translationSegments(markdown) {
     if (node.type === 'image' && /\p{Script=Han}/u.test(node.alt ?? '')) {
       const raw = markdown.slice(node.position.start.offset, node.position.end.offset)
       const start = node.position.start.offset + raw.indexOf('[') + 1
+      let end = raw.indexOf('[') + 1
+      let depth = 1
+      for (; end < raw.length; end++) {
+        if (raw[end] === '\\') end++
+        else if (raw[end] === '[') depth++
+        else if (raw[end] === ']' && --depth === 0) break
+      }
       segments.push({
         start,
-        end: start + raw.slice(raw.indexOf('[') + 1).indexOf(']'),
+        end: node.position.start.offset + end,
         text: node.alt,
         type: 'alt'
       })
@@ -94,11 +101,13 @@ export function applyTextTranslations(markdown, dictionary) {
     if (typeof translation !== 'string' || !translation.trim())
       throw new Error(`Missing translation: ${segment.text.slice(0, 80)}`)
     const raw = markdown.slice(segment.start, segment.end)
-    let replacement = translation.trim()
+    // A translated inline fragment must not introduce a paragraph break inside
+    // an image label, link, emphasis span or heading.
+    let replacement = translation.trim().replace(/\s+/gu, ' ')
     replacement = replacement.replace(/[。，；：“”‘’（）！？、]/gu, (mark) => punctuation[mark])
     if (segment.type === 'diagram')
       replacement = replacement.replace(/["\[\]{}<>()]/g, '').replace(/:$/u, ': ')
-    else replacement = replacement.replace(/([\\*_[\]<>#`|])/g, '\\$1')
+    else replacement = replacement.replace(/([\\*_[\]<>#`|$])/g, '\\$1')
     if (segment.spaceBefore && /^[\w(]/u.test(replacement)) replacement = ' ' + replacement
     if (segment.spaceAfter && /[\w.,;:!?)”’]$/u.test(replacement)) replacement += ' '
     const leading = raw.match(/^\s*/)[0]

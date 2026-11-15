@@ -77,3 +77,20 @@ test('translated Mermaid subgraph titles remain valid around existing English pa
   )
   assert.match(result, /subgraph "Application \(Use of Data\)"/)
 })
+
+test('translated image labels retain escaped brackets and prose dollar amounts stay literal', () => {
+  const original = '![中文 \\[1, 2\\]](/attachments/image.png)\n\n金额文字。\n'
+  const dictionary = {
+    '中文 [1, 2]': 'A label\n\n[1, 2]',
+    '金额文字。': 'Raised $400 million, then $675 million.'
+  }
+  const translated = applyTextTranslations(original, dictionary)
+  const images = [],
+    math = []
+  walk(parseMarkdown(translated), (node) => {
+    if (node.type === 'image') images.push(node.url)
+    if (node.type === 'inlineMath' || node.type === 'math') math.push(node.value)
+  })
+  assert.deepEqual(images, ['/attachments/image.png'])
+  assert.deepEqual(math, [])
+})
