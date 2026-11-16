@@ -26,12 +26,15 @@ const { note, previous, next } = Astro.props
 const { Content, headings } = await render(note.translation ?? note)
 const hasToc = getTocHeadings(headings).length > 0
 const { title, description, tags, topic, date, updated, status, sample, pdf } = note.data
+const backHref = path(note.data.order ? topicUrl(topic) : '/notes/all')
+const backLabel = locale === 'en' ? 'Back' : '返回'
 ---
 
 <BaseLayout
   {title}
   {description}
   reading
+  readingBack={backHref}
   alternatePath={
     locale === 'en'
       ? noteUrl(note.id)
@@ -40,9 +43,9 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
         : null
   }
 >
-  <a class="back-link" href={path(note.data.order ? topicUrl(topic) : '/notes/all')}>
+  <a class="back-link" href={backHref} data-note-back>
     <Icon name="back" />
-    <span class="lift-text">{t(note.data.order ? topic : '全部笔记')}</span>
+    <span class="lift-text">{backLabel}</span>
   </a>
   <div class:list={['article-grid', 'note-layout', hasToc && 'has-toc']}>
     <article class="article-body enter" data-pagefind-body>
@@ -101,8 +104,8 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
             </a>
           ))}
         </div>
-        <a href={path('/notes/all')}>
-          <span class="lift-text">{t('返回全部笔记')}</span>
+        <a href={backHref} data-note-back>
+          <span class="lift-text">{backLabel}</span>
         </a>
       </footer>
       {(previous || next) && (
@@ -127,3 +130,7 @@ const { title, description, tags, topic, date, updated, status, sample, pdf } = 
   <ArticleTools />
   <MermaidDiagrams />
 </BaseLayout>
+
+<script>
+  import '../../scripts/note-back'
+</script>

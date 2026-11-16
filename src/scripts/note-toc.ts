@@ -6,6 +6,13 @@ const title = document.querySelector<HTMLElement>('[data-note-toc-title]')
 if (layout && toggle && contents && title) {
   const storageKey = 'notes-toc'
   const wideScreen = matchMedia('(min-width: 1100px)')
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+  let anchorFrame = 0
+  const stopAnchoring = () => cancelAnimationFrame(anchorFrame)
+  for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) {
+    window.addEventListener(event, stopAnchoring, { passive: true })
+  }
+  window.addEventListener('pagehide', stopAnchoring)
   let preference: string | null = null
   try {
     preference = localStorage.getItem(storageKey)
@@ -15,8 +22,9 @@ if (layout && toggle && contents && title) {
 
   const apply = (collapsed: boolean) => {
     layout.dataset.tocCollapsed = String(collapsed)
-    contents.hidden = collapsed
-    title.hidden = collapsed
+    contents.inert = collapsed
+    contents.setAttribute('aria-hidden', String(collapsed))
+    title.setAttribute('aria-hidden', String(collapsed))
     toggle.setAttribute('aria-expanded', String(!collapsed))
     const label = collapsed ? toggle.dataset.labelExpand! : toggle.dataset.labelCollapse!
     toggle.setAttribute('aria-label', label)
@@ -29,7 +37,9 @@ if (layout && toggle && contents && title) {
 
   restore()
   toggle.hidden = false
+  requestAnimationFrame(() => (layout.dataset.tocReady = ''))
   toggle.addEventListener('click', () => {
+    stopAnchoring()
     const offset =
       parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--reading-offset')) ||
       112
@@ -44,7 +54,14 @@ if (layout && toggle && contents && title) {
     preference = collapsed ? 'collapsed' : 'expanded'
     apply(collapsed)
     if (reading && anchor && before !== undefined) {
-      window.scrollBy({ top: anchor.getBoundingClientRect().top - before, behavior: 'instant' })
+      const started = performance.now()
+      const keepPosition = () => {
+        window.scrollBy({ top: anchor.getBoundingClientRect().top - before, behavior: 'instant' })
+        if (!reducedMotion.matches && performance.now() - started < 360) {
+          anchorFrame = requestAnimationFrame(keepPosition)
+        }
+      }
+      keepPosition()
     }
     try {
       localStorage.setItem(storageKey, preference)

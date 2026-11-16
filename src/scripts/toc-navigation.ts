@@ -98,7 +98,16 @@ export function setupTocNavigation(links: HTMLAnchorElement[]) {
     event.preventDefault()
     const mobileToc = link.closest<HTMLDetailsElement>('.mobile-toc')
     if (mobileToc) mobileToc.open = false
-    if (location.hash !== link.hash) history.pushState(null, '', link.hash)
+    if (location.hash !== link.hash) {
+      const state = { ...history.state }
+      if (state.noteReadingReturn) {
+        state.noteReadingReturn = {
+          ...state.noteReadingReturn,
+          depth: state.noteReadingReturn.depth + 1
+        }
+      }
+      history.pushState(state, '', link.hash)
+    }
     navigate(target, matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth')
   })
 

@@ -8,8 +8,9 @@ import Wordmark from './Wordmark.astro'
 import { localeFromPath, localizePath, useTranslations } from '../lib/i18n'
 interface Props {
   alternatePath: string | null
+  readingBack?: string
 }
-const { alternatePath } = Astro.props
+const { alternatePath, readingBack } = Astro.props
 const pathname = Astro.url.pathname
 const locale = localeFromPath(pathname)
 const t = useTranslations(locale)
@@ -18,14 +19,27 @@ const active = (href: string) => pathname === href || pathname.startsWith(`${hre
 ---
 
 <header class="site-header" data-pagefind-ignore>
-  <a class="brand character-link" href={path('/')}>
-    <span class="nav-flip">
-      <span class="nav-label">
-        <Wordmark kind="blog" />
+  <div class:list={['header-brand', readingBack && 'has-reading-back']}>
+    <a class="brand character-link" href={path('/')}>
+      <span class="nav-flip">
+        <span class="nav-label">
+          <Wordmark kind="blog" />
+        </span>
+        <NavCharacter href="/" />
       </span>
-      <NavCharacter href="/" />
-    </span>
-  </a>
+    </a>
+    {readingBack && (
+      <a
+        class="reading-back"
+        href={readingBack}
+        data-note-back
+        aria-label={locale === 'en' ? 'Go back' : '返回上一页'}
+      >
+        <Icon name="back" />
+        <span>{locale === 'en' ? 'Back' : '返回'}</span>
+      </a>
+    )}
+  </div>
   <nav class="desktop-nav" aria-label={t('主导航')}>
     {theme.header.menu.map((item) => (
       <a

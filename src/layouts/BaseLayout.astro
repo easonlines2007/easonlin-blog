@@ -13,6 +13,7 @@ interface Props {
   description?: string
   home?: boolean
   reading?: boolean
+  readingBack?: string
   noindex?: boolean
   alternatePath?: string | null
 }
@@ -109,7 +110,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
       {t('跳转到正文')}
     </a>
     <div class="site-container">
-      <Header {alternatePath} />
+      <Header {alternatePath} readingBack={Astro.props.readingBack} />
       <main id="main" class="page-content" tabindex="-1">
         <slot />
       </main>

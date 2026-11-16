@@ -324,6 +324,45 @@ img {
     padding 300ms ease,
     margin 300ms ease;
 }
+.header-brand {
+  display: grid;
+  align-items: center;
+}
+.header-brand > a {
+  grid-area: 1 / 1;
+}
+.has-reading-back > a {
+  transition:
+    opacity 220ms ease,
+    transform 300ms ease,
+    visibility 220ms;
+}
+.reading-back {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  min-height: 44px;
+  padding-inline: 6px 12px;
+  color: var(--secondary);
+  font-size: 14px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(6px);
+}
+.reading-back:hover {
+  color: var(--accent);
+}
+.site-header.is-scrolled .reading-back {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+.site-header.is-scrolled .has-reading-back > .brand {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6px);
+}
 .brand {
   font-family: var(--font-editorial);
   font-size: 23px;
@@ -1102,56 +1141,91 @@ summary::-webkit-details-marker {
 .note-layout .prose {
   max-width: none;
 }
+.note-layout[data-toc-ready] {
+  transition: grid-template-columns 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
 .note-toc-header {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  justify-content: flex-end;
+  min-height: 44px;
   margin-bottom: 12px;
 }
 .note-layout .note-toc {
+  min-width: 0;
   max-height: none;
   overflow: visible;
 }
 #note-toc-content {
+  width: 224px;
   max-height: calc(100dvh - var(--reading-offset) - 72px);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
+  opacity: 1;
+  transform: none;
+  visibility: visible;
 }
 .note-toc-header .toc-title {
+  position: absolute;
+  left: 0;
   margin-bottom: 0;
+  white-space: nowrap;
+}
+[data-toc-ready] :is(#note-toc-content, .note-toc-header .toc-title) {
+  transition:
+    opacity 200ms ease,
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 320ms;
+}
+[data-toc-collapsed='true'] :is(#note-toc-content, .note-toc-header .toc-title) {
+  opacity: 0;
+  transform: translateX(12px);
+  visibility: hidden;
+  pointer-events: none;
 }
 .toc-toggle {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 32px;
-  min-height: 32px;
-  padding: 5px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--page-bg);
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: 10px;
+  background: hsl(var(--background) / 0.94);
   color: var(--secondary);
-  transition: color 160ms ease;
+  box-shadow: 0 2px 6px hsl(var(--foreground) / 0.025);
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 .toc-toggle:is(:hover, :focus-visible) {
   color: var(--accent);
+  border-color: hsl(var(--primary) / 0.3);
+  background: var(--soft);
+  box-shadow: 0 3px 10px hsl(var(--foreground) / 0.06);
 }
-.toc-toggle-label {
-  display: none;
+.toc-toggle:active {
+  transform: scale(0.94);
 }
-[data-toc-collapsed='true'] .toc-toggle {
-  flex-direction: column;
-  gap: 4px;
-  width: 44px;
-  min-height: 54px;
+.toc-icon-arrow {
+  transform-origin: 19.5px 12px;
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-[data-toc-collapsed='true'] .toc-toggle-label {
-  display: block;
-  font-size: 11px;
-  line-height: 1.2;
+[data-toc-collapsed='true'] .toc-icon-arrow {
+  transform: rotate(180deg);
+}
+/* Keep the disappearing panel inside its column throughout the transition. */
+.note-toc > .note-toc-panel {
+  overflow: clip;
 }
 @media (max-width: 900px) {
   .note-layout.has-toc,
