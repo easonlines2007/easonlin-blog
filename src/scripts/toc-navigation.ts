@@ -1,3 +1,14 @@
+// Integrate the velocity curve: a short ramp, steady travel, then a soft landing.
+function scrollProgress(t: number) {
+  const ramp = 0.1
+  const landing = 0.42
+  const cruiseEnd = 1 - landing
+  const travel = ramp / 2 + (cruiseEnd - ramp) + landing / 4
+  if (t < ramp) return (t * t) / (2 * ramp * travel)
+  if (t <= cruiseEnd) return (t - ramp / 2) / travel
+  return 1 - (landing / (4 * travel)) * ((1 - t) / landing) ** 4
+}
+
 /** Keep a requested heading aligned while lazy diagrams and the header settle. */
 export function setupTocNavigation(links: HTMLAnchorElement[]) {
   const ids = new Set(links.map((link) => decodeURIComponent(link.hash.slice(1))))
@@ -39,28 +50,28 @@ export function setupTocNavigation(links: HTMLAnchorElement[]) {
       return
     }
 
-    // Keep long chapter jumps brief, with a gentle start and landing.
-    const duration = Math.min(520, 180 + 6 * Math.sqrt(distance))
-    const started = performance.now()
-    let segmentStart = start
-    let segmentProgress = 0
-    let previousProgress = 0
+    const duration = Math.min(1050, 280 + 9 * Math.sqrt(distance))
+    let elapsed = 0
+    const initialEnd = end
+    let correction = 0
+    let previousTime = performance.now()
     function step(now: number) {
       if (geometryDirty) {
-        const nextEnd = destination(target)
-        if (Math.abs(nextEnd - end) > 1) {
-          segmentStart = window.scrollY
-          segmentProgress = previousProgress
-          end = nextEnd
-        }
+        end = destination(target)
         geometryDirty = false
       }
-      const t = reducedMotion.matches ? 1 : Math.max(0, Math.min(1, (now - started) / duration))
-      const eased = t * t * (3 - 2 * t)
-      const progress = (eased - segmentProgress) / (1 - segmentProgress)
-      window.scrollTo({ top: segmentStart + (end - segmentStart) * progress, behavior: 'instant' })
-      previousProgress = eased
-      frame = t < 1 ? requestAnimationFrame(step) : 0
+      // A slow paint should lengthen the trip, not skip the landing frames.
+      const delta = Math.min(32, Math.max(0, now - previousTime))
+      previousTime = now
+      elapsed += delta
+      const t = Math.min(1, elapsed / duration)
+      // Give late layout changes their own settling time, even on the last frame.
+      const shift = end - initialEnd
+      correction += (shift - correction) * (1 - Math.exp(-delta / 55))
+      const done = reducedMotion.matches || (t === 1 && Math.abs(shift - correction) < 0.5)
+      const top = done ? end : start + (initialEnd - start) * scrollProgress(t) + correction
+      window.scrollTo({ top, behavior: 'instant' })
+      frame = done ? 0 : requestAnimationFrame(step)
     }
     frame = requestAnimationFrame(step)
   }
