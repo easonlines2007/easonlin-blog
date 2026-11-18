@@ -1,14 +1,15 @@
 /** Keep a requested heading aligned while lazy diagrams and the header settle. */
 export function setupTocNavigation(links: HTMLAnchorElement[]) {
   const ids = new Set(links.map((link) => decodeURIComponent(link.hash.slice(1))))
-  let navigation:
-    | { target: HTMLElement; events: AbortController; timer?: ReturnType<typeof setTimeout> }
-    | undefined
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+  let navigation: { target: HTMLElement; events: AbortController; smooth: boolean } | undefined
+  let frame = 0
+  let geometryDirty = false
 
   function stop() {
-    if (!navigation) return
-    clearTimeout(navigation.timer)
-    navigation.events.abort()
+    cancelAnimationFrame(frame)
+    frame = 0
+    navigation?.events.abort()
     navigation = undefined
   }
 
@@ -25,21 +26,57 @@ export function setupTocNavigation(links: HTMLAnchorElement[]) {
     )
   }
 
-  function realign() {
+  function scrollToHeading() {
     if (!navigation) return
-    const current = navigation
-    clearTimeout(current.timer)
-    // Wait for both smooth scrolling and layout changes to go quiet. No idle frame loop.
-    current.timer = setTimeout(() => {
-      if (navigation !== current) return
-      const top = destination(current.target)
-      if (Math.abs(top - window.scrollY) > 1) {
-        window.scrollTo({ top, behavior: 'instant' })
+    const { target, smooth } = navigation
+    const start = window.scrollY
+    let end = destination(target)
+    geometryDirty = false
+    const distance = Math.abs(end - start)
+    if (distance <= 1) return
+    if (!smooth || reducedMotion.matches) {
+      window.scrollTo({ top: end, behavior: 'instant' })
+      return
+    }
+
+    // Keep long chapter jumps brief, with a gentle start and landing.
+    const duration = Math.min(520, 180 + 6 * Math.sqrt(distance))
+    const started = performance.now()
+    let segmentStart = start
+    let segmentProgress = 0
+    let previousProgress = 0
+    function step(now: number) {
+      if (geometryDirty) {
+        const nextEnd = destination(target)
+        if (Math.abs(nextEnd - end) > 1) {
+          segmentStart = window.scrollY
+          segmentProgress = previousProgress
+          end = nextEnd
+        }
+        geometryDirty = false
       }
-    }, 160)
+      const t = reducedMotion.matches ? 1 : Math.max(0, Math.min(1, (now - started) / duration))
+      const eased = t * t * (3 - 2 * t)
+      const progress = (eased - segmentProgress) / (1 - segmentProgress)
+      window.scrollTo({ top: segmentStart + (end - segmentStart) * progress, behavior: 'instant' })
+      previousProgress = eased
+      frame = t < 1 ? requestAnimationFrame(step) : 0
+    }
+    frame = requestAnimationFrame(step)
   }
 
-  function navigate(target: HTMLElement, behavior: ScrollBehavior) {
+  function realign() {
+    if (!navigation) return
+    geometryDirty = true
+    // Reuse the current animation when images or the header change size.
+    if (!frame)
+      frame = requestAnimationFrame(() => {
+        frame = 0
+        scrollToHeading()
+      })
+  }
+
+  function navigate(target: HTMLElement, smooth: boolean) {
     stop()
     for (let parent = target.parentElement; parent; parent = parent.parentElement) {
       if (parent instanceof HTMLDetailsElement) parent.open = true
@@ -50,23 +87,16 @@ export function setupTocNavigation(links: HTMLAnchorElement[]) {
     }
     target.focus({ preventScroll: true })
     const events = new AbortController()
-    navigation = { target, events }
-    // Reading or choosing another destination must never fight an earlier jump.
-    const cancel = () => {
-      stop()
-      window.scrollTo({ top: window.scrollY, behavior: 'instant' })
-    }
+    navigation = { target, events, smooth }
     for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) {
-      window.addEventListener(event, cancel, {
+      window.addEventListener(event, stop, {
         passive: true,
         capture: true,
         signal: events.signal
       })
     }
     window.addEventListener('pagehide', stop, { signal: events.signal })
-    window.addEventListener('scroll', realign, { passive: true, signal: events.signal })
-    window.scrollTo({ top: destination(target), behavior })
-    realign()
+    scrollToHeading()
   }
 
   function hashTarget(hash: string) {
@@ -108,13 +138,13 @@ export function setupTocNavigation(links: HTMLAnchorElement[]) {
       }
       history.pushState(state, '', link.hash)
     }
-    navigate(target, matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth')
+    navigate(target, true)
   })
 
   function followHash() {
     stop()
     const target = hashTarget(location.hash)
-    if (target) navigate(target, 'instant')
+    if (target) navigate(target, false)
   }
   window.addEventListener('hashchange', followHash)
   if (location.hash) followHash()
